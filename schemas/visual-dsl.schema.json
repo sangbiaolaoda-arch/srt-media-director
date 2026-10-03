@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "visual-dsl",
+  "type": "object",
+  "required": ["version", "canvas", "beats"],
+  "properties": {
+    "version": {"type": "string"},
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height", "fps"],
+      "properties": {
+        "width": {"type": "integer", "exclusiveMinimum": 0},
+        "height": {"type": "integer", "exclusiveMinimum": 0},
+        "fps": {"type": "integer", "exclusiveMinimum": 0}
+      }
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "start_sec", "end_sec", "strategy",
+                     "elements", "relations", "camera"],
+        "properties": {
+          "beat_id": {"type": "string"},
+          "start_sec": {"type": "number", "minimum": 0},
+          "end_sec": {"type": "number", "minimum": 0},
+          "strategy": {"type": "string"},
+          "motion_policy": {"enum": ["required", "optional", "hold"]},
+          "visual_claim": {"type": "string"},
+          "elements": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "slot", "type", "role"],
+              "properties": {
+                "id": {"type": "string"},
+                "slot": {"type": "string"},
+                "type": {"enum": ["text", "shape", "motif", "chart",
+                                  "connector", "decor"]},
+                "role": {"enum": ["primary", "secondary", "support",
+                                  "ambient"]}
+              }
+            }
+          },
+          "relations": {"type": "array"},
+          "camera": {"type": "object"},
+          "carry_over": {"type": "array"}
+        }
+      }
+    }
+  }
+}

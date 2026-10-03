@@ -1,0 +1,13 @@
+# SRT Media Director — runtime dependencies
+#
+# 核心（self_test 与端到端流水线必需）：
+Pillow>=9.5            # 光栅渲染探针帧
+jsonschema>=4.0        # 中间产物 schema 校验
+
+# 可选增强：
+cairosvg>=2.7          # SVG 画法光栅化（skills/04；缺省则退化为基础几何）
+imageio-ffmpeg>=0.4    # MP4 成片编码（runtime/render_video.py；自带静态 ffmpeg）
+
+# 中文字体（任选其一即可，Linux 建议）：
+#   sudo apt-get install fonts-noto-cjk        # Noto Sans/Serif CJK
+# 若系统无 CJK 字体，渲染与播放器会回退为 ASCII，判读能力下降但不报错。

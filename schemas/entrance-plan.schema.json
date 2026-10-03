@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "entrance-plan",
+  "type": "object",
+  "required": ["beats"],
+  "properties": {
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "cues", "lifecycle", "events", "phases",
+                     "pacing", "handoff"],
+        "properties": {
+          "beat_id": {"type": "string"},
+          "cues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["cue_id", "at", "elements"],
+              "properties": {
+                "cue_id": {"type": "string"},
+                "at": {"type": "number", "minimum": 0},
+                "at_ratio": {"type": "number"},
+                "purpose": {"type": "string"},
+                "elements": {"type": "array", "minItems": 1,
+                             "items": {"type": "string"}}
+              }
+            }
+          },
+          "lifecycle": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "required": ["enter", "exit"],
+              "properties": {
+                "enter": {
+                  "type": "object",
+                  "required": ["at", "motion", "dur"],
+                  "properties": {
+                    "at": {"type": "number", "minimum": 0},
+                    "motion": {"enum": ["fade", "rise", "pop", "inherit"]},
+                    "dur": {"type": "number", "exclusiveMinimum": 0}
+                  }
+                },
+                "exit": {
+                  "type": ["object", "null"],
+                  "required": ["at", "motion", "dur"],
+                  "properties": {
+                    "at": {"type": "number", "minimum": 0},
+                    "motion": {"enum": ["fade", "sink", "shrink"]},
+                    "dur": {"type": "number", "exclusiveMinimum": 0}
+                  }
+                }
+              }
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["at", "action", "targets"],
+              "properties": {
+                "at": {"type": "number", "minimum": 0},
+                "at_ratio": {"type": "number"},
+                "type": {"type": "string"},
+                "action": {"type": "string"},
+                "targets": {"type": "array",
+                            "items": {"type": "string"}}
+              }
+            }
+          },
+          "phases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "t"],
+              "properties": {
+                "id": {"type": "string"},
+                "t": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          },
+          "pacing": {"type": "object"},
+          "handoff": {"type": "object"}
+        }
+      }
+    }
+  }
+}

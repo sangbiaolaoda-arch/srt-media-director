@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "beat-plan",
+  "type": "object",
+  "required": ["timing_source", "beats"],
+  "properties": {
+    "timing_source": {"const": "srt"},
+    "total_duration_sec": {"type": "number"},
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "cue_range", "start_sec", "end_sec",
+                     "duration_sec", "narration", "semantic_role",
+                     "motion_policy"],
+        "properties": {
+          "beat_id": {"type": "string", "pattern": "^beat_\\d+$"},
+          "cue_range": {"type": "array", "minItems": 2, "maxItems": 2,
+                        "items": {"type": "integer", "minimum": 1}},
+          "start_sec": {"type": "number", "minimum": 0},
+          "end_sec": {"type": "number", "minimum": 0},
+          "duration_sec": {"type": "number", "exclusiveMinimum": 0},
+          "narration": {"type": "string", "minLength": 1},
+          "semantic_role": {"type": "string"},
+          "narrative_shape": {"type": "object"},
+          "motion_policy": {"enum": ["required", "optional", "hold"]}
+        }
+      }
+    }
+  }
+}
