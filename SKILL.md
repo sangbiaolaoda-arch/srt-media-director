@@ -1,6 +1,6 @@
 ---
 name: srt-media-director
-version: 6.1.0
+version: 7.4.0
 status: public-learning-and-execution
 language: zh-CN
 agent_created: false
@@ -9,10 +9,24 @@ description: >-
   面向 AI Agent 的开源信息图动画导演 Skill：SRT → 语义分析 → Beat → 叙事形状 →
   Visual Claim → 强调与信息编码 → 视觉叙事 → 全局语法 → 构图 → 时序编排 →
   Visual DSL → 布局/编译 Runtime → 适配器 → 分层验证 → 局部修复。
-  v4.0 将 v3.0 单文档重组为「11 个模块技能 + 主协调器 + 可运行参考 Runtime」，
-  全部硬规则保留并配上机器门禁（runtime/self_test.py 12 道门禁已验证）。
+  v4.0 将 v3.0 单文档重组为「14 个模块技能 + 主协调器 + 可运行参考 Runtime」，
+  全部硬规则保留并配上机器门禁（runtime/self_test.py 20 道门禁已验证）。
   v6.0 增补生成后契约（转场三类型 / 停留下限 / 视线路径 / ambient / 反空话）、
   风格锁定扫描、节拍表与末帧联系表、故障→修复层路由与单变量重拍预算。
+  v7.0 「固定视觉规则 → 自适应视觉导演」：固定审美原则不固定视觉风格、
+  固定视觉语法体系不固定表达、固定编译验证规则不固定长相。新增 Visual Grammar
+  （抽象语法替代素材名）、Style Bible（视频级视觉人格）、Visual Necessity
+  （必要性替代数量门禁），构图模板降为建议锚点。
+  v7.1 参考帧构图语法：把参考帧的手写 SVG 构图学成可复用模块（版心网格 /
+  圆角卡片 / 线稿图标 / 连接箭头 / 强调纪律 / 逐元素入场编排），而非只抄配色。
+  v7.2 把参考帧学习从「模板动物园」升级为「规则引擎」：坐标改为规则的**解**
+  （cols(n)/rows(n)），强调改为**预算**（一帧一处、一个元素），并新增
+  quadrants/timeline/stack 三个参考帧没有的新构型，证明学到的是可泛化规则。
+  v7.3 「语义视觉意图层」：把 Agent 从**模板选择器**改造为**只输出视觉意图**
+  （Visual Claim / Visual Grammar / Focal Point / Relationship Graph / Density /
+  Silence / Motion Intent），几何一律由 Runtime 的 composition_compiler 决定；
+  明令拒斥 strategy/template/像素泄漏（门禁 G17）；Agent 不再「画画」。
+  语法词汇新增 accumulation / trajectory / threshold（门禁 G18 验证语法 1:N 实现）。
 ---
 
 # SRT Media Director（v4.0 开源版入口）
@@ -33,7 +47,35 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 | 单文档 ~6900 行 | 11 个模块技能 + 主协调器（`skills/`） |
 | 编号重叠（§10.16 出现两次）、版本残留 | 全仓库唯一规则编号（`CORE-nn` 等），编号不随文档重组变化 |
 | 规则靠自觉 | 规则分 [强制]/[经验]/[建议] 三级；[强制] 级全部有机器门禁 |
-| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 12 道门禁 CI 可跑 |
+| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 20 道门禁 CI 可跑 |
+
+### v7.1：参考帧构图语法
+
+| 学的是（构图代码） | 不是只学（表面） |
+|---|---|
+| 版心网格 / 圆角卡片 / 描边阶梯 | 单一配色 |
+| 线稿图标 / 连接箭头 / 强调纪律 | 单个素材 |
+| 逐元素入场编排（rise/fade/pop/draw/grow） | 整拍淡入 |
+
+### v7.2：从「抄三张图」到「生成引擎」
+
+判据只有一条：**一条规则若只能还原它被抽出的那张图，就是「抄」；若还能外推出源图没有的解，才是「学」。**
+
+| 维度 | 照抄（模板动物园） | 学会（规则引擎） |
+|---|---|---|
+| 坐标 | 写死 `x=[48,265,482]` | `cols(3)` 公式的解 = 那个坐标 |
+| 列数 | 只能 3 列 | `cols(n)` 任意 n，仍贴版心不重叠 |
+| 强调 | 颜色计数 | 预算：含强调色的**元素个数** ≤ 1 |
+| 新构型 | 做不出 | 四象限 / 时间轴 / 纵向清单 |
+| 门禁 | 无 | G16：复现 + 泛化双断言 |
+
+### v7.0：自适应视觉导演
+
+| 固定（不变） | 不固定（随内容自适应） |
+|---|---|
+| 审美原则（层级/对比/静默/必要性） | 视觉风格（家族/情绪/密度） |
+| 视觉语法体系（causality/contrast/progression…） | 表层表达（用哪种画法实现该语法） |
+| 编译与验证规则（门禁/契约/风格锁） | 画面长相（构图模板降为建议锚点） |
 
 ## 30 秒上手
 
@@ -41,7 +83,7 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 pip install pillow jsonschema
 
 # 1. 先验证 Runtime（Bootstrap Gate，VAL-03）
-python runtime/self_test.py          # 12 道门禁 → SELF-TEST VERIFIED ✔
+python runtime/self_test.py          # 20 道门禁 → SELF-TEST VERIFIED ✔
 
 # 2. 跑最小示例（8 条字幕 / 38 秒 / 5 种构图模板）
 python cli.py examples/minimal/attention.srt \
@@ -72,11 +114,16 @@ srt-media-director/
 │  ├─ 07-choreography.md     #   时序编排（lifecycle/cue/交接 G1-G5）
 │  ├─ 08-dsl.md              #   Visual DSL 规范（禁像素）
 │  ├─ 09-validation-repair.md      # 四层验证 + 修复路由
-│  └─ 10-anti-ppt.md         #   防退化质量底线
+│  ├─ 10-anti-ppt.md         #   防退化质量底线
+│  ├─ 11-visual-grammar.md   #   视觉语法体系（抽象语法替代素材名）
+│  ├─ 12-style-bible.md      #   视频级视觉人格（风格随内容自适应）
+│  └─ 13-reference-frames.md #   参考帧构图语法（学构图代码，非抄配色）
 ├─ runtime/                  # 参考实现（怎么算 / 机器事实）
 │  ├─ srt_parser.py  beat_planner.py  visual_director.py
 │  ├─ composition_planner.py  entrance_planner.py
 │  ├─ raster_renderer.py  html_adapter.py  validator.py
+│  ├─ visual_grammar.py  style_bible.py  visual_necessity.py
+│  ├─ ref_frame.py           #   参考帧构图语法 + 逐元素入场图层规范
 │  ├─ pipeline.py  make_sample.py  self_test.py  common.py
 ├─ schemas/                  # 6 个中间产物的 JSON Schema
 ├─ examples/minimal/         # 8-cue 最小示例 + 导演覆写示例
