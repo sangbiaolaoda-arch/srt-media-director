@@ -21,7 +21,17 @@ import pipeline  # noqa: E402
 import raster_renderer  # noqa: E402
 import srt_parser  # noqa: E402
 import svg_art  # noqa: E402
+import svg_backend  # noqa: E402
 import visual_director  # noqa: E402
+
+
+class Skip(Exception):
+    """显式跳过门禁（例如无系统 cairo 时的光栅门禁）——不计为失败。"""
+
+
+# 无系统 cairo（如 Windows runner）时光栅门禁显式跳过，而非崩溃：
+# 项目自带「无 cairo 优雅降级」设计（svg_backend + svg-fallback 作业）。
+_CAIRO_OK = svg_backend.probe()["chosen"] is not None
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAMPLE_SRT = os.path.join(ROOT, "examples", "minimal", "attention.srt")
@@ -193,6 +203,8 @@ def g5():
 
 @gate("6. 光栅探针（真实帧 / 墨水量 / 颜色数）")
 def g6():
+    if not _CAIRO_OK:
+        raise Skip("无可用 SVG 光栅后端（cairosvg/resvg），跳过光栅探针")
     _, dsl = _example_dsl()
     render_plan, _, _, _ = composition_planner.plan(dsl)
     entrance = entrance_planner.plan(dsl)
@@ -233,7 +245,7 @@ def g8():
         make_sample.trim_srt(EXAMPLE_SRT, trimmed, 30.0)
         report = pipeline.run(trimmed, os.path.join(tmp, "out"),
                               overrides_path=EXAMPLE_OVERRIDES,
-                              render_previews=True, log=lambda *a: None)
+                              render_previews=_CAIRO_OK, log=lambda *a: None)
         assert report["status"] == "PASS", json.dumps(report["issues"],
                                                       ensure_ascii=False)
         work = os.path.join(tmp, "out", "work")
@@ -331,6 +343,8 @@ def main():
         try:
             fn()
             print("  PASS  %s" % name)
+        except Skip as e:
+            print("  SKIP  %s (%s)" % (name, e))
         except Exception as e:  # noqa: BLE001 — 报告全部失败而非首个
             failures.append((name, repr(e)))
             print("  FAIL  %s -> %r" % (name, e))
