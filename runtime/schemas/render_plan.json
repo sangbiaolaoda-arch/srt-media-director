@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "render_plan",
+  "description": "编译层产物：把语义意图解成几何（盒子/槽位）。这是 Agent 不许直接产出的层。",
+  "type": "object",
+  "required": ["beats"],
+  "properties": {
+    "beats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "elements"],
+        "properties": {
+          "beat_id": { "type": "string" },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "box"],
+              "properties": {
+                "id": { "type": "string" },
+                "box": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+                "motion": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
