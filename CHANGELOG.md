@@ -1,5 +1,117 @@
 # Changelog
 
+## [6.1.0] — 2026-10-04
+
+回应「作为主体的文字太淡、像背景」的可读性反馈。
+
+### Fixed
+
+- **主体文字对比度过低**（`runtime/common.py` · `runtime/raster_renderer.py` ·
+  `runtime/html_adapter.py` · `runtime/style_tokens.json`）：
+  - 旧主题主墨色 `#494343` 在暖米底 `#E9E4DE` 上只有 ≈3:1；语义色
+    （红 `#E14D49` / 图示蓝灰 `#787C90` / 绿 `#AFCAC1`）落在 ≈2:1，主体文字
+    在浅底上「发灰、读起来像背景」。
+  - 主墨色加深为暖黑 `#26221E`；新增三个**主体语义文字加深变体**
+    `text_negative #A8281F` / `text_positive #2E5A4A` / `text_info #33374D`。
+  - 文字层一律经 `_text_color()` / `textColor()` 取加深色，图形/装饰仍用原
+    语义色，保证「文字够重、图形仍鲜活」。
+  - 实测：主体文字对比度由 ≈1.9–2.9 提升到 **5.10:1**（跨过 WCAG AA 4.5:1）。
+  - 风格锁定扫描（`style_guard`）token 表同步更新；黄金基准重生成。
+
+### Notes
+
+- 本次仅改文字取色，不改构图、时序、分拍与图形语汇；`self_test` 12/12、
+  `pytest` 全绿。
+
+## [6.0.0] — 2026-10-04
+
+本轮把「静音信息图」的**生成 → 检查 → 定位 → 修复**闭环补成机器保证，
+回应最常见的失败：画面一闪而过、转场接不上、风格漂移、构图撞车。
+
+### Added
+
+- **生成后契约层**（`runtime/contracts.py`，接入 `pipeline`，未过即阻断）：
+  - 每拍 `end_state`（visible / positions / hold_ms）与 `transition_in`
+    （carry / cut / dissolve 三选一，必须写 reason）。
+  - **转场三类型机器检查**：carry 的元素必须在上一拍 end_state 且位移在容差内
+    （否则要声明 transform）；cut 必须新旧构图有差异（否则「这不是转场，只是
+    闪一下」）；dissolve 必须至少一个 carried（否则「空溶解」）。
+  - **静音停留下限**：`hold ≥ min(阅读时间, 本拍时长) × 0.22`，低于即阻断。
+  - **视线路径 attention_path**：≤4，按入场波次时间序，primary 必在且最强；
+    只纳入有信息量元素（排除 decor / ambient）。
+  - **ambient 持续微动**：主元素禁止 ambient；幅度上限；久静标 WARN。
+  - **反空话过滤**：视觉命题/关键文本禁「高级感/科技感/震撼/有张力」等，
+    要求可画描述。
+- **风格锁定**（`runtime/style_tokens.json` + `runtime/style_guard.py`）：
+  编译产物出现 token 外颜色 / 线宽 / 字体即 FAIL。风格一致性不靠提示词。
+- **节拍表 + 末帧联系表**（`runtime/beat_sheet.py`、`runtime/lastframe.py`）：
+  渲染前生成纸张评审用的节拍表 md；只渲染每拍末帧拼成 contact sheet，
+  在花整片渲染成本前先看结构。
+- **故障 → 修复层路由**（`runtime/repair_routing.py`、`runtime/diagnose.py`）：
+  症状映射到归属层（contract / transition / token / layout / visual_claim /
+  semantic）与修复动作；`RepairBudget` 每拍单变量重拍预算默认 3 次，超预算阻断，
+  杜绝无限返工。
+
+### Fixed
+
+- **同拍断句粘连**：`beat_planner._join_texts` 旧实现用 `"".join`，导致上一句
+  结尾与下一句开头粘在一起（「半点不由人」+「说这句话的人」→「半点不由人
+  说这句话的人」）。改为缺标点处补逗号，断句合理。
+- **短拍波次挤爆门禁**：短拍下固定归一化波次锚点会把相邻波次压到 0.25s 内，
+  触发 G2 误报。`entrance_planner._respace_cues` 按最小间隔重排真实入场时刻，
+  放不下时合并最近的相邻波次（= 同一时刻入场），lifecycle 同步更新。
+
+### Changed
+
+- `self_test.py` 门禁 8 → 12：新增生成后契约、风格锁定、语义断句、故障路由。
+- 黄金基准因断句修复变更中间产物，已人工确认后重生成。
+
+## [5.0.0] — 2026-10-04
+
+本轮聚焦「可信度」，把主观口号落成可验证事实（P0 四项）。
+
+### Changed
+
+- **默认底色改为米白纸感 `#F4EFE6`**（`common.THEME`：`cinema`→`paper`）。
+  浅底上连带调整：暗角 0.42→0.08、胶片颗粒 5→3、去掉黑遮幅、
+  幽灵字/水印透明度上调（0.10/0.15 → 0.14/0.20）。5 套情绪调色板
+  （`common.PALETTES`）全部换成米白系，强调色由金改为赭。
+- **`ink_stats` 改为主题无关的高通法**：旧实现用「与单一底色固定差值」
+  判定墨迹，换浅底后会把整片渐变+暗角误判成内容（实测墨迹比 0.78）。
+  改为与「局部高斯模糊背景估计」比对，渐变/暗角/颗粒归为背景，
+  仅真实内容计墨——阈值在深/浅底上语义一致。
+- **`_draw_glow_panel` 浅底适配**：暗色主题的同心椭圆光晕在浅底上会糊，
+  改为浅色圆角色块 + 同色细边。
+
+### Added
+
+- **真实样例库**（`examples/showcase/`）：4 类内容各一段成片 + GIF 预览——
+  技术讲解（因果链/中英混排）、叙事抒情（问答/让步）、数据对比（数字/前后）、
+  长片（3m41s，模板复用与调色板分布）。生成脚本 `tools/make_showcase_srt.py`。
+- **已知失败案例**（`examples/known-failures/README.md`）：F01 SRT 缺空行
+  导致解析退化、F02 同质内容不被误判、F03 曾存在的跨进程不可复现（已修复）、
+  F04 缺 CJK 排版门禁、F05 模板覆盖缺口、F06 镜头运动仅 1 种。
+- **重复感量化门禁（REP）**（`runtime/rep_metrics.py`）：模板连续拍数、
+  模板分布熵、相邻拍相似度（模板/区域/调色板/装饰加权和）、调色板占比、
+  装饰复现间隔；WARN/FAIL 两级，接入 `validator` L2 层。
+- **黄金回归测试**（`tests/golden/` + `tests/test_golden.py`）：固定 SRT →
+  五层中间产物归一化哈希比对（剔除 volatile 键 + sort_keys + 定长浮点）。
+- **SVG 后端抽象**（`runtime/svg_backend.py`）：cairosvg 主 / resvg 备 /
+  缺失时明确降级；`--probe` 供 CI 验证降级路径。
+- **真 CI 矩阵**（`.github/workflows/ci.yml`）：Python 3.9–3.12 ×
+  Linux/macOS/Windows 十二组合，显式处理三平台 cairosvg 系统依赖；
+  另有 `golden`（哈希回归）与 `svg-fallback`（无系统 cairo 降级）两个 job。
+- `requirements.txt` 增 `pytest`；`pyproject.toml` 增 `test` extra。
+
+### Fixed
+
+- **跨进程不可复现**（黄金测试上线当天抓到）：`semantic_grouper` 蝉联检测
+  用 `sorted(strong, key=len)[-1]` 取锚点，长度并列时依赖集合迭代序，
+  受 `PYTHONHASHSEED` 影响导致 `beat-plan.json` 跨进程哈希漂移。改为
+  `sorted(strong, key=lambda g: (len(g), g))[-1]`，消除进程间差异并有回归测试。
+- **WARN 误判为 FAIL**：`validator` 曾把 REP 的 WARN 级问题也计入阻断，
+  与「WARN 只记录不阻断」契约冲突；状态判定改为仅非 warn 项阻塞。
+
 ## [4.4.0] — 2026-10-03
 
 ### Added

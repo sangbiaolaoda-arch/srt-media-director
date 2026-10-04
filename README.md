@@ -3,9 +3,9 @@
 > 把 SRT 字幕变成有导演思维的信息图动画：不是「字幕 → PPT」，
 > 而是「语言理解 → 视觉命题 → 强调与编码 → 构图 → 时序编排 → 可验证渲染」。
 
-[![self-test](https://img.shields.io/badge/self--test-8%20gates-brightgreen)](runtime/self_test.py)
+[![ci](https://github.com/sangbiaolaoda-arch/srt-media-director/actions/workflows/ci.yml/badge.svg)](https://github.com/sangbiaolaoda-arch/srt-media-director/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![python](https://img.shields.io/badge/python-%3E%3D3.9-blue)](https://www.python.org)
+[![python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org)
 
 ## 一句话
 
@@ -14,11 +14,54 @@ render-plan → entrance-plan → film/index.html（可播放）→
 validation-report（机器证据）`——每一层落盘、每一层可校验、
 每一层错误都有明确的修复路由。
 
+## 真实样例库（先看画面，再谈方法）
+
+「反 PPT / 画面会讲故事」是本项目最大的卖点，所以它必须可被外人验证——
+不是只放最好的一段，而是**覆盖不同内容类型 + 主动公开失败案例**。
+全部样例在 [`examples/showcase/`](examples/showcase/)：
+
+| 样例 | 内容类型 | 时长 | 看点 |
+|---|---|---|---|
+| [01-explanatory-tech](examples/showcase/01-explanatory-tech/) | 技术讲解 | 1m11s | 因果链 / 流程排序；中英混排（gradient checkpointing、BF16） |
+| [02-narrative-emotion](examples/showcase/02-narrative-emotion/) | 叙事抒情 | 1m54s | 问答断句、让步转折、跨拍交接 |
+| [03-data-comparison](examples/showcase/03-data-comparison/) | 数据对比 | 1m00s | 数字/前后变化；语义色分离（正负对比） |
+| [04-longform-3min](examples/showcase/04-longform-3min/) | 长片 | 3m41s | 模板复用率、调色板分布是否漂移 |
+
+> 下方 GIF 为各成片前 6 秒的降采样预览（工程内可离线复现完整 MP4）。
+
+**01 · 技术讲解（因果链 / 中英混排）**
+
+![01-explanatory-tech preview](examples/showcase/01-explanatory-tech/preview.gif)
+
+**02 · 叙事抒情（问答 / 让步 / 转折）**
+
+![02-narrative-emotion preview](examples/showcase/02-narrative-emotion/preview.gif)
+
+**03 · 数据对比（数字 / 前后变化）**
+
+![03-data-comparison preview](examples/showcase/03-data-comparison/preview.gif)
+
+**04 · 长片（3m41s，模板复用与调色板分布）**
+
+![04-longform-3min preview](examples/showcase/04-longform-3min/preview.gif)
+
+复现：
+```bash
+python runtime/render_video.py \
+  --srt examples/showcase/01-explanatory-tech/case.srt \
+  --out out/01-tech.mp4
+```
+
+**已知失败案例与局限**：[`examples/known-failures/`](examples/known-failures/)
+——包括 SRT 解析敏感性（F01）、同质内容不被误判（F02）、曾存在的跨进程
+不可复现（F03，已修复 + 回归测试）、缺失的 CJK 排版门禁（F04）、构图模板
+覆盖缺口（F05）。**公开失败比只展示高光更可信。**
+
 ## 快速开始
 
 ```bash
 pip install pillow jsonschema cairosvg
-python runtime/self_test.py        # Bootstrap Gate：8 道门禁
+python runtime/self_test.py        # Bootstrap Gate：12 道门禁
 python cli.py examples/minimal/attention.srt \
   --out sample --overrides examples/minimal/director_overrides.json
 ```
@@ -79,6 +122,29 @@ python runtime/make_sample.py 30 --no-render  # 只编译 + 门禁（2 秒级）
   样例产物为 PNG 探针帧 + HTML 播放器。
 - L4（语义/审美）验证**无法自动化**，`validation-report.json` 中恒为
   PENDING——请真的去看 `preview/` 里的帧。
+
+## 质量门禁与可复现性
+
+本项目把「可验证优先」落到机器可查的指标上，而不是口号：
+
+- **重复感门禁（REP）**：把「画面重复 / 没随机感」变成五个可计算量——
+  同一模板连续拍数、模板分布熵、相邻拍相似度（模板/区域/调色板/装饰
+  加权和）、调色板占比、装饰复现间隔。阈值分 WARN / FAIL，FAIL 让 L2
+  整体不通过。见 [`runtime/rep_metrics.py`](runtime/rep_metrics.py)。
+- **黄金回归（golden）**：固定 SRT → 五层中间产物（beat-plan / visual-plan
+  / visual-dsl / render-plan / entrance-plan）**归一化后哈希比对**。
+  「种子跨机器可复现」的声明由 [`tests/`](tests/) 回归测试支撑——它上线
+  第一天就抓到并固化了 `PYTHONHASHSEED` 导致的跨进程漂移（见
+  [`known-failures/F03`](examples/known-failures/)）。
+- **终端渲染兜底**：`runtime/svg_backend.py` 主用 cairosvg、备选 resvg、
+  缺失时明确降级而非静默伪装；CI 的 `svg-fallback` job 专门验证「无系统
+  cairo 时优雅降级」。
+
+```bash
+python runtime/self_test.py     # 12 道 Bootstrap Gate
+python -m pytest tests -q       # 黄金哈希回归
+python runtime/svg_backend.py --probe   # SVG 后端可用性
+```
 
 ## 参与贡献
 

@@ -79,7 +79,40 @@ _MOTIF_MAP = (
     ("进度", "progress_ring"), ("完成", "progress_ring"),
     # 坐标 / 原点
     ("坐标", "map_pin"), ("原点", "map_pin"), ("原地", "map_pin"),
+    # ---- 命理 / 心理学（《10月4日》母题：控制错觉 / 后见之明 / 命运）----
+    # 命 / 注定 / 不由人
+    ("万般皆是命", "compass"), ("皆是命", "compass"), ("命里", "compass"),
+    ("信命", "compass"), ("说命", "compass"), ("命运", "compass"),
+    ("不由人", "compass"), ("注定", "compass"), ("天意", "compass"), ("命", "compass"),
+    # 实验 / 研究 / 判断 / 衡量
+    ("实验", "puzzle"), ("研究者", "puzzle"), ("研究", "puzzle"),
+    ("兰格", "puzzle"), ("菲施霍夫", "puzzle"), ("被试", "puzzle"),
+    ("判断", "balance"), ("裁决", "balance"), ("判决", "balance"),
+    ("估", "balance"), ("评估", "balance"), ("打分", "balance"),
+    # 概率 / 数据 / 概率估计
+    ("概率", "chart_bar"), ("开价", "chart_bar"), ("平均", "chart_bar"),
+    ("数字", "chart_bar"), ("数据", "chart_bar"), ("几个", "chart_bar"), ("多少", "chart_bar"),
+    ("翻一倍", "chart_line"), ("倍", "chart_line"), ("差", "chart_line"), ("涨", "chart_line"),
+    # 中奖 / 结果 / 结局
+    ("中奖", "target"), ("结局", "target"), ("结果", "target"), ("结尾", "target"),
+    # 选择 / 随机（自己挑 = 控制的错觉）
+    ("自己挑", "balance"), ("挑选", "balance"), ("选择", "balance"),
+    ("随机", "puzzle"), ("发到", "puzzle"), ("拿票", "puzzle"),
+    # 记忆 / 后见之明
+    ("记忆", "bookmark"), ("回想", "bookmark"),
+    # 错觉 / 大脑 / 规则（两台机器）
+    ("错觉", "gears"), ("大脑", "gears"), ("机器", "gears"), ("规则", "gears"),
+    # 时间 / 发生 / 结束
+    ("发生", "clock"), ("开始", "hourglass"), ("结束", "hourglass"),
+    # 归档 / 抽屉 / 盖章（办手续）
+    ("归档", "lock"), ("抽屉", "lock"), ("盖章", "lock"), ("收进", "lock"), ("封存", "lock"),
 )
+
+# 无关键词命中时的兜底候选（内容驱动、跨拍变化；刻意不含 "phone"，
+# 避免「上一支视频的母题」在无关内容上反复渗入背景水印）。
+_GENERIC_MOTIFS = ("compass", "gears", "bulb", "puzzle", "balance",
+                   "target", "hourglass", "map_pin", "flag", "bookmark",
+                   "calendar", "clock")
 
 # ---- 装饰附体（v4.4：策略主题 + 受控随机陪衬 + 跨拍冷却）----
 # 落位区域池：画面四角 + 边缘中点，避开中央主体区
@@ -97,10 +130,10 @@ _DECOR_ZONES = (
 _STRATEGY_DECOR = {
     "single_focus": ("ring_pair",),
     "left_to_right_flow": ("arrow_chain", "wave"),
-    "cause_effect": ("arrow_chain", "milestone"),
-    "comparison": ("divider", "bar_mini"),
+    "cause_effect": ("conn_nodes", "milestone"),
+    "comparison": ("chip_row", "bar_mini"),
     "center_cluster": ("ring_pair", "orbit"),
-    "before_after": ("bar_mini", "milestone"),
+    "before_after": ("mini_curve", "milestone"),
 }
 
 # 随机陪衬候选池（全部非拟人图形/图表）
@@ -198,13 +231,20 @@ def _motif_color(keyword, cue_ids, numbers_index):
     return "info"
 
 
-def _pick_motif(narration, override=None):
+def _pick_motif(narration, override=None, salt=""):
+    """关键词命中优先；未命中时做「内容驱动的确定性兜底」。
+
+    旧实现返回固定 "phone"，导致上一支视频的母题在无关内容里被反复复用，
+    背景水印每拍都是同一张图（用户可见的「重复手机」）。现改为：种子取自
+    salt + 字幕文本，跨进程可复现，且随拍号/文案变化，不再钉死单张图。
+    """
     if override:
         return override
     for w, name in _MOTIF_MAP:
         if w in narration:
             return name
-    return "phone"
+    h = int(hashlib.md5((salt + "|" + narration).encode("utf-8")).hexdigest()[:8], 16)
+    return _GENERIC_MOTIFS[h % len(_GENERIC_MOTIFS)]
 
 
 def _decor(strategy, beat_i, ghost_text=None, rng=None, recent=None):
@@ -287,8 +327,11 @@ def _build_elements(strategy, beat_i, ov, emphasis, encoding, narration,
         if pair:
             left, right = pair
         else:
-            left = _pick_motif(narration.split("，")[0])
-            right = "phone" if left != "phone" else "moon"
+            left = _pick_motif(narration.split("，")[0], salt="L")
+            right = _pick_motif(narration, salt="R")
+            if right == left:  # 左右两端不重复：顺延到下一个兜底候选
+                i = _GENERIC_MOTIFS.index(right) if right in _GENERIC_MOTIFS else 0
+                right = _GENERIC_MOTIFS[(i + 1) % len(_GENERIC_MOTIFS)]
         els.append(motif_el("hero_left", "primary", left, "info"))
         els.append({"id": "%s_bridge" % bid, "slot": "bridge",
                     "type": "connector", "role": "support",
@@ -498,3 +541,7 @@ def direct(beats, overrides=None):
     }, "beats": vplans}
     dsl = {"version": "4.4", "canvas": CANVAS, "beats": dsl_beats}
     return vplan, dsl
+
+
+# v6.0：把参考图信息图装饰纳入随机陪衬池
+_DECOR_POOL = tuple(_DECOR_POOL) + ("conn_nodes", "mini_curve", "chip_row")

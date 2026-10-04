@@ -9,6 +9,7 @@ import os
 import jsonschema
 
 import raster_renderer
+import rep_metrics
 from common import dump_json, ensure_dir, load_json
 
 SCHEMA_FILES = {
@@ -138,28 +139,55 @@ def _l3(docs, preview_dir, issues):
     return report
 
 
+def _l2_rep(docs, issues):
+    """L2 门禁（重复感）：把「画面重复 / 无随机感」落成机器可查指标。
+
+    布局类 L2（R1..R8）在 composition_planner 内 fail-fast；这里补上
+    跨拍的重复感门禁（REP-*），它与布局 gate 同属 L2 层，但需要全片
+    视野，因此在校验阶段统一评估。
+    """
+    if "visual-dsl.json" not in docs or "render-plan.json" not in docs:
+        return None
+    rep = rep_metrics.evaluate(docs["visual-dsl.json"], docs["render-plan.json"])
+    for v in rep["violations"]:
+        issues.append({"layer": "L2", "code": v["code"], "msg": v["msg"]})
+    for w in rep["warnings"]:
+        issues.append({"layer": "L2", "code": w["code"], "msg": w["msg"],
+                       "severity": "warn"})
+    return rep
+
+
 def validate(project_root, work_dir, preview_dir, render=True):
     """Run schema + L1 (+ L3) and write validation-report.json. Returns it."""
     issues = []
     docs = _schema_layer(project_root, work_dir, issues)
     _l1(docs, issues)
+    rep = _l2_rep(docs, issues)
     raster = None
     if render and not any(i["code"] == "ARTIFACT_MISSING" for i in issues):
         raster = _l3(docs, preview_dir, issues)
 
-    status = "PASS" if not issues else "FAIL"
+    l2_fail = [i for i in issues if i["layer"] == "L2" and
+               i.get("severity") != "warn"]
+    l2_warn = [i for i in issues if i["layer"] == "L2" and
+               i.get("severity") == "warn"]
+    # WARN 级问题只记录、不阻断（REP 门禁契约）。只有非 warn 的 issue 才 FAIL。
+    blocking = [i for i in issues if i.get("severity") != "warn"]
+    status = "PASS" if not blocking else "FAIL"
     report = {
         "status": status,
         "layers": {
-            "schema": "PASS" if not [i for i in issues if i["layer"] == "schema"] else "FAIL",
-            "l1": "PASS" if not [i for i in issues if i["layer"] == "L1"] else "FAIL",
-            "l2": "see work/layout-audit.json (runs fail-fast inside composition_planner)",
+            "schema": "PASS" if not [i for i in issues if i["layer"] == "schema" and i.get("severity") != "warn"] else "FAIL",
+            "l1": "PASS" if not [i for i in issues if i["layer"] == "L1" and i.get("severity") != "warn"] else "FAIL",
+            "l2": ("FAIL (%d)" % len(l2_fail)) if l2_fail
+                  else ("PASS (%d warn)" % len(l2_warn) if l2_warn else "PASS"),
             "l3": ("PASS" if not [i for i in issues if i["layer"] == "L3"] else "FAIL")
                   if render else "SKIPPED",
             "l4": "PENDING — semantic/visual review must be done by agent or human",
         },
         "issues": issues,
         "raster": raster,
+        "rep_metrics": rep,
     }
     ensure_dir(work_dir)
     dump_json(report, os.path.join(work_dir, "validation-report.json"))

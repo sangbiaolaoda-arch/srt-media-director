@@ -10,6 +10,7 @@ import os
 
 import beat_planner
 import composition_planner
+import contracts
 import entrance_planner
 import html_adapter
 import srt_parser
@@ -60,9 +61,37 @@ def run(srt_path, out_dir, overrides_path=None, render_previews=True, log=print)
         raise SystemExit("入场编排门禁未通过: %s" % ent_audit["issues"])
     dump_json(entrance, os.path.join(work, "entrance-plan.json"))
 
+    log("→ 生成后契约（end_state / transition / hold / 视线路径 / ambient）")
+    from common import CANVAS_W, CANVAS_H
+    cbeats = contracts.derive(dsl, render_plan, entrance, CANVAS_W, CANVAS_H)
+    c_audit = contracts.validate(dsl, cbeats, CANVAS_W, CANVAS_H)
+    dump_json({"beats": cbeats}, os.path.join(work, "contracts.json"))
+    dump_json(c_audit, os.path.join(work, "contract-audit.json"))
+    for i in c_audit["issues"][:8]:
+        log("  [%s] %s %s" % (i["severity"], i["code"], i["msg"]))
+    if c_audit["status"] != "PASS":
+        raise SystemExit("契约门禁未通过: %s" % c_audit["issues"][:4])
+
+    log("→ 节拍表（渲染前纸面评审）")
+    import beat_sheet
+    beat_sheet.beat_sheet(dsl, cbeats, os.path.join(work, "beat-sheet.md"))
+
+    log("→ 反空话过滤（视觉命题不得含空泛词）")
+    cliche = contracts.check_claims(dsl)
+    if cliche:
+        dump_json({"issues": cliche}, os.path.join(work, "claim-audit.json"))
+        raise SystemExit("视觉命题含空泛词: %s" % [i["msg"] for i in cliche][:4])
+
     log("→ 编译 film/index.html（只读产物，禁止手改）")
     title = os.path.splitext(os.path.basename(srt_path))[0]
     html_adapter.compile(dsl, render_plan, entrance, title, film)
+
+    log("→ 风格锁定扫描（token 外颜色/线宽/字体即报错）")
+    import style_guard
+    s_audit = style_guard.scan(PROJECT_ROOT, os.path.join(film, "index.html"))
+    dump_json(s_audit, os.path.join(work, "style-audit.json"))
+    if s_audit["status"] != "PASS":
+        raise SystemExit("风格漂移: %s" % s_audit["issues"][:4])
 
     log("→ 校验（schema / L1 / L3 光栅探针）")
     report = validator.validate(PROJECT_ROOT, work, preview, render=render_previews)

@@ -92,6 +92,14 @@ def main():
                               os.path.join(args.out, "sheet.jpg"))
         if sheet:
             print("联系表: %s" % sheet)
+        # v6.0：末帧联系表（只渲每拍末帧，渲整片前先纸面复核结构）
+        try:
+            import lastframe
+            lf = lastframe.run(args.out)
+            if lf:
+                print("末帧联系表: %s" % lf)
+        except Exception as e:  # noqa: BLE001 — 预览失败不阻断样例
+            print("末帧联系表跳过: %r" % e)
     print("播放器: %s" % os.path.join(args.out, "film", "index.html"))
     sys.exit(0 if report["status"] == "PASS" else 1)
 

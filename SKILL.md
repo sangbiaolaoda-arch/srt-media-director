@@ -1,6 +1,6 @@
 ---
 name: srt-media-director
-version: 4.4.0
+version: 6.1.0
 status: public-learning-and-execution
 language: zh-CN
 agent_created: false
@@ -10,7 +10,9 @@ description: >-
   Visual Claim → 强调与信息编码 → 视觉叙事 → 全局语法 → 构图 → 时序编排 →
   Visual DSL → 布局/编译 Runtime → 适配器 → 分层验证 → 局部修复。
   v4.0 将 v3.0 单文档重组为「11 个模块技能 + 主协调器 + 可运行参考 Runtime」，
-  全部硬规则保留并配上机器门禁（runtime/self_test.py 8 道门禁已验证）。
+  全部硬规则保留并配上机器门禁（runtime/self_test.py 12 道门禁已验证）。
+  v6.0 增补生成后契约（转场三类型 / 停留下限 / 视线路径 / ambient / 反空话）、
+  风格锁定扫描、节拍表与末帧联系表、故障→修复层路由与单变量重拍预算。
 ---
 
 # SRT Media Director（v4.0 开源版入口）
@@ -31,7 +33,7 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 | 单文档 ~6900 行 | 11 个模块技能 + 主协调器（`skills/`） |
 | 编号重叠（§10.16 出现两次）、版本残留 | 全仓库唯一规则编号（`CORE-nn` 等），编号不随文档重组变化 |
 | 规则靠自觉 | 规则分 [强制]/[经验]/[建议] 三级；[强制] 级全部有机器门禁 |
-| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 8 道门禁 CI 可跑 |
+| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 12 道门禁 CI 可跑 |
 
 ## 30 秒上手
 
@@ -39,7 +41,7 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 pip install pillow jsonschema
 
 # 1. 先验证 Runtime（Bootstrap Gate，VAL-03）
-python runtime/self_test.py          # 8 道门禁 → SELF-TEST VERIFIED ✔
+python runtime/self_test.py          # 12 道门禁 → SELF-TEST VERIFIED ✔
 
 # 2. 跑最小示例（8 条字幕 / 38 秒 / 5 种构图模板）
 python cli.py examples/minimal/attention.srt \

@@ -27,7 +27,7 @@ Runtime 负责**机器事实**（坐标、尺寸、碰撞、编译、渲染、�
 | 入场编排 | `runtime/entrance_planner.py` | cue 序列、每元素 enter/exit/after、跨拍 handoff | `entrance-plan.json` |
 | 渲染层 | `runtime/raster_renderer.py` / `html_adapter.py` | PIL 探针帧 / 可交互 HTML 播放器（同一份 SVG 画法） | `preview/*.png` / `film/index.html` |
 | 画法库 | `runtime/svg_art.py` | 非拟人 SVG 画法（motif + decor）+ 越界审计 + 光栅化 | data-URL / PNG |
-| 验证 | `runtime/validator.py` + `self_test.py` | L1 机器 / L3 光栅探针 / 8 道门禁 | `validation-report.json` |
+| 验证 | `runtime/validator.py` + `self_test.py` | L1 机器 / L3 光栅探针 / 12 道门禁 | `validation-report.json` |
 | 编排 | `runtime/pipeline.py` / `cli.py` | 串联全链路 | 全套产物 |
 
 ## 数据流（不可逆）
@@ -65,4 +65,4 @@ srt-analysis.json  ──►  beat-plan.json  ──►  visual-plan.json  ─�
 
 缺某模块时，实现**不得假装具备能力**：只有三种合法动作——
 找到已验证的等价实现 → 简化表达 → 阻断并报告。
-`runtime/self_test.py` 的 8 道门禁即是这条纪律的机器化。
+`runtime/self_test.py` 的 12 道门禁即是这条纪律的机器化。

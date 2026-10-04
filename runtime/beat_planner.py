@@ -41,6 +41,25 @@ def guess_role(text):
     return "explanation"
 
 
+def _join_texts(pieces):
+    """把同一拍内的多条字幕拼成可读文本。
+
+    旧实现用字符串直接相连（"".join），导致上一句结尾与下一句开头粘在一起
+    （如「半点不由人」+「说这句话的人」→「半点不由人说这句话的人」）。
+    这里在缺少标点处补一个逗号，保证断句合理。
+    """
+    PUNCT = "，。！？、；：,.!?;:…—）)」』】"
+    out = ""
+    for p in pieces:
+        t = (p or "").strip()
+        if not t:
+            continue
+        if out and out[-1] not in PUNCT:
+            out += "，"
+        out += t
+    return out
+
+
 def plan_beats(cues):
     """语义约束驱动的分拍。
 
@@ -57,7 +76,7 @@ def plan_beats(cues):
     buf = []
 
     def close(buf):
-        txt = "".join(c["text"] for c in buf)
+        txt = _join_texts([c["text"] for c in buf])
         beats.append({
             "beat_id": "beat_%02d" % (len(beats) + 1),
             "cue_range": [buf[0]["id"], buf[-1]["id"]],
@@ -104,7 +123,7 @@ def plan_beats(cues):
         merged["end_sec"] = last["end_sec"]
         merged["duration_sec"] = round(
             last["end_sec"] - prev["start_sec"], 3)
-        merged["narration"] = prev["narration"] + last["narration"]
+        merged["narration"] = _join_texts([prev["narration"], last["narration"]])
         merged["semantic_role"] = guess_role(merged["narration"])
         beats[-1] = merged
 

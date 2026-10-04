@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "srt-media-director"
-version = "4.4.0"
+version = "6.1.0"
 description = "把 SRT 字幕编译为有视觉层级、空间关系、信息编码与时间节奏的动画信息场景——一个面向 AI Agent 的开源动画导演 Skill 与参考实现。"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,12 +26,13 @@ dependencies = [
 [project.optional-dependencies]
 svg = ["cairosvg>=2.7"]
 video = ["imageio-ffmpeg>=0.4"]
-all = ["cairosvg>=2.7", "imageio-ffmpeg>=0.4"]
+test = ["pytest>=7.4"]
+all = ["cairosvg>=2.7", "imageio-ffmpeg>=0.4", "pytest>=7.4"]
 
 [project.urls]
-Homepage = "https://github.com/your-org/srt-media-director"
-Repository = "https://github.com/your-org/srt-media-director"
-Issues = "https://github.com/your-org/srt-media-director/issues"
+Homepage = "https://github.com/sangbiaolaoda-arch/srt-media-director"
+Repository = "https://github.com/sangbiaolaoda-arch/srt-media-director"
+Issues = "https://github.com/sangbiaolaoda-arch/srt-media-director/issues"
 
 [project.scripts]
 srt-director = "cli:main"

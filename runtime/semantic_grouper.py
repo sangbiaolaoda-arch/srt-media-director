@@ -108,8 +108,11 @@ def find_pairs(cues, max_span=6):
             strong = [g for g in common if len(g) >= 2
                       and g not in ("的是", "你了", "我在", "他在")]
             if strong:
+                # 确定性锚点：长度并列时再按字典序，避免集合迭代序
+                # （受 PYTHONHASHSEED 影响）泄漏到产物，破坏跨进程可复现。
+                anchor = sorted(strong, key=lambda g: (len(g), g))[-1]
                 pairs.append({"type": "echo", "from": i, "to": j,
-                              "anchor": sorted(strong, key=len)[-1]})
+                              "anchor": anchor})
 
     return pairs, rels
 

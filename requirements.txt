@@ -4,8 +4,11 @@
 Pillow>=9.5            # 光栅渲染探针帧
 jsonschema>=4.0        # 中间产物 schema 校验
 
+# 测试（黄金回归 / CI）：
+pytest>=7.4            # tests/ 黄金哈希回归
+
 # 可选增强：
-cairosvg>=2.7          # SVG 画法光栅化（skills/04；缺省则退化为基础几何）
+cairosvg>=2.7          # SVG 画法光栅化（主后端；缺省则尝试 resvg → 退化基础几何）
 imageio-ffmpeg>=0.4    # MP4 成片编码（runtime/render_video.py；自带静态 ffmpeg）
 
 # 中文字体（任选其一即可，Linux 建议）：

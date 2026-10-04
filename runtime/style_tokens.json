@@ -1,0 +1,28 @@
+{
+  "_comment": "v6.0 风格锁定 token。编译每拍自动注入；扫描 HTML/SVG 出现 token 外颜色/字体/线宽即报错。palette 为渲染器实际使用的完整色集。",
+  "version": "6.0.0",
+  "source": "10 张参考图（教科书式信息图）提炼 + 渲染器实际用色",
+  "background": "#E9E4DE",
+  "ink": "#26221E",
+  "muted": "#5F564B",
+  "text_negative": "#A8281F",
+  "text_positive": "#2E5A4A",
+  "text_info": "#33374D",
+  "accent": "#E14D49",
+  "rose_fill": "#F0D8CC",
+  "rose_edge": "#D8B4A8",
+  "diagram": "#787C90",
+  "diagram_green": "#AFCAC1",
+  "palette": [
+    "#E9E4DE", "#26221E", "#5F564B", "#A8281F",
+    "#2E5A4A", "#33374D", "#E14D49",
+    "#F0D8CC", "#D8B4A8", "#787C90", "#AFCAC1",
+    "#5E8C7E", "#2B2723", "#E08A2E", "#C9C2B4",
+    "#8F887C", "#B8AD99", "#F4EFE6", "#5C5548", "#494343",
+    "#17130E", "#0B0906", "#FFFFFF", "#000000"
+  ],
+  "line_widths": [1, 2, 3],
+  "radii": [4, 6],
+  "fonts": ["sans", "serif"],
+  "allowed_neutral": ["#FFFFFF", "#000000"]
+}

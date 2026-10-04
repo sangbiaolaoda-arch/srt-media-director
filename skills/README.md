@@ -41,4 +41,4 @@
 `skills/` 定义**为什么与做什么**（语义层），`runtime/` 实现**怎么算**
 （坐标、碰撞、测量、编译、机器事实）。Agent 不猜像素，Runtime 不替
 Agent 决定叙事。模块文档中引用的运行时入口（如 `composition_planner.plan()`）
-均已在本仓库的参考实现中通过 `runtime/self_test.py` 8 道门禁验证。
+均已在本仓库的参考实现中通过 `runtime/self_test.py` 12 道门禁验证。

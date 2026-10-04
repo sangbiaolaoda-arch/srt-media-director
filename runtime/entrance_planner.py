@@ -123,6 +123,55 @@ def _cues_from_lifecycle(life, elements, start, dur):
     return cues
 
 
+def _respace_cues(cues, life, start, dur, min_gap=None):
+    """把派生 cue 的波次间隔重排到 ≥ G_MIN_WAVE_GAP，避免短拍下挤成一团。
+
+    诚实修法：波次是真实入场时刻，不是标签。这里只前移靠后的波次
+    （不改早的波次），并在拍太短、放不下全部波次时**合并**最近的相邻波次
+    （合并=同一时刻入场，语义上是「这几样一起出现」）。lifecycle 同步更新，
+    保证渲染器与校验读到同一套时刻。
+    """
+    from common import G_MIN_WAVE_GAP
+    min_gap = G_MIN_WAVE_GAP if min_gap is None else min_gap
+    cap = start + 0.86 * dur
+
+    groups = [[c] for c in sorted(cues, key=lambda c: c["at"])]
+    if len(groups) <= 1:
+        return cues
+
+    def _shift(gs):
+        out, t = [], None
+        for g in gs:
+            a = g[0]["at"]
+            t = a if t is None else max(a, t + min_gap)
+            out.append(t)
+        return out
+
+    while len(groups) > 1 and _shift(groups)[-1] > cap + 1e-9:
+        gaps = [groups[i + 1][0]["at"] - groups[i][-1]["at"]
+                for i in range(len(groups) - 1)]
+        i = min(range(len(gaps)), key=lambda k: gaps[k])
+        groups[i] = groups[i] + groups[i + 1]
+        groups.pop(i + 1)
+
+    times = _shift(groups)
+    out = []
+    for g, t in zip(groups, times):
+        eids = sorted(e for c in g for e in c["elements"])
+        at = round(t, 3)
+        for eid in eids:
+            lc = life.get(eid)
+            if lc and lc.get("enter"):
+                lc["enter"]["at"] = at
+        out.append({"cue_id": None, "at": at,
+                    "at_ratio": round((at - start) / dur, 3),
+                    "purpose": None, "elements": eids})
+    for i, c in enumerate(out):
+        c["cue_id"] = "cue_%d" % (i + 1)
+        c["purpose"] = "wave_%d" % (i + 1)
+    return out
+
+
 def _interactions(beat, life):
     """基于 relations / 强调生成互动事件（画箭头、图表生长、洗色、脉冲）。"""
     start, end = beat["start_sec"], beat["end_sec"]
@@ -200,6 +249,7 @@ def plan(dsl):
         life = _build_lifecycle(beat, carried[i - 1] if i > 0 else set(),
                                 carried[i], i + 1)
         cues = _cues_from_lifecycle(life, beat["elements"], start, dur)
+        cues = _respace_cues(cues, life, start, dur)
         evs = _interactions(beat, life)
         beat["carry_over"] = ([{"element_motif": handoffs[i]["element_motif"],
                                 "reason": handoffs[i]["reason"]}]

@@ -74,6 +74,13 @@ function roleColor(el){
   if(el.colorRole==="ink")return THEME.ink;
   if(el.colorRole==="neutral")return THEME.muted;
   return COLORS[el.colorRole]||THEME.ink;}
+// v6.1：主体文字走加深色，避免浅底上「文字像背景」。
+function textColor(el){
+  const r=el.colorRole;
+  if(r==="ink")return THEME.ink;
+  if(r==="neutral")return THEME.muted;
+  const k="text_"+r;
+  return THEME[k]||COLORS[r]||THEME.ink;}
 function rr(c2,x,y,w,h,r){c2.beginPath();c2.moveTo(x+r,y);
   c2.arcTo(x+w,y,x+w,y+h,r);c2.arcTo(x+w,y+h,x,y+h,r);
   c2.arcTo(x,y+h,x,y,r);c2.arcTo(x,y,x+w,y,r);c2.closePath();}
@@ -181,14 +188,11 @@ function drawBeat(c2,beat,t,exclude,overrides){
       c2.fillStyle=g; c2.fillRect(b.x-r*0.3,b.y-r*0.3,b.w+r*0.6,b.h+r*0.6);
     }else if(el.type==="motif"){
       const col=el.color;
-      const im=IMG[(el.art||"phone")+"|"+col]; if(!im||!im.complete)continue;
-      if(nMotifs===1){ // 水印模式：放大垫底，文字是主角
-        const wb=scaledBox(b,2.2,0.03);
-        c2.globalAlpha=a*THEME.motif_watermark;
-        c2.drawImage(im,wb.x,wb.y,wb.w,wb.h);
-      }else{           // 多 motif 对照：保持构图盒子，半透明
+      const im=IMG[(el.art||el.motif||"compass")+"|"+col]; if(!im||!im.complete)continue;
+      { // v5.1：按构图盒子画前景插图，不再放大成背景水印
+        const k=nMotifs===1?0.92:0.55;
         const w=b.w*s.scale,h=b.h*s.scale;
-        c2.globalAlpha=a*0.55;
+        c2.globalAlpha=a*k;
         c2.drawImage(im,b.x+(b.w-w)/2,b.y+(b.h-h)/2,w,h);
       }
       c2.globalAlpha=1;
@@ -235,9 +239,9 @@ function drawBeat(c2,beat,t,exclude,overrides){
     }else if(el.type==="text"){
       const fs=beat.fonts[el.id]||{size:26,bold:false};
       const serif=!!SERIF_SLOTS[el.slot];
-      let col=roleColor(el);
+      let col=textColor(el);
       for(const pr of evs){
-        if(pr[0]==="color_wash")col=mix(THEME.ink,roleColor(el),pr[1]);
+        if(pr[0]==="color_wash")col=mix(THEME.ink,textColor(el),pr[1]);
       }
       let size=fs.size;
       for(const pr of evs){

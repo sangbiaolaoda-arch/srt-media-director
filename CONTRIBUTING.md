@@ -8,7 +8,7 @@
 > **新增 `[强制]` 级规则必须附带机器检查。**
 
 没有机器检查的规则在 Agent 执行时等于不存在。提交新的强制规则时，
-必须同时在 `runtime/self_test.py`（8 道门禁之一或新增一门）或
+必须同时在 `runtime/self_test.py`（12 道门禁之一或新增一门）或
 `runtime/validator.py`（L1/L3）中给出可执行的校验。CI 会拦。
 
 ## 1. 改方法论（skills/）

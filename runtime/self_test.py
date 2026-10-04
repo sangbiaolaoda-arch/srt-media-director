@@ -247,6 +247,83 @@ def g8():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+@gate("9. 生成后契约（end_state / transition 三类型 / hold 下限 / 视线路径 / ambient）")
+def g9():
+    import contracts
+    from common import CANVAS_W, CANVAS_H
+    _, dsl = _example_dsl()
+    render_plan, _, _, _ = composition_planner.plan(dsl)
+    entrance = entrance_planner.plan(dsl)
+    cbeats = contracts.derive(dsl, render_plan, entrance, CANVAS_W, CANVAS_H)
+    audit = contracts.validate(dsl, cbeats, CANVAS_W, CANVAS_H)
+    assert audit["status"] == "PASS", audit["issues"]
+    for i, c in enumerate(cbeats):
+        es = c["end_state"]
+        assert set(es) >= {"visible", "positions", "hold_ms"}, c["beat_id"]
+        assert len(c["attention_path"]) <= 4, c["beat_id"]
+        assert c["primary"] in c["attention_path"], (c["beat_id"], c["primary"])
+        tr = c["transition_in"]
+        assert tr["type"] in contracts.TRANSITION_TYPES, tr
+        assert tr["reason"], c["beat_id"]
+        if i > 0 and tr["type"] == "dissolve":
+            assert tr["carried"], c["beat_id"]
+        if i > 0 and tr["type"] == "cut":
+            assert tr.get("composition_changed"), c["beat_id"]
+    # 负例：hold 过短应被阻断
+    bad = {"beats": [dict(dsl["beats"][0])]}
+    bad_c = [{"beat_id": dsl["beats"][0]["beat_id"], "primary": None,
+              "attention_path": [], "ambient": {},
+              "end_state": {"visible": [], "positions": {}, "hold_ms": 0},
+              "transition_in": {"type": "cut", "carried": [], "reason": "x"}}]
+    ba = contracts.validate(bad, bad_c, CANVAS_W, CANVAS_H)
+    assert any(i["code"] == "HOLD_TOO_SHORT" for i in ba["issues"]), ba["issues"]
+
+
+@gate("10. 风格锁定（token 外颜色/线宽/字体报错）")
+def g10():
+    import style_guard
+    _, dsl = _example_dsl()
+    render_plan, _, _, _ = composition_planner.plan(dsl)
+    entrance = entrance_planner.plan(dsl)
+    tmp = tempfile.mkdtemp()
+    try:
+        path = html_adapter.compile(dsl, render_plan, entrance, "self-test", tmp)
+        audit = style_guard.scan(ROOT, path)
+        assert audit["status"] == "PASS", audit["issues"]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+@gate("11. 语义断句（同拍拼接不粘连 / 硬约束不可拆）")
+def g11():
+    # 无标点拼接必须补逗号，禁止两句话首尾粘连
+    j = beat_planner._join_texts(["万般皆是命，半点不由人", "说这句话的人", "其实很努力"])
+    assert "人说这句话的人" not in j, j
+    assert "，" in j, j
+    a, beats = _example_beats()
+    assert "".join(b["narration"] for b in beats) == "".join(
+        c["text"] for c in a["cues"]).replace("\n", "")
+    # 每拍 narration 内部不应出现「句号/问号/感叹号 + 无标点直接接字」
+    for b in beats:
+        n = b["narration"]
+        assert "。说" not in n and "？说" not in n, (b["beat_id"], n)
+
+
+@gate("12. 故障路由（症状 → 修复层 → 单变量预算）")
+def g12():
+    import repair_routing
+    r = repair_routing.route({"code": "CARRY_NOT_IN_PREV", "msg": "x"})
+    assert r["layer"] == "transition", r
+    r = repair_routing.route({"code": "STYLE_COLOR", "msg": "x"})
+    assert r["layer"] == "token", r
+    r = repair_routing.route({"code": "HOLD_TOO_SHORT", "msg": "x"})
+    assert r["layer"] == "contract", r
+    b = repair_routing.RepairBudget(budget=2)
+    assert b.attempt("beat_01") and b.attempt("beat_01")
+    assert not b.attempt("beat_01"), "第 3 次应超预算"
+    assert "beat_01" in b.exhausted()
+
+
 def main():
     print("SRT Media Director — runtime self-test")
     failures = []

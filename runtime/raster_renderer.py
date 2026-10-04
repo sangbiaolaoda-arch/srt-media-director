@@ -87,9 +87,10 @@ def _apply_grade(img, t):
     grain = Image.merge("RGB", (_grain_tile(int(t * 24)),) * 3)
     img = Image.blend(img, grain, THEME["grain"] / 255.0)
     bar = int(round(H * THEME["letterbox"]))
-    dr = ImageDraw.Draw(img)
-    dr.rectangle([0, 0, W, bar], fill=(0, 0, 0))
-    dr.rectangle([0, H - bar, W, H], fill=(0, 0, 0))
+    if bar > 0:
+        dr = ImageDraw.Draw(img)
+        dr.rectangle([0, 0, W, bar], fill=(0, 0, 0))
+        dr.rectangle([0, H - bar, W, H], fill=(0, 0, 0))
     return img
 
 
@@ -125,6 +126,24 @@ def _role_color(el):
         return hex2rgb(THEME["ink"])
     if role == "neutral":
         return hex2rgb(THEME["muted"])
+    return hex2rgb(COLORS.get(role, THEME["ink"]))
+
+
+_TEXT_ROLE = {
+    "ink": "ink", "neutral": "muted",
+    "negative": "text_negative", "positive": "text_positive", "info": "text_info",
+}
+
+
+def _text_color(el):
+    """v6.1：主体文字一律走加深色，避免浅底上「文字像背景」。
+
+    ink → 暗暖黑；语义色（红/绿/蓝灰）→ 同名加深变体，保证对比度 ≥4.5:1。
+    """
+    role = el.get("color_role", "ink")
+    key = _TEXT_ROLE.get(role)
+    if key and key in THEME:
+        return hex2rgb(THEME[key])
     return hex2rgb(COLORS.get(role, THEME["ink"]))
 
 
@@ -224,7 +243,7 @@ def _draw_glow(img, b, text, size, bold, serif, color, alpha):
     d = ImageDraw.Draw(layer)
     f = font(max(8, int(size / 2)), bold, serif)
     cx, cy = (b["x"] + b["w"] / 2) / 2, (b["y"] + b["h"] / 2) / 2
-    ga = int(255 * 0.30 * alpha)
+    ga = int(255 * 0.18 * alpha)  # 浅底上柔光减半，避免糊成色斑
     d.text((cx, cy), text, font=f, fill=_rgb(color) + (ga,), anchor="mm")
     layer = layer.filter(ImageFilter.GaussianBlur(7))
     layer = layer.resize((W, H), Image.BILINEAR)
@@ -233,31 +252,34 @@ def _draw_glow(img, b, text, size, bold, serif, color, alpha):
 
 
 def _draw_rules(dr, b, color, alpha):
-    """关键词上下的细金线（替代 v4.1 的圆角描边框）。"""
-    c = _fade(color, alpha)
-    cx = b["x"] + b["w"] / 2
-    hw = b["w"] * 0.28
-    for y in (b["y"] + b["h"] * 0.04, b["y"] + b["h"] * 0.96):
-        dr.line([cx - hw, y, cx + hw, y], fill=c, width=2)
-    # 两侧小圆点收尾
-    for y in (b["y"] + b["h"] * 0.04, b["y"] + b["h"] * 0.96):
-        for x in (cx - hw, cx + hw):
-            dr.ellipse([x - 2.5, y - 2.5, x + 2.5, y + 2.5], fill=c)
+    """关键词标签：玫色圆角填充块 + 同色描边（v6.0 参考图的盒装标签）。"""
+    fill = _fade(THEME["rose_fill"], alpha * 0.92)
+    edge = _fade(THEME["rose_edge"], alpha)
+    pad_x = b["w"] * 0.16
+    pad_y = b["h"] * 0.24
+    r = (b["h"] + 2 * pad_y) * 0.40
+    dr.rounded_rectangle([b["x"] - pad_x, b["y"] - pad_y,
+                          b["x"] + b["w"] + pad_x, b["y"] + b["h"] + pad_y],
+                         radius=r, fill=fill, outline=edge, width=2)
 
 
 def _draw_glow_panel(dr, b, tone, alpha):
-    """comparison 面板：暗色主题下改为柔和径向光晕（近似：多层同心椭圆）。"""
-    base = hex2rgb({"negative_soft": COLORS["negative"],
-                    "positive_soft": COLORS["positive"]}.get(tone,
-                                                            THEME["muted"]))
-    cx, cy = _center(b)
-    for i in range(6, 0, -1):
-        k = i / 6.0
-        a = alpha * 0.028 * (1 - k)
-        c = _mix(THEME["bg_top"], base, a)
-        rx, ry = b["w"] * 0.62 * k + b["w"] * 0.30, \
-            b["h"] * 0.62 * k + b["h"] * 0.30
-        dr.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=c)
+    """comparison 面板：米白主题下改为浅色圆角色块 + 细同色边。
+
+    暗色主题用同心椭圆模拟光晕；浅底上光晕会糊成一团，改用干净的
+    色块 + 描边，既是分区又承担「一侧对比」的语义着色。
+    """
+    bg = THEME["bg_top"]
+    base = {"negative_soft": COLORS["negative"],
+            "positive_soft": COLORS["positive"]}.get(tone, THEME["muted"])
+    a = _clamp01(alpha)
+    if a <= 0.0:
+        return
+    fill = _mix(bg, base, 0.10 * a)
+    edge = _mix(bg, base, 0.55 * a)
+    r = max(6.0, min(b["w"], b["h"]) * 0.10)
+    dr.rounded_rectangle([b["x"], b["y"], b["x"] + b["w"], b["y"] + b["h"]],
+                         radius=r, fill=fill, outline=edge, width=2)
 
 
 def _draw_arrow(dr, b, color, progress):
@@ -348,15 +370,13 @@ def _render_scene(beat_dsl, plan_beat, entrance_beat, t,
         elif tpe == "shape":
             _draw_glow_panel(dr, b, el.get("tone", ""), a)
         elif tpe == "motif":
-            if n_motifs == 1:
-                # 水印模式：放大垫底，文字是主角
-                wb = _scaled_box(b, _WATERMARK_SCALE)
-                _paste_svg(img, wb, el.get("art", el.get("motif", "phone")),
-                           color, a * THEME["motif_watermark"])
-            else:
-                # 多 motif 对照：保持构图盒子，降为半透明
-                _paste_svg(img, b, el.get("art", el.get("motif", "phone")),
-                           color, a * 0.55, scale=s["scale"])
+            # v5.1：不再放大成背景水印（旧版把唯一 motif 放大 2.2× 垫在文字
+            # 之下，浅底上像一块「背景大图」，且上一支视频的母题会被反复复用）。
+            # 现在唯一 motif 也按构图盒子画成前景插图（内容相关的图形），
+            # 文字依旧是主角，背景保持纯米白。
+            alpha_k = 0.92 if n_motifs == 1 else 0.55
+            _paste_svg(img, b, el.get("art") or el.get("motif") or "compass",
+                       color, a * alpha_k, scale=s["scale"])
         elif tpe == "connector":
             p = next((p for act, p in evs if act == "draw"), 1.0)
             _draw_arrow(dr, b, _fade(accent, a * 0.85), p)
@@ -374,7 +394,7 @@ def _render_scene(beat_dsl, plan_beat, entrance_beat, t,
             fs = fonts.get(eid, {"size": 26, "bold": False})
             slot = el.get("slot", "")
             serif = slot in _SERIF_SLOTS
-            col = color
+            col = _text_color(el)
             wash = [p for act, p in evs if act == "color_wash"]
             if wash:
                 col = _mix(THEME["ink"], color, wash[-1])
@@ -437,15 +457,27 @@ def draw_frame(beat_dsl, plan_beat, entrance_beat, t, prev=None):
 
 
 def ink_stats(img):
-    """(ink_ratio, distinct_colors)。遮幅黑条不算内容，先裁掉；
-    暗色主题下「墨迹」= 与主题底色差异显著的像素。"""
+    """(ink_ratio, distinct_colors)。遮幅黑条不算内容，先裁掉。
+
+    「墨迹」判定必须**与主题无关**（v5.0 米白底修复）：不能用「与单一底色
+    常量比对」——同样的渐变/暗角在浅底上的绝对像素差远大于暗底，会把整片
+    背景误判成墨迹（暗底实测 ~0.3、浅底飙到 0.78）。
+
+    改为高通法：以大幅高斯模糊作为「局部背景估计」，把平滑的渐变、径向暗角
+    与胶片颗粒都视为背景；只有与局部背景差异显著的像素（文字、图形、色块
+    的真正边缘与填充）才计为内容墨。这条阈值在暗底/浅底上语义一致。
+    """
     bar = int(round(H * THEME["letterbox"]))
     body = img.crop([0, bar, W, H - bar])
-    small = body.resize((320, 180))
+    small = body.resize((320, 180)).convert("RGB")
+    # 局部背景估计：模糊半径远大于内容笔画宽度，抹掉平滑背景、保留内容高频
+    bg_est = small.filter(ImageFilter.GaussianBlur(radius=10))
     px = list(small.getdata())
-    bg = hex2rgb(THEME["bg_top"])
-    ink = sum(1 for p in px
-              if abs(p[0] - bg[0]) + abs(p[1] - bg[1]) + abs(p[2] - bg[2]) > 48)
+    bpx = list(bg_est.getdata())
+    ink = 0
+    for p, q in zip(px, bpx):
+        if abs(p[0] - q[0]) + abs(p[1] - q[1]) + abs(p[2] - q[2]) > 40:
+            ink += 1
     q = body.convert("P", palette=Image.ADAPTIVE, colors=48)
     return ink / float(len(px)), len(q.getcolors())
 

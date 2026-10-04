@@ -14,32 +14,44 @@ FPS = 30
 SAFE = 0.07  # safe-area margin as a fraction of the canvas
 
 COLORS = {
-    "paper": "#F7F4EE",
+    "paper": "#E9E4DE",
     "panel": "#FFFFFF",
-    "ink": "#211D17",
+    "ink": "#2B2723",
     "neutral": "#8F887C",
     "line": "#C9C2B4",
-    "negative": "#D64541",   # 危险 / 风险 / 失败
-    "positive": "#2E9E63",   # 安全 / 保护 / 通过
-    "info": "#3E7CB1",
+    "negative": "#E14D49",   # 危险 / 风险 / 失败（v6.0 参考图正红）
+    "positive": "#5E8C7E",   # 安全 / 保护 / 通过
+    "info": "#787C90",       # 图示蓝灰
     "warning": "#E08A2E",
+    # v6.0 参考图（教科书信息图）新增语义通道
+    "rose_fill": "#F0D8CC",  # 玫色浅填充（半透明红箱）
+    "rose_edge": "#D8B4A8",  # 玫色描边
+    "diagram_green": "#AFCAC1",  # 示意图绿灰
 }
 
-# v4.2 电影感暗色主题 —— 情感/独白类内容的默认画布。语义颜色保持
-# COLORS 不变（negative/positive/info 承担语义，CORE-20），主题只决定
-# 背景、墨色与强调色。HTML 播放器与光栅渲染器共用同一份（双侧一致）。
+# v5.0 米白纸感主题 —— 默认画布底色 #F4EFE6。语义颜色保持 COLORS 不变
+# （negative/positive/info 承担语义，CORE-20），主题只决定背景、墨色与强调色。
+# HTML 播放器与光栅渲染器共用同一份（双侧一致）。浅底上不再用黑遮幅，
+# 暗角与颗粒降到最低，幽灵字/水印透明度上调以在浅底上仍可读。
 THEME = {
-    "name": "cinema",
-    "bg_top": "#17130E",      # 渐变底：上
-    "bg_bottom": "#241C12",   # 渐变底：下（略暖，像暗室里的暖光）
-    "ink": "#F2E9D8",         # 主墨色：暖米白
-    "muted": "#9A9081",       # 次要文字
-    "accent": "#D4A94E",      # 强调金（keyword / 强调线 / 数字）
-    "vignette": 0.42,         # 径向暗角强度（四角压暗比例）
-    "grain": 5,               # 胶片颗粒强度（0-255 幅值）
-    "letterbox": 0.04,        # 上下遮幅黑边占画布高度比例
-    "ghost_alpha": 0.10,      # 幽灵大字基础透明度（暗底上的浅色淡字）
-    "motif_watermark": 0.15,  # motif 背景水印透明度
+    "name": "textbook",       # v6.0 参考图（教科书式知识信息图）视觉系统
+    "bg_top": "#E9E4DE",      # 暖米灰底（参考图实测 modal bg #E9E4DE）
+    "bg_bottom": "#E9E4DE",   # 上下同色 = 纯色平底，无渐变
+    "ink": "#26221E",         # 主墨色：暗暖黑（v6.1 加深，主体文字不再发灰）
+    "muted": "#5F564B",       # 次要文字（v6.1 加深，浅底上可读）
+    "text_negative": "#A8281F",  # 主体语义文字：风险/否定（正红压深，浅底够重）
+    "text_positive": "#2E5A4A",  # 主体语义文字：安全/正向（压深保可读）
+    "text_info": "#33374D",      # 主体语义文字：图示蓝灰（压深保可读）
+    "accent": "#E14D49",      # 强调正红（参考图 red median #E14D49）
+    "rose_fill": "#F0D8CC",   # 玫色浅填充（盒装标签底）
+    "rose_edge": "#D8B4A8",   # 玫色描边
+    "diagram": "#787C90",     # 图示蓝灰（连接线 / 节点）
+    "diagram_green": "#AFCAC1",  # 图示绿灰
+    "vignette": 0.0,          # 纯平底，无暗角
+    "grain": 0,               # 纯平底，无颗粒
+    "letterbox": 0.0,
+    "ghost_alpha": 0.0,
+    "motif_watermark": 0.0,
 }
 
 _FONT_REG = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
@@ -117,11 +129,12 @@ def narrative_function_rank(role):
 # --- v4.4 分段情绪背景调色板（回应「背景颜色不好看 / 全片一个色」）-------------
 # 每拍按字幕情绪选一套渐变（top/bottom/accent），渲染器与 HTML 播放器共用。
 PALETTES = {
-    "night": {"top": "#12100C", "bottom": "#241C12", "accent": "#D4A94E"},
-    "warm":  {"top": "#1A120B", "bottom": "#2E1C0E", "accent": "#E0A85C"},
-    "cold":  {"top": "#0E1418", "bottom": "#16242C", "accent": "#6FB3C9"},
-    "tense": {"top": "#160E12", "bottom": "#2C1418", "accent": "#C96F6F"},
-    "calm":  {"top": "#10140F", "bottom": "#1C2418", "accent": "#9EC98A"},
+    # v6.0：统一暖米灰底（#E9E4DE），情绪只体现在强调色上（参考图配色）。
+    "night": {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#787C90"},
+    "warm":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#E14D49"},
+    "cold":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#787C90"},
+    "tense": {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#E14D49"},
+    "calm":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#5E8C7E"},
 }
 
 # 关键词 → 情绪（命中即返回；顺序敏感，越靠前越优先）

@@ -541,3 +541,46 @@ def render_png(art, color, w, h):
                            output_width=max(1, int(w)),
                            output_height=max(1, int(h)))
     return Image.open(io.BytesIO(png)).convert("RGBA")
+
+
+# ---- v6.0 参考图（教科书信息图）新增装饰语汇 ----
+
+def _conn_nodes():
+    """三节点连线（流程 / 因果 / 传导）：盒装节点 + 连线 + 中继点。"""
+    xs = (8, 40, 72)
+    out = []
+    for i, x in enumerate(xs):
+        out.append('<rect x="%d" y="38" width="20" height="24" rx="4" stroke-width="2"/>' % x)
+        if i < 2:
+            nx = xs[i + 1]
+            out.append('<line x1="%d" y1="50" x2="%d" y2="50" stroke-width="2"/>' % (x + 20, nx))
+            out.append('<circle cx="%d" cy="50" r="2.2" fill="{COLOR}" stroke="none"/>'
+                       % ((x + 20 + nx) / 2))
+    return (_HEADF + "".join(out) + '</svg>')
+
+
+def _mini_curve():
+    """迷你曲线 + 坐标轴（增长 / 衰减 / 对数增速）。"""
+    return (_HEADF +
+            '<path d="M10 88 L10 12" stroke-width="1.8"/>'
+            '<path d="M10 88 L92 88" stroke-width="1.8"/>'
+            '<line x1="12" y1="70" x2="90" y2="70" stroke-width="1" stroke-dasharray="3 4"/>'
+            '<path d="M12 82 C40 62 70 30 90 18" stroke-width="2.8" stroke-linecap="round"/>'
+            '<circle cx="90" cy="18" r="2.6" fill="{COLOR}" stroke="none"/>'
+            '</svg>')
+
+
+def _chip_row():
+    """盒装标签行（类别 / 选项 / 并列项）。"""
+    out = []
+    for x, w in ((6, 24), (36, 26), (68, 22)):
+        out.append('<rect x="%d" y="42" width="%d" height="16" rx="6" stroke-width="1.8"/>'
+                   % (x, w))
+    return (_HEADF + "".join(out) + '</svg>')
+
+
+ART["conn_nodes"] = _conn_nodes()
+ART["mini_curve"] = _mini_curve()
+ART["chip_row"] = _chip_row()
+DECOR_ARTS = tuple(DECOR_ARTS) + ("conn_nodes", "mini_curve", "chip_row")
+print("svg_art v6.0 decor added:", ART["conn_nodes"][:20], "ok")

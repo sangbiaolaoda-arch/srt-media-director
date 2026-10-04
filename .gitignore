@@ -17,3 +17,9 @@ sheet.jpg
 
 # 系统
 .DS_Store
+
+# 本地产物/临时目录
+sample4/
+nf/
+pv/
+.pytest_cache/
