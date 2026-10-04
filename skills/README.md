@@ -1,6 +1,6 @@
 # skills/ — 模块技能导航
 
-原 v3.0 单文档（约 6900 行）按主题拆分为 11 个可独立阅读的模块技能，
+原 v3.0 单文档（约 6900 行）按主题拆分为 16 个可独立阅读的模块技能，
 外加一个**主协调器**（`coordinator.md`）负责按顺序调用它们。
 
 拆分原则：**一个模块只回答一类问题**。复杂度被完整保留——所有硬规则
@@ -22,6 +22,11 @@
 | 8 | [08-dsl.md](08-dsl.md) | 语义层的 Visual DSL 长什么样？ | `visual-dsl.json`（禁像素） |
 | 9 | [09-validation-repair.md](09-validation-repair.md) | 如何分层验证？错了回哪一层修？ | `validation-report.json` / `repair-log.json` |
 | 10 | [10-anti-ppt.md](10-anti-ppt.md) | 如何防止退化成「字幕 PPT」？ | 质量门禁清单 |
+| 11 | [11-visual-grammar.md](11-visual-grammar.md) | 语法体系是什么（抽象语法替代素材名）？ | `grammar_ops`（beat 内） |
+| 12 | [12-style-bible.md](12-style-bible.md) | 这条片子的视觉人格是什么（风格随内容自适应）？ | `global_visual_grammar.style_bible` |
+| 13 | [13-reference-frames.md](13-reference-frames.md) | 参考帧的手写 SVG 构图语法怎么复用（规则引擎）？ | `runtime/ref_frame.py` |
+| 14 | [14-intent-layer.md](14-intent-layer.md) | Agent 如何输出视觉意图而非选模板？ | `visual-intent.schema.json` / `runtime/intent_layer.py` |
+| 15 | [15-runtime-architecture.md](15-runtime-architecture.md) | Runtime 六包如何分工、闭环怎么转？ | `runtime/{director,compiler,render,validation,primitives,schemas}/` |
 | ★ | [coordinator.md](coordinator.md) | **主协调器：什么时候调哪个模块、出错怎么办** | 端到端流水线 |
 
 ## 给 Agent 的用法
@@ -41,4 +46,4 @@
 `skills/` 定义**为什么与做什么**（语义层），`runtime/` 实现**怎么算**
 （坐标、碰撞、测量、编译、机器事实）。Agent 不猜像素，Runtime 不替
 Agent 决定叙事。模块文档中引用的运行时入口（如 `composition_planner.plan()`）
-均已在本仓库的参考实现中通过 `runtime/self_test.py` 12 道门禁验证。
+均已在本仓库的参考实现中通过 `runtime/self_test.py` 20 道门禁验证。
