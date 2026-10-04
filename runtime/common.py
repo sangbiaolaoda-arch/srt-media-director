@@ -14,19 +14,19 @@ FPS = 30
 SAFE = 0.07  # safe-area margin as a fraction of the canvas
 
 COLORS = {
-    "paper": "#E9E4DE",
-    "panel": "#FFFFFF",
-    "ink": "#2B2723",
-    "neutral": "#8F887C",
-    "line": "#C9C2B4",
-    "negative": "#E14D49",   # 危险 / 风险 / 失败（v6.0 参考图正红）
+    # v7.1：对齐用户参考帧（frame_01/02/03）的封闭调色板。
+    "paper": "#F3F2EF",      # 画布底（warm grey）
+    "panel": "#FAFAF8",      # 卡片 / 主体填充
+    "ink": "#2B2B2B",        # 主描边 / 主文字（≈12:1 on bg）
+    "neutral": "#8A8A86",    # 次级描边（≈3:1 on bg）
+    "line": "#D3D2CD",       # 灰填充 / 分隔
+    "negative": "#C4452B",   # 唯一强调砖红（参考帧 accent）
     "positive": "#5E8C7E",   # 安全 / 保护 / 通过
-    "info": "#787C90",       # 图示蓝灰
-    "warning": "#E08A2E",
-    # v6.0 参考图（教科书信息图）新增语义通道
-    "rose_fill": "#F0D8CC",  # 玫色浅填充（半透明红箱）
-    "rose_edge": "#D8B4A8",  # 玫色描边
-    "diagram_green": "#AFCAC1",  # 示意图绿灰
+    "info": "#8A8A86",       # 图示灰（参考帧用单一次级灰）
+    "warning": "#C4452B",
+    "rose_fill": "#F0DED6",  # 玫色浅填充
+    "rose_edge": "#DDB6A6",  # 玫色描边
+    "diagram_green": "#C9C2B4",  # 示意图灰绿
 }
 
 # v5.0 米白纸感主题 —— 默认画布底色 #F4EFE6。语义颜色保持 COLORS 不变
@@ -34,19 +34,19 @@ COLORS = {
 # HTML 播放器与光栅渲染器共用同一份（双侧一致）。浅底上不再用黑遮幅，
 # 暗角与颗粒降到最低，幽灵字/水印透明度上调以在浅底上仍可读。
 THEME = {
-    "name": "textbook",       # v6.0 参考图（教科书式知识信息图）视觉系统
-    "bg_top": "#E9E4DE",      # 暖米灰底（参考图实测 modal bg #E9E4DE）
-    "bg_bottom": "#E9E4DE",   # 上下同色 = 纯色平底，无渐变
-    "ink": "#26221E",         # 主墨色：暗暖黑（v6.1 加深，主体文字不再发灰）
-    "muted": "#5F564B",       # 次要文字（v6.1 加深，浅底上可读）
-    "text_negative": "#A8281F",  # 主体语义文字：风险/否定（正红压深，浅底够重）
-    "text_positive": "#2E5A4A",  # 主体语义文字：安全/正向（压深保可读）
-    "text_info": "#33374D",      # 主体语义文字：图示蓝灰（压深保可读）
-    "accent": "#E14D49",      # 强调正红（参考图 red median #E14D49）
-    "rose_fill": "#F0D8CC",   # 玫色浅填充（盒装标签底）
-    "rose_edge": "#D8B4A8",   # 玫色描边
-    "diagram": "#787C90",     # 图示蓝灰（连接线 / 节点）
-    "diagram_green": "#AFCAC1",  # 图示绿灰
+    "name": "reference_flat",  # v7.1 对齐用户参考帧（frame_01/02/03）视觉系统
+    "bg_top": "#F3F2EF",      # 中性暖灰底（参考帧实测 bg）
+    "bg_bottom": "#F3F2EF",   # 上下同色 = 纯色平底，无渐变
+    "ink": "#2B2B2B",         # 主墨色：中性近黑（参考帧 ink，≈12:1）
+    "muted": "#6B6B67",       # 次要文字（参考帧 text-mid，≈4.9:1）
+    "text_negative": "#A83A22",  # 主体语义文字：风险/否定（砖红压深保可读）
+    "text_positive": "#3E6B5C",  # 主体语义文字：安全/正向
+    "text_info": "#5C5C58",      # 主体语义文字：图示灰（压深保可读）
+    "accent": "#C4452B",      # 唯一强调砖红（参考帧 accent）
+    "rose_fill": "#F0DED6",   # 玫色浅填充
+    "rose_edge": "#DDB6A6",   # 玫色描边
+    "diagram": "#8A8A86",     # 图示灰（连接线 / 节点，参考帧次级灰）
+    "diagram_green": "#C9C2B4",  # 图示灰绿
     "vignette": 0.0,          # 纯平底，无暗角
     "grain": 0,               # 纯平底，无颗粒
     "letterbox": 0.0,
@@ -129,12 +129,15 @@ def narrative_function_rank(role):
 # --- v4.4 分段情绪背景调色板（回应「背景颜色不好看 / 全片一个色」）-------------
 # 每拍按字幕情绪选一套渐变（top/bottom/accent），渲染器与 HTML 播放器共用。
 PALETTES = {
-    # v6.0：统一暖米灰底（#E9E4DE），情绪只体现在强调色上（参考图配色）。
-    "night": {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#787C90"},
-    "warm":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#E14D49"},
-    "cold":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#787C90"},
-    "tense": {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#E14D49"},
-    "calm":  {"top": "#E9E4DE", "bottom": "#E9E4DE", "accent": "#5E8C7E"},
+    # v7.2 修复「全片一个底色」：v7.1 曾把五种情绪的 top/bottom 全部塌缩成
+    # #F3F2EF，只留 accent 不同——于是背景永远是同一块米白，画面单调。
+    # 这里恢复「同族但确有差异」的柔和纵向渐变：仍在中性暖灰体系内，但每拍
+    # 顶/底色与色温不同，情绪一眼可辨，同时保持低饱和、不刺眼。
+    "night": {"top": "#F3F2EF", "bottom": "#EAE7E0", "accent": "#8A8A86"},
+    "warm":  {"top": "#F8F0E6", "bottom": "#EFDFCC", "accent": "#C4452B"},
+    "cold":  {"top": "#EEF2F4", "bottom": "#DEE7EE", "accent": "#5B7C99"},
+    "tense": {"top": "#F8EDE8", "bottom": "#EFD6CD", "accent": "#C4452B"},
+    "calm":  {"top": "#EFF4EF", "bottom": "#DDEAE0", "accent": "#5E8C7E"},
 }
 
 # 关键词 → 情绪（命中即返回；顺序敏感，越靠前越优先）
@@ -146,10 +149,27 @@ _MOOD_WORDS = (
 )
 
 
+# 语义角色 → 情绪调色板（关键词未命中时的确定性兜底）。
+# 修复：旧版兜底恒为 "night"，导致无关键词的片子 6 拍全落同一色。
+_ROLE_PALETTE = {
+    "hook": "warm",
+    "explanation": "cold",
+    "comparison": "cold",
+    "turning_point": "tense",
+    "emphasis": "warm",
+    "conclusion": "calm",
+}
+
+
 def mood_palette(narration, semantic_role=None):
-    """按字幕情绪/语义选背景调色板（night 为默认暖暗）。"""
+    """按字幕情绪/语义选背景调色板。
+
+    优先级：显性情绪关键词 > 语义角色映射 > night 兜底。
+    """
     text = narration or ""
     for name, words in _MOOD_WORDS:
         if any(w in text for w in words):
             return name
+    if semantic_role in _ROLE_PALETTE:
+        return _ROLE_PALETTE[semantic_role]
     return "night"
