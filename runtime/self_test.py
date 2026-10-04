@@ -21,17 +21,7 @@ import pipeline  # noqa: E402
 import raster_renderer  # noqa: E402
 import srt_parser  # noqa: E402
 import svg_art  # noqa: E402
-import svg_backend  # noqa: E402
 import visual_director  # noqa: E402
-
-
-class Skip(Exception):
-    """显式跳过门禁（例如无系统 cairo 时的光栅门禁）——不计为失败。"""
-
-
-# 无系统 cairo（如 Windows runner）时光栅门禁显式跳过，而非崩溃：
-# 项目自带「无 cairo 优雅降级」设计（svg_backend + svg-fallback 作业）。
-_CAIRO_OK = svg_backend.probe()["chosen"] is not None
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAMPLE_SRT = os.path.join(ROOT, "examples", "minimal", "attention.srt")
@@ -128,8 +118,8 @@ def g3():
     for b in dsl["beats"]:
         motifs = [e.get("motif") for e in b["elements"] if e["type"] == "motif"]
         assert all(m in svg_art.MOTIF_ARTS for m in motifs), (b["beat_id"], motifs)
-        decor = [e for e in b["elements"] if e["type"] == "decor"]
-        assert len(decor) >= 3, (b["beat_id"], len(decor))   # v4.4：每拍≥3 图形要素
+        # P0②：不再用「每拍≥N 图形要素」硬门禁逼导演堆料；元素是否该存在，
+        # 交给必要性审计（g15）——数量是结果，不是约束。画面该密则密、该简则简。
 
 
 @gate("4. 构图求解（门禁通过 / 拒绝猜坐标）")
@@ -203,8 +193,6 @@ def g5():
 
 @gate("6. 光栅探针（真实帧 / 墨水量 / 颜色数）")
 def g6():
-    if not _CAIRO_OK:
-        raise Skip("无可用 SVG 光栅后端（cairosvg/resvg），跳过光栅探针")
     _, dsl = _example_dsl()
     render_plan, _, _, _ = composition_planner.plan(dsl)
     entrance = entrance_planner.plan(dsl)
@@ -245,7 +233,7 @@ def g8():
         make_sample.trim_srt(EXAMPLE_SRT, trimmed, 30.0)
         report = pipeline.run(trimmed, os.path.join(tmp, "out"),
                               overrides_path=EXAMPLE_OVERRIDES,
-                              render_previews=_CAIRO_OK, log=lambda *a: None)
+                              render_previews=True, log=lambda *a: None)
         assert report["status"] == "PASS", json.dumps(report["issues"],
                                                       ensure_ascii=False)
         work = os.path.join(tmp, "out", "work")
@@ -336,6 +324,268 @@ def g12():
     assert "beat_01" in b.exhausted()
 
 
+@gate("13. 视觉语法（抽象语法替代素材名：causality/contrast/progression…）")
+def g13():
+    import visual_grammar
+    _, dsl = _example_dsl()
+    audit = visual_grammar.audit(dsl)
+    assert audit["status"] == "PASS", audit["issues"]
+    for b in dsl["beats"]:
+        ops = b["grammar_ops"]
+        assert ops, b["beat_id"]
+        assert all(o in visual_grammar.GRAMMAR_OPS for o in ops), (b["beat_id"], ops)
+    # 同一语法必须多于一种表层实现，否则语法退化成素材名
+    for op, surfaces in visual_grammar.GRAMMAR_SURFACES.items():
+        assert len(surfaces) >= 2, (op, surfaces)
+    assert visual_grammar.relation_to_grammar("answer_to") == "causality"
+    assert visual_grammar.relation_to_grammar("concession") == "contrast"
+
+
+@gate("14. Style Bible（视频级视觉人格随内容推导，非固定风格）")
+def g14():
+    import style_bible
+    vp, dsl = _example_dsl()
+    assert "style_bible" in vp["global_visual_grammar"]
+    _, beats = _example_beats()
+    bible = style_bible.derive_style_bible(beats)
+    v = style_bible.validate_bible(bible)
+    assert v["status"] == "PASS", v["issues"]
+    for k in style_bible.REQUIRED_KEYS:
+        assert k in bible, k
+    # 人格由内容推导：更长句子的内容应得出非 sparse 的 density
+    b2 = style_bible.derive_style_bible(
+        [{"narration": "这是一句明显更长的叙述文本用于改变密度档位", "semantic_role": "explanation"}])
+    assert b2["density"] in style_bible.DENSITIES
+
+
+@gate("15. 视觉必要性（元素须能被『删除是否减弱命题』论证）")
+def g15():
+    import visual_necessity
+    _, dsl = _example_dsl()
+    audit = visual_necessity.audit(dsl)
+    assert audit["status"] == "PASS", audit["issues"]
+    for b in audit["beats"]:
+        levels = {e["necessity"] for e in b["elements"]}
+        assert levels <= set(visual_necessity.NECESSITY_LEVELS), (b["beat_id"], levels)
+        assert "required" in levels, b["beat_id"]   # 每拍必有承载命题的主元素
+    # 负例：既非氛围、也不承载任何意义的孤立元素应被判 UNJUSTIFIED
+    bad = {"beats": [{"beat_id": "b", "narration": "x", "relations": [],
+            "elements": [
+                {"id": "b_p", "slot": "hero", "type": "motif", "role": "primary",
+                 "motif": "target"},
+                {"id": "b_z", "slot": "z", "type": "shape", "role": "support"}]}]}
+    ba = visual_necessity.audit(bad)
+    assert ba["status"] == "FAIL", ba
+
+
+@gate("16. 参考帧构图语法（规则驱动：复现参考帧 + 泛化到新构图，非照抄）")
+def g16():
+    import ref_frame as R
+    # (a) 规则必须能**精确复现**参考帧：cols(3) → x=[48,265,482]，列宽 150
+    c3 = R.cols(3)
+    assert [round(x) for x, _ in c3] == [48, 265, 482], c3
+    assert abs(c3[0][1] - 150) < 0.5, c3
+    c2 = R.cols(2, gap=32)
+    assert [round(x) for x, _ in c2] == [48, 356], c2
+    assert abs(c2[0][1] - 276) < 0.5, c2
+    # (b) 规则必须能**外推**到参考帧没画过的列数（2/4/5 列：非重叠、贴版心）
+    for n in (2, 4, 5):
+        cc = R.cols(n)
+        assert len(cc) == n, (n, cc)
+        assert abs(cc[0][0] - R.MARGIN) < 0.5, (n, cc)
+        assert abs((cc[-1][0] + cc[-1][1]) - (R.CANVAS_W - R.MARGIN)) < 1.0, (n, cc)
+        for i in range(1, n):
+            assert cc[i][0] > cc[i - 1][0] + cc[i - 1][1] - 0.5, (n, i, cc)
+    # (c) 描边角色规则：强调 = 加粗 + 加深（primary 比 secondary 粗、色不同）
+    assert R.stroke("primary")[0] > R.stroke("secondary")[0]
+    assert R.stroke("primary")[1] != R.stroke("secondary")[1]
+    # (d) 必须能产出参考帧**没有**的新构型，且仍是合法图层规范
+    quad = R.frame_quadrants("四种代价", [
+        ("通知", lambda cx, cy: R.icon_bell(cx, cy, 0.72), False),
+        ("打断", lambda cx, cy: R.icon_focus_break(cx, cy, 0.8), False),
+        ("等待", lambda cx, cy: R.icon_bar_half(cx, cy, 0.8), False),
+        ("回不去", lambda cx, cy: R.icon_door(cx, cy, 0.9), True)])
+    line = R.frame_timeline("一次通知的时间线", [
+        ("响", "", False), ("看", "", False), ("断", "", True), ("续", "", False)])
+    stack = R.frame_stack("三件事", [
+        ("关通知", "", True), ("放远", "", False), ("回来", "", False)])
+    for name, spec in (("quadrants", quad), ("timeline", line), ("stack", stack)):
+        issues = R.audit_spec(spec)
+        assert issues == [], (name, issues)
+        assert R.count_accent(spec) <= 1, (name, R.count_accent(spec))
+    # (e) 强调预算：参考帧系（hero / compare）必须恰好一次
+    hero = R.frame_hero("为什么总在分心？", "注意力被反复打断",
+                        R.icon_phone(500, 200, 0.9, badge=3), (440, 80, 136, 236))
+    cmp_ = R.frame_compare(
+        "离手机远一点",
+        {"label": "在手边", "bar": 54, "bar_accent": False,
+         "icon_inner": R.icon_phone(246, 238, 0.24), "icon_box": (226, 206, 44, 68)},
+        {"label": "在另一房间", "bar": 130, "bar_accent": True,
+         "icon_inner": R.icon_door(562, 245, 1.0), "icon_box": (534, 208, 60, 76)})
+    assert R.count_accent(hero) == 1, R.count_accent(hero)
+    assert R.count_accent(cmp_) == 1, R.count_accent(cmp_)
+    for name, spec in (("hero", hero), ("compare", cmp_)):
+        assert R.audit_spec(spec) == [], (name, R.audit_spec(spec))
+
+
+@gate("17. 意图层：Agent 输出视觉意图而非模板选择（拒斥 strategy/像素泄漏）")
+def g17():
+    import intent_layer as IL
+    # 用户点名的「错误方式」：模板选择器 —— 必须被拒斥
+    wrong = {"strategy": "cause_effect", "template": "left_to_right_flow",
+             "hero_x": 300, "hero_y": 400}
+    assert IL.is_template_selector(wrong) is True
+    leak = IL.template_leak_keys(wrong)
+    for k in ("strategy", "template", "hero_x", "hero_y"):
+        assert k in leak, (k, leak)
+    codes = [i["code"] for i in IL.validate_intent(wrong)]
+    assert "INTENT_TEMPLATE_LEAK" in codes, codes
+    # 用户点名的「正确方式」：语义视觉意图 —— 必须通过
+    right = {
+        "beat_id": "b1",
+        "visual_claim": "small_repeated_actions_accumulate_into_large_change",
+        "grammar": ["accumulation", "trajectory", "threshold"],
+        "focal_point": "trajectory",
+        "relationship": [
+            {"from": "small_actions", "relation": "accumulate_into", "to": "trajectory"},
+            {"from": "trajectory", "relation": "crosses", "to": "threshold"}],
+        "density": 0.62, "silence": False, "motion_intent": "accumulate_then_reveal",
+        "entities": ["small_actions", "trajectory", "threshold"]}
+    assert IL.is_template_selector(right) is False
+    assert IL.validate_intent(right) == [], IL.validate_intent(right)
+    # 从 beat 推导意图也必须合法（且不含任何坐标/模板键）
+    beat = {"beat_id": "b2", "narration": "一个小动作反复累积，最终越过阈值",
+            "semantic_role": "explanation",
+            "relations": [{"from": "small_actions", "type": "causes", "to": "trajectory"}],
+            "focal_point": "trajectory"}
+    d = IL.derive_intent(beat)
+    assert IL.validate_intent(d) == [], IL.validate_intent(d)
+    assert IL.template_leak_keys(d) == [], IL.template_leak_keys(d)
+
+
+@gate("18. 构图编译器：意图→几何（语法 1:N 实现，坐标来自规则由 Runtime 决定）")
+def g18():
+    import ref_frame as R
+    import visual_grammar as VG
+    import composition_compiler as CC
+    right = {
+        "beat_id": "b1",
+        "visual_claim": "small_repeated_actions_accumulate_into_large_change",
+        "grammar": ["accumulation", "trajectory", "threshold"],
+        "focal_point": "trajectory",
+        "relationship": [
+            {"from": "small_actions", "relation": "accumulate_into", "to": "trajectory"},
+            {"from": "trajectory", "relation": "crosses", "to": "threshold"}],
+        "density": 0.62, "silence": False, "motion_intent": "accumulate_then_reveal",
+        "entities": ["small_actions", "trajectory", "threshold"]}
+    spec, meta = CC.compile_intent(right)
+    assert meta["issues"] == [], meta["issues"]
+    assert meta["realization"] == "accum_trajectory_threshold", meta
+    assert R.audit_spec(spec) == [], R.audit_spec(spec)
+    assert R.count_accent(spec) == 1, R.count_accent(spec)
+    # 语法到实现是 1:N：contrast 走的是不同实现（不是「语法==模板」）
+    contrast = {"beat_id": "b3", "visual_claim": "near_vs_far", "grammar": ["contrast"],
+                "focal_point": "far",
+                "relationship": [{"from": "near", "relation": "contrast_with", "to": "far"}],
+                "density": 0.45, "silence": False, "motion_intent": "contrast_then_focus",
+                "entities": ["near", "far"]}
+    spec2, meta2 = CC.compile_intent(contrast)
+    assert meta2["issues"] == [], meta2["issues"]
+    assert meta2["realization"] != meta["realization"], (meta2, meta)
+    assert R.count_accent(spec2) == 1
+    # 每个语法操作都必须有实现映射（Runtime 有视觉语言可画）
+    for op in VG.GRAMMAR_OPS:
+        assert op in CC.GRAMMAR_REALIZATION, op
+    # silence 让 Runtime 收敛到更少槽位（Runtime 决定画多少，不是 Agent）
+    quiet = dict(contrast); quiet["silence"] = True
+    qspec, qmeta = CC.compile_intent(quiet)
+    assert R.audit_spec(qspec) == [], R.audit_spec(qspec)
+
+
+@gate("19. Runtime 六包架构：director/compiler/render/validation/primitives/schemas 可导入且接线")
+def g19():
+    import os
+    # (a) 目标架构的六个包必须存在且可导入
+    import director, compiler, render, validation, primitives
+    import schemas as SCH
+    root = os.path.dirname(os.path.abspath(__file__))
+    for pkg in ("director", "compiler", "render", "validation", "primitives", "schemas"):
+        assert os.path.isdir(os.path.join(root, pkg)), "缺包 " + pkg
+    # (b) 目标文件布局（用户给的结构）
+    want = {
+        "director": ["visual_intent.py", "grammar.py", "relationship.py"],
+        "compiler": ["composition.py", "constraints.py", "layout.py", "svg_compiler.py"],
+        "render": ["html_renderer.py", "playwright_renderer.py", "screenshot.py"],
+        "validation": ["geometry.py", "typography.py", "safe_area.py", "visual_regression.py"],
+        "primitives": ["text.py", "shape.py", "path.py", "chart.py", "connector.py", "motif.py"],
+        "schemas": ["visual_intent.json", "visual_plan.json", "render_plan.json"],
+    }
+    for pkg, files in want.items():
+        for f in files:
+            assert os.path.exists(os.path.join(root, pkg, f)), "缺文件 %s/%s" % (pkg, f)
+    # (c) 跨包接线可用：director → compiler → render → validation
+    from director import grammar as G, relationship as REL, visual_intent as VI, critic as C
+    assert len(G.GRAMMAR_OPS) == 12
+    assert G.unknown_ops(["contrast", "bogus"]) == ["bogus"]
+    assert REL.sinks([{"from": "a", "relation": "accumulate_into", "to": "b"},
+                      {"from": "b", "relation": "crosses", "to": "c"}]) == ["c"]
+    assert hasattr(VI, "derive") and hasattr(VI, "validate")
+    from compiler import composition as CO, constraints as CON, layout as LAY, svg_compiler as SVGC
+    assert CO.coverage() and all(CO.coverage().values())        # 每个语法都有实现可画
+    assert LAY.safe_area()["margin"] == __import__("ref_frame").MARGIN
+    from render import screenshot as SHOT
+    be = SHOT.backends()
+    assert set(be) == {"playwright", "chromium", "cairosvg"}, be
+    assert any(be.values()), be                                  # 至少一个后端可用（如实探测）
+    from validation import geometry, typography, safe_area
+    assert callable(geometry.check) and callable(typography.check) and callable(safe_area.check)
+    assert SCH.available() == ["render_plan", "visual_intent", "visual_plan"], SCH.available()
+
+
+@gate("20. 生成→截图→Critic→修复 闭环：PASS 前进 + FAIL 路由回上游层")
+def g20():
+    import tempfile
+    import ref_frame as R
+    import director_loop as DL
+    from director import critic as C
+    from compiler import constraints as CON
+
+    good = {"beat_id": "b1", "visual_claim": "small_actions_accumulate",
+            "grammar": ["accumulation", "trajectory", "threshold"],
+            "focal_point": "trajectory",
+            "relationship": [{"from": "small_actions", "relation": "accumulate_into", "to": "trajectory"},
+                             {"from": "trajectory", "relation": "crosses", "to": "threshold"}],
+            "density": 0.62, "silence": False, "motion_intent": "accumulate_then_reveal",
+            "entities": ["small_actions", "trajectory", "threshold"]}
+    d = tempfile.mkdtemp()
+    r = DL.run_beat(good, d, max_repair=2)
+    # 闭环必须真的渲染出 PNG 并 PASS（真实证据，不是纸面）
+    assert r["verdict"] == "PASS", r
+    assert r["png"] and os.path.exists(r["png"]), r
+    assert r["backend"] in ("playwright", "chromium", "cairosvg"), r
+    # 修复路由：问题码必须指回正确上游层
+    assert C.route([{"code": "CRITIC_OVERCROWDED"}])["target_layer"] == "intent"
+    assert C.route([{"code": "CRITIC_BLANK_FRAME"}])["target_layer"] == "intent"
+    assert C.route([{"code": "GEO_OUT_OF_CANVAS"}])["target_layer"] == "layout"
+    assert C.route([{"code": "SAFE_RIGHT"}])["target_layer"] == "layout"
+    assert C.route([{"code": "CRITIC_PNG_UNREADABLE"}])["target_layer"] == "render"
+    # 编译期约束必须拦住超支强调
+    bad = {"bg": R.BG, "elements": [
+        R._E("a", '<circle cx="10" cy="10" r="4" fill="%s"/>' % R.ACC, (0, 0, 40, 40), "fade", 0),
+        R._E("b", '<circle cx="30" cy="30" r="4" fill="%s"/>' % R.ACC, (0, 0, 40, 40), "fade", 0)]}
+    con = CON.check(bad)
+    assert con["status"] == "FAIL", con
+    assert any(i["code"] == "CON_ACCENT_BUDGET" for i in con["issues"]), con
+    # 修复函数：过密则降密度（确定性、可复现）
+    from director_loop import _auto_fix
+    fixed = _auto_fix({"density": 0.8}, {"target_layer": "intent",
+                                         "issue_codes": ["CRITIC_OVERCROWDED"]}, 1)
+    assert fixed["density"] < 0.8, fixed
+    blank = _auto_fix({"density": 0.3, "silence": True},
+                      {"target_layer": "intent", "issue_codes": ["CRITIC_BLANK_FRAME"]}, 1)
+    assert blank["density"] > 0.3 and blank["silence"] is False, blank
+
+
 def main():
     print("SRT Media Director — runtime self-test")
     failures = []
@@ -343,8 +593,6 @@ def main():
         try:
             fn()
             print("  PASS  %s" % name)
-        except Skip as e:
-            print("  SKIP  %s (%s)" % (name, e))
         except Exception as e:  # noqa: BLE001 — 报告全部失败而非首个
             failures.append((name, repr(e)))
             print("  FAIL  %s -> %r" % (name, e))
