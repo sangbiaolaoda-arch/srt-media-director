@@ -22,12 +22,15 @@ Runtime 负责**机器事实**（坐标、尺寸、碰撞、编译、渲染、�
 | 时序真值 | `runtime/srt_parser.py` | SRT 解析、时间真值、数字/间隙检测 | `srt-analysis.json` |
 | 语义分拍 | `runtime/semantic_grouper.py` + `beat_planner.py` | 语义检索（问答/让步/因果/蝉联/指代）+ 时长窗切拍 | `beat-plan.json` |
 | 导演决策 | `runtime/visual_director.py` | 命题/强调/信息编码/策略/生命周期/motif/装饰/调色板 | `visual-plan.json` |
+| 视觉语法 | `runtime/visual_grammar.py` | 语义关系 → 抽象语法（causality/contrast/…），语法→表达一对多 | `grammar_ops`（beat 内） |
+| 风格人格 | `runtime/style_bible.py` | 视频级视觉人格（family/mood/density/typography/…），随内容推导 | `global_visual_grammar.style_bible` |
+| 必要性 | `runtime/visual_necessity.py` | 每个元素「删除是否减弱命题」论证（required/supporting/optional） | necessity 审计 |
 | 中间语言 | （`visual-dsl.json`） | 语义方位与关系，禁像素 | `visual-dsl.json` |
-| 构图求解 | `runtime/composition_planner.py` | 区域预算、分组、落位、门禁 R1–R8 / A20 / A21 | `render-plan.json` / `layout-intent.json` / `layout-audit.json` |
+| 构图求解 | `runtime/composition_planner.py` | 区域预算、分组、落位、门禁 R1–R8 / A20 / A21；模板为**建议锚点**、元素可自由落位 | `render-plan.json` / `layout-intent.json` / `layout-audit.json` |
 | 入场编排 | `runtime/entrance_planner.py` | cue 序列、每元素 enter/exit/after、跨拍 handoff | `entrance-plan.json` |
 | 渲染层 | `runtime/raster_renderer.py` / `html_adapter.py` | PIL 探针帧 / 可交互 HTML 播放器（同一份 SVG 画法） | `preview/*.png` / `film/index.html` |
 | 画法库 | `runtime/svg_art.py` | 非拟人 SVG 画法（motif + decor）+ 越界审计 + 光栅化 | data-URL / PNG |
-| 验证 | `runtime/validator.py` + `self_test.py` | L1 机器 / L3 光栅探针 / 12 道门禁 | `validation-report.json` |
+| 验证 | `runtime/validator.py` + `self_test.py` | L1 机器 / L3 光栅探针 / 15 道门禁 | `validation-report.json` |
 | 编排 | `runtime/pipeline.py` / `cli.py` | 串联全链路 | 全套产物 |
 
 ## 数据流（不可逆）
@@ -65,4 +68,15 @@ srt-analysis.json  ──►  beat-plan.json  ──►  visual-plan.json  ─�
 
 缺某模块时，实现**不得假装具备能力**：只有三种合法动作——
 找到已验证的等价实现 → 简化表达 → 阻断并报告。
-`runtime/self_test.py` 的 12 道门禁即是这条纪律的机器化。
+`runtime/self_test.py` 的 15 道门禁即是这条纪律的机器化。
+
+## 固定什么，不固定什么（v7.0）
+
+| 固定（机器保证） | 不固定（随内容自适应） |
+|---|---|
+| 审美原则（层级/对比/静默/必要性） | 视觉风格（family / mood / density） |
+| 视觉语法体系（causality/contrast/…） | 表层表达（用哪种画法实现该语法） |
+| 编译与验证规则（门禁/契约/风格锁） | 画面长相（构图模板降为建议锚点） |
+
+`style_tokens.json`（物理锁：颜色/字体/线宽）与 `style_bible.py`（气质锁：视频级人格）
+互补——前者让画面不跑色，后者让画面合气质。
