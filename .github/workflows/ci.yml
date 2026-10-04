@@ -14,8 +14,8 @@ jobs:
   # 真实矩阵：Python 3.9–3.12 × Linux / macOS / Windows。
   # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
   #   Linux  → libcairo2 + libffi
-  #   macOS  → brew cairo + libffi
-  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll）
+  #   macOS  → brew cairo + libffi（并导出 DYLD_FALLBACK_LIBRARY_PATH）
+  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll，需把 bin 加入 PATH）
   matrix-test:
     name: py${{ matrix.python }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -38,10 +38,14 @@ jobs:
           sudo apt-get install -y -qq libcairo2 libffi-dev
       - name: System cairo libs (macOS)
         if: runner.os == 'macOS'
-        run: brew install cairo libffi
+        run: |
+          brew install cairo libffi
+          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
       - name: System cairo libs (Windows)
         if: runner.os == 'Windows'
-        run: choco install -y gtk-runtime --no-progress
+        run: |
+          choco install -y gtk-runtime --no-progress
+          echo "C:\Program Files\GTK2-Runtime\bin" >> "$env:GITHUB_PATH"
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
@@ -71,6 +75,8 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Install CJK font (golden layout depends on font metrics)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
       - name: pytest (golden hashes)
         run: python -m pytest tests -q
