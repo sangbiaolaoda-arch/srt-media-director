@@ -15,7 +15,7 @@ jobs:
   # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
   #   Linux  → libcairo2 + libffi
   #   macOS  → brew cairo + libffi（并导出 DYLD_FALLBACK_LIBRARY_PATH）
-  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll，需把 bin 加入 PATH）
+  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll，需把 DLL 目录加入 PATH）
   matrix-test:
     name: py${{ matrix.python }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -43,9 +43,20 @@ jobs:
           echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
       - name: System cairo libs (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           choco install -y gtk-runtime --no-progress
-          echo "C:\Program Files\GTK2-Runtime\bin" >> "$env:GITHUB_PATH"
+          $roots = @(
+            "C:\Program Files (x86)\GTK2-Runtime",
+            "C:\Program Files\GTK2-Runtime"
+          )
+          foreach ($r in $roots) {
+            if (Test-Path $r) {
+              Get-ChildItem -Path $r -Recurse -Filter *.dll -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty DirectoryName -Unique |
+                ForEach-Object { Add-Content -Path $env:GITHUB_PATH -Value $_ }
+            }
+          }
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
