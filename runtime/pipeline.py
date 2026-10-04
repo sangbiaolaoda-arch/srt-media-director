@@ -53,6 +53,36 @@ def run(srt_path, out_dir, overrides_path=None, render_previews=True, log=print)
     dump_json(footprint, os.path.join(work, "content-footprint.json"))
     dump_json(layout_audit, os.path.join(work, "layout-audit.json"))
 
+    # ---- Motion Compiler：Composition → Motion Planner → RenderPlan ----
+    # 架构改造核心。Agent 只给视觉意图；此处由 Runtime 为每个可见元素生成
+    # 明确的 motion_policy，并经 Motion Validator 校验（缺失即自动补全，
+    # 补全仍失败则 FAIL，绝不静默渲染成静态）。整条既有 pipeline 保持不变。
+    log("→ Motion 编排（语义 → Motion Sequence → 强制 Motion Policy）")
+    import motion
+    motion_plan = motion.compile_plan(dsl, composition=render_plan)
+    motion_check = motion.validate_motion(motion_plan)
+    for i in motion_check["issues"][:8]:
+        log("  [%s] %s %s" % (i["severity"], i["code"], i["msg"]))
+    dump_json(motion_plan, os.path.join(work, "motion-plan.json"))
+    dump_json(motion_check, os.path.join(work, "motion-audit.json"))
+    log("  motion_coverage=%.2f  missing=%d  static(explicit)=%d  moving=%d / %d" % (
+        motion_check["motion_coverage"], motion_check["motion_missing"],
+        motion_check["static_explicit"], motion_check["moving"], motion_check["visible"]))
+    if motion_check["status"] != "PASS":
+        raise SystemExit("Motion 门禁未通过: %s" % motion_check["errors"][:4])
+    # 把 RenderPlan 的 motion 决策回写进 dsl，供下游 entrance/renderer 复用同一来源
+    plan_by_beat = {b["beat_id"]: b for b in motion_plan["beats"]}
+    for b in dsl.get("beats", []):
+        mp = plan_by_beat.get(b["beat_id"])
+        if mp:
+            b["motion"] = {"sequence": mp["motion_sequence"],
+                           "camera": mp.get("camera", {}),
+                           "validation": motion_check}
+            for e in b.get("elements", []):
+                pe = next((x for x in mp["elements"] if x["id"] == e["id"]), None)
+                if pe:
+                    e["motion_policy"] = pe["motion_policy"]
+
     log("→ 入场编排（cue 序列 / 节奏预算 / handoff）")
     entrance = entrance_planner.plan(dsl)
     ent_audit = entrance_planner.audit(entrance)
