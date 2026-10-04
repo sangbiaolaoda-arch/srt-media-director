@@ -48,7 +48,7 @@
 ## 4. Runtime 自检（Bootstrap Gate）
 
 - **VAL-03 [强制]** Runtime 可以由 Agent 创建，但**不得由它自己宣布正确**。
-  `runtime/self_test.py` 是机器证据：12 道门禁覆盖
+  `runtime/self_test.py` 是机器证据：20 道门禁覆盖
   SRT 解析 → Beat → 导演层 → 构图（含拒绝猜坐标）→ 入场编排 →
   光栅探针 → HTML 适配器 → 端到端 30s 样例。
   改过 Runtime 任何一行，必须重跑到 VERIFIED 才允许进入正式生产。
