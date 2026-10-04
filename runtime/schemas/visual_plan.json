@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "visual_plan",
+  "description": "导演层产物（现阶段兼容既有 visual-plan.json）。核心仍是 per-beat 的语义决策，不含像素。",
+  "type": "object",
+  "required": ["beats"],
+  "properties": {
+    "beats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["beat_id", "visual_claim"],
+        "properties": {
+          "beat_id": { "type": "string" },
+          "visual_claim": { "type": "string" },
+          "emphasis": { "type": "object" },
+          "encoding": { "type": "object" },
+          "strategy": { "type": "string", "description": "历史字段，v7.3 起不再推荐" },
+          "grammar": { "type": "array" }
+        }
+      }
+    }
+  }
+}
