@@ -15,7 +15,9 @@ jobs:
   # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
   #   Linux  → libcairo2 + libffi
   #   macOS  → brew cairo + libffi（并导出 DYLD_FALLBACK_LIBRARY_PATH）
-  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll，需把 DLL 目录加入 PATH）
+  #   Windows→ MSYS2 mingw-w64 的 64 位 cairo（DLL 名恰为 libcairo-2.dll，
+  #            与 x64 CPython 架构匹配；choco 的 GTK2-Runtime 只有 32 位，会因
+  #            架构不符报 error 0xc1）
   matrix-test:
     name: py${{ matrix.python }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -41,22 +43,18 @@ jobs:
         run: |
           brew install cairo libffi
           echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
-      - name: System cairo libs (Windows)
+      - name: System cairo libs (Windows, 64-bit via MSYS2 mingw-w64)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: mingw-w64-x86_64-cairo
+      - name: Add mingw64 to PATH (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          choco install -y gtk-runtime --no-progress
-          $roots = @(
-            "C:\Program Files (x86)\GTK2-Runtime",
-            "C:\Program Files\GTK2-Runtime"
-          )
-          foreach ($r in $roots) {
-            if (Test-Path $r) {
-              Get-ChildItem -Path $r -Recurse -Filter *.dll -ErrorAction SilentlyContinue |
-                Select-Object -ExpandProperty DirectoryName -Unique |
-                ForEach-Object { Add-Content -Path $env:GITHUB_PATH -Value $_ }
-            }
-          }
+          "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
