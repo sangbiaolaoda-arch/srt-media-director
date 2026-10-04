@@ -14,6 +14,17 @@ render-plan → entrance-plan → film/index.html（可播放）→
 validation-report（机器证据）`——每一层落盘、每一层可校验、
 每一层错误都有明确的修复路由。
 
+> **v7.3 起**：Agent 只输出**视觉意图**（Visual Claim / Grammar / Focal Point /
+> Relationship Graph / Density / Silence / Motion Intent），几何由 Runtime 的
+> 构图编译器决定——Agent 不再「选模板」、不再「猜像素」。见
+> [`skills/14-intent-layer.md`](skills/14-intent-layer.md)。
+
+> **v7.4 起**：Runtime 拆为职责清晰的六包
+> （`director/ compiler/ render/ validation/ primitives/ schemas/`），并落地
+> **生成 → 截图 → Critic → 修复** 闭环：每生成一个 Beat 就自动截图，交给机器
+> Critic，PASS 才前进，FAIL 就带修复目标层回到上游重编重截。见
+> [`skills/15-runtime-architecture.md`](skills/15-runtime-architecture.md)。
+
 ## 真实样例库（先看画面，再谈方法）
 
 「反 PPT / 画面会讲故事」是本项目最大的卖点，所以它必须可被外人验证——
@@ -61,7 +72,7 @@ python runtime/render_video.py \
 
 ```bash
 pip install pillow jsonschema cairosvg
-python runtime/self_test.py        # Bootstrap Gate：12 道门禁
+python runtime/self_test.py        # Bootstrap Gate：20 道门禁
 python cli.py examples/minimal/attention.srt \
   --out sample --overrides examples/minimal/director_overrides.json
 ```
