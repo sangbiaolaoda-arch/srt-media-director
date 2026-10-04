@@ -16,6 +16,8 @@ import hashlib
 import random
 import re
 
+import style_bible
+import visual_grammar
 from common import (CANVAS_H, CANVAS_W, COLORS, mood_palette,
                     narrative_function_rank)
 
@@ -27,6 +29,9 @@ STRATEGIES = ("single_focus", "left_to_right_flow", "cause_effect",
 # GATE-R8 邻拍避让时的轮换顺序（显式覆写优先，见 direct()）
 ROTATION = ("single_focus", "cause_effect", "center_cluster",
             "comparison", "before_after", "left_to_right_flow")
+
+# P0⑤：邻拍调色板避让顺序（见 direct()），保证背景不整片一个色。
+_PALETTE_ROTATION = ("warm", "cold", "tense", "calm", "night")
 
 SEMANTIC_DEFAULT = {
     "hook": "left_to_right_flow",
@@ -507,6 +512,9 @@ def _direct_beat(beat, beat_i, ov, prev_strategy, numbers_index,
         "elements": els, "relations": rels,
         "camera": plan["camera_intent"], "carry_over": [],
         "palette": mood_palette(beat["narration"], beat["semantic_role"]),
+        # P0④：把语义关系编译为**抽象视觉语法**（causality/contrast/…），
+        # 而非固定素材名——语法到表层实现是一对多，导演可自由挑选。
+        "grammar_ops": visual_grammar.grammar_for_beat(beat),
     }
     return plan, dsl_beat, strategy
 
@@ -516,12 +524,21 @@ def direct(beats, overrides=None):
     overrides = overrides or {}
     vplans, dsl_beats = [], []
     prev_strategy = None
+    prev_palette = None
     recent_decor = []
     for i, beat in enumerate(beats, 1):
         ov = overrides.get(beat["cue_range"][0], {})
         rng = random.Random(_seed_for(beat))
         plan, dsl_beat, prev_strategy = _direct_beat(
             beat, i, ov, prev_strategy, None, rng, recent_decor)
+        # P0⑤：调色板 R8 防重复。旧版全片易落同一底色（语义角色常被判定为
+        # 同一类，情绪兜底于是一个颜色），这里保证相邻拍不撞色。
+        if dsl_beat["palette"] == prev_palette:
+            for cand in _PALETTE_ROTATION:
+                if cand != prev_palette:
+                    dsl_beat["palette"] = cand
+                    break
+        prev_palette = dsl_beat["palette"]
         vplans.append(plan)
         dsl_beats.append(dsl_beat)
     vplan = {"global_visual_grammar": {
@@ -538,6 +555,10 @@ def direct(beats, overrides=None):
         "narrative_function_order": sorted(
             set(b["semantic_role"] for b in beats),
             key=narrative_function_rank),
+        # P0③：视频级视觉人格由本条内容推导，不预设固定风格。
+        "style_bible": style_bible.derive_style_bible(beats),
+        # P0④：全片语法词汇表（抽象语法体系，固定；表达，不固定）。
+        "grammar_language": list(visual_grammar.GRAMMAR_OPS),
     }, "beats": vplans}
     dsl = {"version": "4.4", "canvas": CANVAS, "beats": dsl_beats}
     return vplan, dsl
