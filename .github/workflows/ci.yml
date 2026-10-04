@@ -12,13 +12,12 @@ concurrency:
 
 jobs:
   # 真实矩阵：Python 3.9–3.12 × Linux / macOS / Windows。
-  # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
-  #   Linux  → libcairo2 + libffi
-  #   macOS  → brew cairo + libffi（并导出 DYLD_FALLBACK_LIBRARY_PATH）
-  #   Windows→ MSYS2 UCRT64 的 64 位 cairo（DLL 名恰为 libcairo-2.dll，与 x64 CPython
-  #            架构匹配；choco 的 GTK2-Runtime 只有 32 位，会因架构不符报 error 0xc1）。
-  #            Windows 的 ctypes.CDLL 不搜索 MSYS2 目录，需用 os.add_dll_directory
-  #            显式注册 DLL 目录（经 sitecustomize.py 在解释器启动时生效）。
+  # cairosvg 的系统依赖是这类渲染管线跨平台最常见的失败点。本项目的设计立场是
+  # 「无系统 cairo 时优雅降级，而非崩溃」：
+  #   - Linux  → 装 libcairo2 + libffi（走 cairosvg 主路径）
+  #   - macOS  → brew cairo + libffi + DYLD_FALLBACK_LIBRARY_PATH
+  #   - Windows→ 不装 cairo：runtime 里 cairosvg 为可选导入，光栅门禁在无后端时
+  #             显式 SKIP，端到端样例仍可 --no-render 通过（见 svg-fallback 作业）
   matrix-test:
     name: py${{ matrix.python }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -44,34 +43,6 @@ jobs:
         run: |
           brew install cairo libffi
           echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
-      - name: System cairo libs (Windows, 64-bit via MSYS2 UCRT64)
-        if: runner.os == 'Windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: false
-          install: mingw-w64-ucrt-x86_64-cairo
-      - name: Register cairo DLL directory (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $dllDir = "C:\msys64\ucrt64\bin"
-          # 双保险 1：写入 PATH（供子进程命令行工具）
-          $dllDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          # 双保险 2：写 sitecustomize.py，用 os.add_dll_directory 显式注册
-          # （ctypes.CDLL 会搜索该目录；这是 cairocffi 在 Win 上找 cairo 的可靠方式）
-          $site = python -c "import site; print(site.getsitepackages()[0])"
-          $py = @"
-          import os
-          _d = r"$dllDir"
-          if os.path.isdir(_d):
-              try:
-                  os.add_dll_directory(_d)
-              except OSError:
-                  pass
-          "@
-          $py | Out-File -FilePath (Join-Path $site "sitecustomize.py") -Encoding utf8
-          Write-Host "cairo DLL dir registered: $dllDir"
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
@@ -82,8 +53,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: cairosvg import probe (fails loudly if system cairo missing)
-        run: python -c "import cairosvg; print('cairosvg', cairosvg.__version__)"
+      - name: SVG backend probe (must degrade gracefully, not crash)
+        run: python runtime/svg_backend.py --probe
 
       - name: Runtime self-test (Bootstrap Gate, VAL-03)
         run: python runtime/self_test.py
