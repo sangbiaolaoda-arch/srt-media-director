@@ -22,12 +22,7 @@ import io
 import math
 import re
 
-try:
-    import cairosvg
-    _CAIROSVG_AVAILABLE = True
-except Exception:  # noqa: BLE001 — 系统 cairo 缺失时不阻断导入（降级由 svg_backend 选址）
-    cairosvg = None
-    _CAIROSVG_AVAILABLE = False
+import cairosvg
 from PIL import Image
 
 VIEWBOX = 100
@@ -541,9 +536,6 @@ def audit_all():
 @functools.lru_cache(maxsize=512)
 def render_png(art, color, w, h):
     """cairosvg 光栅化为 RGBA PIL Image（带 LRU 缓存，视频渲染友好）。"""
-    if cairosvg is None:
-        raise RuntimeError(
-            "cairosvg/系统 cairo 不可用：无法光栅化 SVG 画法（降级由 svg_backend 决定）")
     svg = ART[art].replace("{COLOR}", color)
     png = cairosvg.svg2png(bytestring=svg.encode("utf-8"),
                            output_width=max(1, int(w)),
