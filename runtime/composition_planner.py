@@ -63,6 +63,16 @@ TEMPLATES = {
     },
 }
 
+# P0① 构图弱约束：6 个模板不再是「必须套用」的固定长相，而是**建议锚点**。
+# 元素可自带归一化 rect（自由落位）绕开模板；未知 slot 且无自带区域时才触发
+# LAYOUT_INTENT_INCOMPLETE，以继续保证「坐标必须有意为之、不许猜」。
+# 模板角色从「定义画面」降为「兜底参考」——固定审美原则，不固定长相。
+COMPOSITION_POLICY = {
+    "templates_are": "advisory",   # advisory（建议）而非 mandatory（强制）
+    "free_placement": True,        # 允许元素自带归一化 rect
+    "unknown_slot": "reject",      # 仍拒绝无意图坐标
+}
+
 
 def _rect(norm):
     x, y, w, h = norm
@@ -147,11 +157,14 @@ def plan_beat(beat):
                                        "h": round(box["h"], 1)}
             continue
         slot = el["slot"]
-        if slot not in tpl:
+        if el.get("rect") is not None:      # P0① 自由落位：元素自带区域，模板仅作建议
+            box = _rect(el["rect"])
+        elif slot in tpl:
+            box = _rect(tpl[slot])
+        else:
             raise LayoutIntentIncomplete(
                 "LAYOUT_INTENT_INCOMPLETE: slot '%s' has no region in strategy '%s'"
                 % (slot, strategy))
-        box = _rect(tpl[slot])
         if el["type"] == "text":
             size = FONT_SIZES[el.get("size", "label")]
             tw, th = measure_text(el["text"], size, bold=bool(el.get("emphasis")))
