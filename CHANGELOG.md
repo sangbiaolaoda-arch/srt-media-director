@@ -1,5 +1,171 @@
 # Changelog
 
+## [7.4.0] — 2026-10-05
+
+**Runtime 六包架构 + 生成→截图→Critic→修复闭环。** 把 runtime 从「一堆平铺模块」
+重构为职责清晰的六包，并落地用户要的闭环：
+
+```
+Agent → VisualIntent → Compiler → RenderPlan → HTML/SVG → 截图 → 检查 → 修复
+```
+
+### Added
+
+- **`runtime/director/`**（Agent 视觉决策层）：`visual_intent.py`（意图契约，零坐标）、
+  `grammar.py`（语法词表 + 可读描述）、`relationship.py`（关系图：sinks/dot 导出）、
+  `critic.py`（机器 Critic：截图+规范→判决+修复路由）。
+- **`runtime/compiler/`**（几何层）：`composition.py`（语法 1:N 实现 + coverage）、
+  `constraints.py`（编译期约束门禁）、`layout.py`（槽位求解）、`svg_compiler.py`（DSL→SVG/HTML）。
+- **`runtime/render/`**（渲染层，多后端可降级）：`html_renderer.py`、
+  `playwright_renderer.py`（有则用）、`screenshot.py`（playwright > chromium CLI > cairosvg）。
+- **`runtime/validation/`**（渲染后校验）：`geometry.py` / `typography.py` /
+  `safe_area.py` / `visual_regression.py`。
+- **`runtime/primitives/`**（图元工厂，函数化可复用）：`text/shape/path/chart/connector/motif.py`。
+- **`runtime/schemas/`**（中间语言 JSON Schema）：`visual_intent.json` / `visual_plan.json` / `render_plan.json`。
+- **`runtime/director_loop.py`**：把六包串成闭环；FAIL 时 `route()` 找上游层并确定性修复后重编重截。
+- **门禁 G19**（架构）：断言六包与目标文件布局存在、跨包接线可用、后端如实探测。
+- **门禁 G20**（闭环）：断言闭环**真的渲染出 PNG 并 PASS**，且问题码路由回正确上游层。
+- 技能文档 `skills/15-runtime-architecture.md`。
+
+### Changed
+
+- `self_test.py` 门禁 18 → **20**；版本 `7.3.0` → `7.4.0`。
+- 顶层模块（`intent_layer` / `composition_compiler` / `visual_grammar` / `ref_frame` /
+  `composition_planner`）保留为**单一逻辑源**，新包作为规范 facade，不重复实现逻辑。
+
+### Notes
+
+- 渲染后端优先级 playwright > chromium(CLI) > cairosvg；纯 Python 环境也能跑，CI 不依赖浏览器。
+- 三设计红线：Agent 不画画（零坐标）/ 语法≠模板（1:N）/ 能力如实报告（不假装有 Playwright）。
+
+## [7.3.0] — 2026-10-05
+
+**从「模板选择器」升级为「语义视觉意图层」。** Agent 不再负责「画画」，只负责
+「这句话应该被怎样视觉化」；几何由 Runtime 决定。
+
+分界线（对照参考 Runtime 的两个例子）：
+
+```jsonc
+// 错误：模板选择器（Agent 被训练成选模板）——被门禁 G17 拒斥
+{"strategy": "cause_effect", "template": "left_to_right_flow",
+ "hero_x": 300, "hero_y": 400}
+
+// 正确：视觉意图（Agent 表达语义，Runtime 决定几何）
+{"visual_claim": "small_repeated_actions_accumulate_into_large_change",
+ "grammar": ["accumulation", "trajectory", "threshold"],
+ "focal_point": "trajectory",
+ "relationship": [{"from": "small_actions", "relation": "accumulate_into", "to": "trajectory"},
+                  {"from": "trajectory", "relation": "crosses", "to": "threshold"}],
+ "density": 0.62, "silence": false, "motion_intent": "accumulate_then_reveal"}
+```
+
+### Added
+
+- **`runtime/intent_layer.py`**（Agent 语义层）：定义视觉意图契约 + 校验 +
+  `template_leak_keys()` / `is_template_selector()`（拒斥 strategy/template/像素键）。
+  `derive_intent(beat)` 从一拍推导意图，输出**零坐标**。
+- **`runtime/composition_compiler.py`**（Runtime 几何层）：`compile_intent(intent)`
+  把意图编译为视觉 DSL。**语法 → 实现是 1:N 映射**（不是「语法==模板」），
+  坐标全部来自 `ref_frame` 的规则（`cols/rows/stroke`），density/silence 决定槽数。
+  新增复合实现 accumulation+trajectory+threshold。
+- **`schemas/visual-intent.schema.json`**：视觉意图 JSON Schema；`additionalProperties: false`
+  从 schema 层就堵死像素/模板键。
+- **门禁 G17**（意图层）：断言「模板选择器被拒斥 + 视觉意图通过 + 推导意图无泄漏」。
+- **门禁 G18**（编译器）：断言「意图→合法 DSL、强调≤1、语法 1:N、每个语法都有实现」。
+- 技能文档 `skills/14-intent-layer.md`。
+
+### Changed
+
+- `visual_grammar.GRAMMAR_OPS` 新增 `accumulation` / `trajectory` / `threshold`。
+- 构图从「Agent 选 `strategy`」改为「Agent 给 `grammar` → 编译器选实现」。
+  旧 `strategy` 路径保留（向后兼容），但不再是推荐入口。
+- `self_test.py` 门禁 16 → **18**；版本 `7.2.0` → `7.3.0`；黄金基准因语法表扩展而重生成。
+
+### Notes
+
+- 视觉证据：`runtime/_build_intent_demo.py` 渲染「意图→构图」两帧
+  （`intent-to-composition.png`）：同一个编译器把 accumulation 组合编译成
+  「累积短柱 → 上升轨迹（焦点，唯一强调）→ 阈值虚线」，把 contrast 编译成双槽对比。
+
+## [7.2.0] — 2026-10-05
+
+**从「抄三张参考帧」升级为「生成引擎」。** 判据：一条规则若只能还原它被抽出的
+那张图就是「抄」，若还能外推出源图没有的解才是「学」。
+
+### Added
+
+- **`runtime/ref_frame.py` 规则引擎化**：把参考帧的写死坐标/写死列数改为**规则**——
+  - `cols(n)` / `rows(n)`：分槽规则。`cols(3)` 精确复现参考帧 `x=[48,265,482]`（列宽 150），
+    `cols(2,gap=32)` 复现 `x=[48,356]`（面板宽 276）；同时可外推到 n=4/5。
+  - `stroke(role)`：描边角色规则（强调=加粗+加深，次级统一同一灰）。
+  - `type_scale(name)`：字阶规则。
+  - `count_accent(spec)`：强调**预算**（含强调色的元素个数 ≤ 1，非颜色串次数）。
+  - `audit_spec(spec)`：图层规范机器门禁（可独立渲染/框在画布内/motion 合法/强调≤1）。
+- **三个参考帧没有的新构型**（同规则外推）：`frame_quadrants`（2×2）、
+  `frame_timeline`（等距时间轴）、`frame_stack`（纵向清单）。
+- **门禁 G16**（`runtime/self_test.py`）：断言「复现参考帧**且**泛化到新构图」，非照抄。
+- 技能文档 `skills/13-reference-frames.md` 新增「代码经验总结」附录（七条可迁移经验）。
+
+### Changed
+
+- 旧版式 `frame_hero/statement/chain/bar_detail/compare` 全部改为**规则调用示例**，
+  不再含写死版式坐标；签名向后兼容（旧脚本仍可跑，见 self_test G16 smoke）。
+- `self_test.py` 门禁 15 → **16**；版本 `7.0.0` → `7.2.0`。
+
+### Notes
+
+- 泛化视觉证据：`runtime/_build_generalize.py` 渲染「上排复现 / 下排外推」并排图
+  （`ref-rule-generalize.png`），6 帧墨量各异、外推帧与复现帧结构差异显著。
+
+## [7.1.0] — 2026-10-04
+
+参考帧构图语法：把参考帧的手写 SVG 构图学成可复用模块（版心网格 / 圆角卡片 /
+线稿图标 / 连接箭头 / 强调纪律 / 逐元素入场编排），而非只抄配色。新增技能文档
+`skills/13-reference-frames.md`；`runtime/ref_frame.py`（逐元素图层规范）；
+逐元素入场渲染 `_build_refanim.py`。
+
+## [7.0.0] — 2026-10-04
+
+「固定视觉规则 → 自适应视觉导演」架构级升级。原则：
+
+> **固定审美原则，不固定视觉风格；固定视觉语法体系，不固定表达；
+> 固定编译/验证规则，不固定长相。**
+
+不推翻 v6.x，在其之上做加法：把「写死的模板与数量」换成「可自适应的语法与必要性」。
+
+### Added
+
+- **Visual Grammar**（`runtime/visual_grammar.py`，门禁 G13）：把语义关系编译为
+  **抽象语法操作**（establish / causality / contrast / progression / hierarchy /
+  emphasis / juxtapose / transition / abstract），每个语法操作对应**多种**表层实现
+  （画法名）。语法到表达是一对多，导演可自由挑选；`answer_to→causality`、
+  `concession→contrast` 等映射集中在此。断开了旧架构「语义关系 → 固定模板/素材名」的硬绑。
+- **Style Bible**（`runtime/style_bible.py`，门禁 G14）：**视频级视觉人格**，由本条
+  内容推导——`family / mood / density / typography / motion_temperament /
+  contrast_policy / silence_policy`。与项目级 `style_tokens.json`（物理锁：颜色/字体/
+  线宽）互补，bible 是「气质锁」：换一段内容，人格随内容变化。
+- **Visual Necessity**（`runtime/visual_necessity.py`，门禁 G15）：每个元素必须能被
+  「**删除它，这一拍的 Visual Claim 会变弱吗**」论证。分 `required / supporting /
+  optional`；只有「既非氛围、又不承载信息、删掉无损」的元素才判 UNJUSTIFIED。
+- 技能文档 `skills/11-visual-grammar.md`、`skills/12-style-bible.md`。
+
+### Changed
+
+- **P0① 构图模板降为建议锚点**（`runtime/composition_planner.py`）：新增
+  `COMPOSITION_POLICY`（`templates_are: advisory`、`free_placement: True`）；
+  元素可自带归一化 `rect` 自由落位绕开模板，未知 slot 无区域时仍拒绝猜坐标
+  （`LAYOUT_INTENT_INCOMPLETE`）。固定审美原则，不固定长相。
+- **P0② 数量门禁改软**（`runtime/self_test.py`）：「每拍 ≥3 图形要素」硬门禁删除，
+  改由必要性审计（G15）承担——数量成为结果，而非约束。
+- 导演层接入：`visual-plan.global_visual_grammar` 增加 `style_bible` 与
+  `grammar_language`；每个 beat 的 DSL 增加 `grammar_ops`。
+- `self_test.py` 门禁 12 → 15；黄金基准重生成（产物新增字段）。
+
+### Notes
+
+- 全链路实测：`self_test` 15/15、`pytest` 全绿、60s 样片 `pipeline` PASS、
+  grammar / necessity 审计 PASS。本次不新增素材/特效（按优先级，素材放最后）。
+
 ## [6.1.0] — 2026-10-04
 
 回应「作为主体的文字太淡、像背景」的可读性反馈。
