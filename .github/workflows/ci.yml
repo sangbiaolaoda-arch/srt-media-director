@@ -10,6 +10,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# 统一设为 UTF-8：self_test 的门禁名/日志含中文，Windows runner 默认 cp1252
+# 控制台会导致 UnicodeEncodeError（与渲染无关的环境问题）。
+env:
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: utf-8
+
 jobs:
   # 真实矩阵：Python 3.9–3.12 × Linux / macOS / Windows。
   # cairosvg 的系统依赖是这类渲染管线跨平台最常见的失败点。本项目的设计立场是
