@@ -1,0 +1,58 @@
+{
+  "1": {
+    "strategy": "left_to_right_flow",
+    "title": "为什么总在分心",
+    "flow_pair": ["compass", "phone"],
+    "note": "注意力被牵着走",
+    "claim": "建立『分心 → 手机』的流向：注意力被不断牵向手机。"
+  },
+  "2": {
+    "strategy": "comparison",
+    "title": "不是意志力差",
+    "keyword": "意志力",
+    "alt": "反复打断",
+    "note_left": "你以为的原因",
+    "note_right": "真正的机制",
+    "claim": "对比『意志力不足』与『反复被打断』，指出真正机制。"
+  },
+  "3": {
+    "strategy": "cause_effect",
+    "title": "一次通知的代价",
+    "cause": "一次通知",
+    "result": "三步代价",
+    "note": "打断 → 偏离 → 恢复",
+    "claim": "从『一次通知』推演出『三步代价』的因果链。"
+  },
+  "4": {
+    "strategy": "left_to_right_flow",
+    "title": "打断与恢复",
+    "flow_pair": ["alert", "clock"],
+    "note": "回来还要时间",
+    "claim": "呈现『被打断 → 重新回到状态』需要时间的过程。"
+  },
+  "5": {
+    "strategy": "single_focus",
+    "title": "每次切换的代价",
+    "keyword": "重新找回思路",
+    "motif": "compass",
+    "note": "切换即损耗",
+    "claim": "聚焦单一主体：每次切换都要重新找回思路。"
+  },
+  "6": {
+    "strategy": "comparison",
+    "title": "距离决定专注",
+    "keyword": "手机在手边",
+    "alt": "放在另一间",
+    "note_left": "随手可得",
+    "note_right": "物理隔离",
+    "claim": "对比『手机在手边』与『放在另一房间』，专注时长完全不同。"
+  },
+  "7": {
+    "strategy": "center_cluster",
+    "title": "离手机远一点",
+    "value": 80,
+    "number": "80%",
+    "note": "专注时长",
+    "claim": "用『80% 专注时长』收束结论：离手机远一点，更能专注。"
+  }
+}
