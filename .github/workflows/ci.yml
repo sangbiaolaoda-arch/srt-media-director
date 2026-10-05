@@ -38,10 +38,21 @@ jobs:
           sudo apt-get install -y -qq libcairo2 libffi-dev
       - name: System cairo libs (macOS)
         if: runner.os == 'macOS'
-        run: brew install cairo libffi
+        run: |
+          brew install cairo libffi
+          # cairocffi dlopen()s libcairo.2.dylib by bare name; macOS does not
+          # search homebrew's prefix by default, so expose it as a fallback path.
+          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix cairo)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
       - name: System cairo libs (Windows)
         if: runner.os == 'Windows'
-        run: choco install -y gtk-runtime --no-progress
+        shell: pwsh
+        run: |
+          choco install -y gtk-runtime --no-progress
+          # choco updates the *machine* PATH, which the already-running job
+          # process does not reload; add the GTK runtime bin for later steps so
+          # cairocffi can LoadLibrary libcairo-2.dll.
+          $gtkBin = 'C:\Program Files (x86)\GTK2-Runtime\bin'
+          if (Test-Path $gtkBin) { "PATH=$gtkBin;$env:PATH" | Out-File -Append $env:GITHUB_ENV }
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
