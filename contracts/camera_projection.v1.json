@@ -1,0 +1,16 @@
+{
+  "contract_id": "camera_projection.v1",
+  "_comment": "Independent Camera projection contract (Final Practical Closeout Directive, P2). The production chain's Camera layer maps a director's per-beat camera intent (visual-dsl.json -> beat.camera) to a UNIFORM magnification of the whole composited beat, applied after every element is drawn, as a scale about the canvas centre. This contract is the EXPECTED side; it MUST NOT be imported by the renderer and MUST NOT read the player's embedded BEATS. The renderer animates; this contract adjudicates.",
+  "modes": {
+    "static": { "zoom": 1.0 },
+    "push_in": { "amplitude": 0.06, "ramp_start_frac": 0.45, "ramp_len_frac": 0.35 }
+  },
+  "_model_comment": "zoom(t) = 1 + amplitude * clamp01((t - start - ramp_start_frac*(end-start)) / (ramp_len_frac*(end-start))). 'static' is identity at every instant. This mirrors the declared production vocabulary (numeric emphasis may push in; everything else stays still).",
+  "_purpose_comment": "Camera has a production purpose: a deliberate push-in marks the one beat whose core information is a number, so the viewer's eye is drawn to it. It is not architecture for its own sake.",
+  "observability": {
+    "_comment": "The camera is a single uniform scale about the canvas centre applied to the WHOLE composited beat, so it is observable exactly as the ratio of the composited content extent to the pre-camera scene extent at the same instant. It has no per-element channel: a beat either is magnified as a whole or is not.",
+    "channel": "composite_scale",
+    "min_delta": 0.01
+  },
+  "tolerance": 0.02
+}

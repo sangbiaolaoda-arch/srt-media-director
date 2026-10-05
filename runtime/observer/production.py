@@ -51,7 +51,7 @@ import sys
 import tempfile
 from typing import Any, Dict, List, Optional
 
-from . import browser, motion, taxonomy
+from . import browser, camera, motion, taxonomy
 
 # Minimum painted pixels (inside the declared box) that count as "the element was
 # actually drawn". Deliberately small: this is a presence test, not an aesthetic
@@ -66,6 +66,15 @@ INK_ABSENT_MAX_PX = 4
 # Transform (motion) measurement tolerances.
 MOTION_MIN_SHIFT_PX = 3.0      # a rise/sink must move the ink at least this far
 MOTION_MAX_AREA_RATIO = 0.85   # a pop/shrink must reduce the ink area below this
+
+# Camera (viewport) measurement: a pixel carries content when it differs from the
+# flat background by at least CONTENT_DIFF (L1 RGB). The measured composite
+# magnification must match the independent Camera projection within CAMERA_TOL.
+CONTENT_DIFF = 30
+CAMERA_TOL = 0.03
+# The camera is a uniform scale about the centre, so the scene/composite extent
+# ratio is robust to coarse sampling; stride the scan to keep observation cheap.
+CAM_SCAN_STRIDE = 3
 
 # Element types that MUST paint (the film's semantic content).
 CONTENT_TYPES = {"text", "chart", "motif", "connector", "shape"}
@@ -90,6 +99,11 @@ _PROBE_TEMPLATE = r"""
       report({available:false, error:'production runtime globals missing (BEATS/drawBeat/W)'});
       return;
     }
+    // Stop the player's own animation loop: render() re-schedules itself via
+    // requestAnimationFrame, so driving render() by hand would spawn a new
+    // self-perpetuating loop per probe and blow the virtual-time budget. The
+    // observer drives render() deterministically to exact times instead.
+    window.requestAnimationFrame=function(){return 0;};
     var PROBES = %(probes)s;
     var byId={};
     for(var i=0;i<BEATS.length;i++){ byId[BEATS[i].id]=i; }
@@ -103,6 +117,42 @@ _PROBE_TEMPLATE = r"""
       return true;
     }
 
+    function contentBBox(data){
+      var br=data[0], bg=data[1], bb=data[2];
+      var step=%(cam_stride)d;
+      var minx=1e9,miny=1e9,maxx=-1,maxy=-1,cnt=0;
+      for(var py=0;py<H;py+=step){
+        var row=py*W;
+        for(var px=0;px<W;px+=step){
+          var j=(row+px)*4;
+          var dd=Math.abs(data[j]-br)+Math.abs(data[j+1]-bg)+Math.abs(data[j+2]-bb);
+          if(dd>%(content_diff)d){
+            cnt++;
+            if(px<minx)minx=px; if(py<miny)miny=py;
+            if(px>maxx)maxx=px; if(py>maxy)maxy=py;
+          }
+        }
+      }
+      if(maxx<0)return null;
+      return {x:minx,y:miny,w:maxx-minx+step,h:maxy-miny+step,cnt:cnt};
+    }
+
+    function measureCamera(beat,t){
+      // Drive the player's own render() to time t. It draws the beat onto `scene`
+      // with NO camera, then composites it onto `ctx` WITH the camera (a uniform
+      // scale about the centre). One render() therefore yields both extents.
+      var nowRef=1e9;
+      try{ lastIdx=-1; hasPrev=false; T0=nowRef - t*1000; render(nowRef); }
+      catch(e){ return {error:'render_failed:'+String(e)}; }
+      var sb=contentBBox(sctx.getImageData(0,0,W,H).data);
+      if(!sb||sb.cnt<%(ink_min)d)return {error:'no_scene_content'};
+      var cb=contentBBox(ctx.getImageData(0,0,W,H).data);
+      if(!cb||cb.cnt<%(ink_min)d)return {error:'no_composite_content'};
+      var zw=cb.w/sb.w, zh=cb.h/sb.h;
+      return {zoom:(zw+zh)/2.0, zw:zw, zh:zh, sb:sb, cb:cb,
+              clipped:(cb.x<=0||cb.y<=0||cb.x+cb.w>=W||cb.y+cb.h>=H)};
+    }
+
     function compute(){
       var out=[];
       for(var s=0;s<PROBES.length;s++){
@@ -110,6 +160,12 @@ _PROBE_TEMPLATE = r"""
         var bi=byId[sm.beat_id];
         if(bi===undefined){ out.push({id:sm.id,t:sm.t,present:sm.present,probe:sm.probe,phase:sm.phase,error:'beat_not_found'}); continue; }
         var beat=BEATS[bi];
+        if(sm.probe==='camera'){
+          var zr=measureCamera(beat, sm.t);
+          if(zr.error){ out.push({id:sm.id,beat_id:sm.beat_id,t:sm.t,probe:'camera',phase:sm.phase,error:zr.error}); }
+          else { out.push({id:sm.id,beat_id:sm.beat_id,t:sm.t,probe:'camera',phase:sm.phase,zoom:zr.zoom,zw:zr.zw,zh:zr.zh,sb:zr.sb,cb:zr.cb,clipped:zr.clipped}); }
+          continue;
+        }
         var x=Math.max(0,Math.floor(sm.box.x));
         var y=Math.max(0,Math.floor(sm.box.y));
         var w=Math.min(W-x, Math.ceil(sm.box.w));
@@ -152,7 +208,7 @@ _PROBE_TEMPLATE = r"""
     report({available:false, error:String(e)});
   }
 })();
-""" % {"attr": repr(_ATTR), "probes": "__PROBES__", "ink_diff": INK_DIFF}
+""" % {"attr": repr(_ATTR), "probes": "__PROBES__", "ink_diff": INK_DIFF, "content_diff": CONTENT_DIFF, "ink_min": INK_MIN_PX, "cam_stride": CAM_SCAN_STRIDE}
 
 
 def _kind(el_type: str) -> str:
@@ -261,6 +317,21 @@ def build_samples(dsl: Dict[str, Any], render_plan: Dict[str, Any],
                                "probe": "transform", "phase": "exit_early",
                                "el_type": etype, "motion": exit_motion,
                                "exp": motion.expected_transform(lc, t_x)})
+
+        # --- camera (viewport) probes (P2) ---
+        # Always one late probe; a second early probe only when the camera moves,
+        # so the ramp and its direction are adjudicated without a redundant render
+        # for every static beat.
+        cam = b.get("camera")
+        if camera.observable(cam):
+            probe_times = [("late", end - 0.15)]
+            if not camera.is_identity(cam):
+                probe_times.append(("early", start + 0.5))
+            for phase, ct in probe_times:
+                ct = _clamp_time(ct, start, end)
+                probes.append({"id": bid, "beat_id": bid, "t": ct,
+                               "present": True, "probe": "camera", "phase": phase,
+                               "exp": {"zoom": camera.expected_zoom(cam, start, end, ct)}})
     return probes
 
 
@@ -292,7 +363,7 @@ def _extract(dumped: str) -> Optional[str]:
 
 
 def observe(film_html: str, probes: List[Dict[str, Any]], *,
-            timeout: int = 180) -> Dict[str, Any]:
+            timeout: int = 300) -> Dict[str, Any]:
     """Observe the compiled player: what ink it actually paints. Browser-gated."""
     binary = browser.find_browser()
     if not binary or not browser.available():
@@ -358,7 +429,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     # --- presence dimension ---
     want: Dict[str, Dict[str, Any]] = {}
     for p in probes:
-        if p.get("probe") == "transform":
+        if p.get("probe") in ("transform", "camera"):
             continue
         w = want.setdefault(p["id"], {"kind": p["kind"], "present": False,
                                       "absence": False})
@@ -371,7 +442,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     absence_ink: Dict[str, int] = {}
     err: Dict[str, str] = {}
     for s in observed.get("samples", []):
-        if s.get("probe") == "transform":
+        if s.get("probe") in ("transform", "camera"):
             continue
         sid = s.get("id")
         if s.get("error"):
@@ -465,6 +536,44 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
                                             round(m["cy"], 1), round(m_settle["cy"], 1),
                                             round(m["area"], 1), round(m_settle["area"], 1)]})
 
+    # --- camera (viewport) dimension ---
+    want_cam: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for p in probes:
+        if p.get("probe") == "camera":
+            want_cam.setdefault(p["beat_id"], {})[p["phase"]] = p
+    obs_cam: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for s in observed.get("samples", []):
+        if s.get("probe") == "camera":
+            obs_cam.setdefault(s.get("beat_id"), {})[s.get("phase")] = s
+
+    camera_checked = 0
+    for bid2, phases in sorted(want_cam.items()):
+        measured: Dict[str, Dict[str, Any]] = {}
+        bad = False
+        for phase in sorted(phases):
+            o = obs_cam.get(bid2, {}).get(phase)
+            if not o or o.get("error"):
+                problems.append({"kind": "camera_probe_missing",
+                                 "detail": [bid2, phase, (o or {}).get("error")]})
+                bad = True
+                continue
+            measured[phase] = o
+        if bad:
+            continue
+        camera_checked += 1
+        for phase, o in sorted(measured.items()):
+            exp_z = float(phases[phase]["exp"]["zoom"])
+            zw = float(o.get("zw", o.get("zoom", 1.0)))
+            zh = float(o.get("zh", o.get("zoom", 1.0)))
+            if not (abs(zw - exp_z) <= CAMERA_TOL or abs(zh - exp_z) <= CAMERA_TOL):
+                problems.append({"kind": "camera_zoom_mismatch",
+                                 "detail": [bid2, phase, round(zw, 4), round(zh, 4), round(exp_z, 4)]})
+        if "early" in measured and "late" in measured:
+            ze = max(float(measured["early"].get("zw", 1.0)), float(measured["early"].get("zh", 1.0)))
+            zl = max(float(measured["late"].get("zw", 1.0)), float(measured["late"].get("zh", 1.0)))
+            if zl + CAMERA_TOL < ze:
+                problems.append({"kind": "camera_reversed", "detail": [bid2, round(ze, 4), round(zl, 4)]})
+
     verdict = taxonomy.PASS if not problems else taxonomy.RENDER_FAIL
     return {
         "verdict": verdict,
@@ -477,6 +586,8 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
         "painted": sum(1 for v in present_ink.values() if v >= INK_MIN_PX),
         "transform_checked": transform_checked,
         "transform_skipped": transform_skipped,
+        "camera_checked": camera_checked,
+        "camera_beats": len(want_cam),
         "problems": problems,
         "advisory": advisory,
     }

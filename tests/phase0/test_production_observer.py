@@ -27,6 +27,25 @@ needs_browser = pytest.mark.skipif(not HAS_BROWSER, reason="no Chromium binary a
 GOLDEN = os.path.join(ROOT, "tests", "golden", "01-minimal", "case.srt")
 
 
+def _obs(samples, ink_of):
+    """Synthesize a complete observation (all dimensions) from probe samples.
+
+    Camera probes are answered with the *expected* zoom so a test that is only
+    about the presence dimension is not falsely failed by the camera dimension.
+    """
+    rows = []
+    for s in samples:
+        if s.get("probe") == "camera":
+            z = float(s["exp"]["zoom"])
+            rows.append({"id": s["id"], "beat_id": s["beat_id"], "t": s["t"],
+                         "present": True, "probe": "camera", "phase": s["phase"],
+                         "zw": z, "zh": z})
+        else:
+            rows.append({"id": s["id"], "t": s["t"], "present": s["present"],
+                         "ink": ink_of(s)})
+    return {"available": True, "backend": "x", "beats": 1, "samples": rows}
+
+
 def _tiny_plan():
     """A tiny synthetic upstream plan: one beat, one text + one decor element."""
     dsl = {"beats": [{"beat_id": "b1", "start_sec": 0.0, "end_sec": 4.0,
@@ -50,19 +69,21 @@ def test_build_samples_is_deterministic_and_upstream_only():
     a = production.build_samples(dsl, rp, en)
     b = production.build_samples(dsl, rp, en)
     assert a == b and a, a
-    ids = {s["id"] for s in a}
+    # presence dimension only; transform/camera probes are separate dimensions
+    presence = [s for s in a if s.get("probe") not in ("transform", "camera")]
+    ids = {s["id"] for s in presence}
     assert ids == {"t1", "d1"}
     # multiple times per element (progressive reveal must be sampled, not assumed)
-    assert sum(1 for s in a if s["id"] == "t1") >= 2
+    assert sum(1 for s in presence if s["id"] == "t1") >= 2
+    # the camera dimension is expected for the beat too (independent expectation)
+    assert any(s.get("probe") == "camera" for s in a)
 
 
 def test_verify_pass_on_synthetic_paint():
     dsl, rp, en = _tiny_plan()
     samples = production.build_samples(dsl, rp, en)
-    observed = {"available": True, "backend": "x", "beats": 1,
-                "samples": [{"id": s["id"], "t": s["t"], "present": s["present"],
-                             "ink": 500} for s in samples]}
-    rep = production.verify(production.build_samples(dsl, rp, en), observed)
+    observed = _obs(samples, lambda s: 500)
+    rep = production.verify(samples, observed)
     assert rep["verdict"] == "PASS", rep
 
 
@@ -80,10 +101,7 @@ def test_verify_render_fail_on_unpainted_content():
 def test_decor_unpainted_is_advisory_not_failure():
     dsl, rp, en = _tiny_plan()
     samples = production.build_samples(dsl, rp, en)
-    observed = {"available": True, "backend": "x", "beats": 1,
-                "samples": [{"id": s["id"], "t": s["t"], "present": s["present"],
-                             "ink": 500 if s["id"] == "t1" else 0}
-                            for s in samples]}
+    observed = _obs(samples, lambda s: 500 if s["id"] == "t1" else 0)
     rep = production.verify(samples, observed)
     assert rep["verdict"] == "PASS", rep
     assert any(a["kind"] == "element_not_painted" for a in rep["advisory"])
