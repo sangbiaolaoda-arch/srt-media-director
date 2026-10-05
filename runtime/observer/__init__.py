@@ -11,6 +11,15 @@ Honesty rules (matching the repo's "有则用，无则明确降级"):
     Playwright-downloaded build) is driven through the stable
     ``--headless --dump-dom`` CLI, which needs no Python browser bindings.
 """
-from . import browser, fidelity, normalize, render
+import os as _os
+import sys as _sys
 
-__all__ = ["browser", "normalize", "fidelity", "render"]
+# Allow `import observer` (or `python -m runtime.observer.*`) from anywhere to
+# resolve the sibling `world_state` package regardless of cwd.
+_rt = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if _rt not in _sys.path:
+    _sys.path.insert(0, _rt)
+
+from . import browser, calibrate, fidelity, normalize, render, thresholds  # noqa: E402
+
+__all__ = ["browser", "normalize", "fidelity", "render", "calibrate", "thresholds"]
