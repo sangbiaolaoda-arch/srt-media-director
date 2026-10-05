@@ -52,14 +52,20 @@ jobs:
           # error 0xc1 (ERROR_BAD_EXE_FORMAT). Use the 64-bit cairo from the
           # MSYS2 toolchain that is preinstalled on the windows runner instead.
           C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-cairo"
-          # cairocffi resolves the library via ctypes.util.find_library ->
-          # ffi.dlopen, which on Windows honours the dedicated
-          # CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory).
-          # NOTE: do NOT add C:\msys64\mingw64\bin to PATH — it ships its own
-          # python.exe that would shadow the runner's interpreter and break
-          # `python -m pip`. add_dll_directory also lets cairo's dependent
-          # DLLs (freetype/fontconfig/glib) resolve from that same directory.
-          "CAIROCFFI_DLL_DIRECTORIES=C:\msys64\mingw64\bin" | Out-File -Append $env:GITHUB_ENV
+          # cairocffi loads cairo through cffi's ffi.dlopen('libcairo-2.dll'). That
+          # call uses LoadLibraryExW(LOAD_WITH_ALTERED_SEARCH_PATH), which does NOT
+          # consult the directories registered by CAIROCFFI_DLL_DIRECTORIES /
+          # os.add_dll_directory — so the env-var hook alone still failed with
+          # error 0x7e (ERROR_MOD_NOT_FOUND) even though cairo was installed.
+          # PATH *is* searched, so stage the cairo DLLs (plus their freetype / glib /
+          # fontconfig / pixman / png dependencies) in a dedicated directory that
+          # contains NO python.exe, then expose only that directory on PATH.
+          # We deliberately avoid putting C:\msys64\mingw64\bin itself on PATH: it
+          # ships its own python.exe that would shadow the runner interpreter and
+          # break `python -m pip`.
+          New-Item -ItemType Directory -Force C:\cairo-dll | Out-Null
+          Copy-Item C:\msys64\mingw64\bin\*.dll C:\cairo-dll -Force
+          "C:\cairo-dll" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
