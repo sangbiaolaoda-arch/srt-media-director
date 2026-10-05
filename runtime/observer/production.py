@@ -1,4 +1,4 @@
-"""Production render-chain observer (Final Practical Closeout Directive, P0).
+"""Production render-chain observer (Final Practical Closeout Directive, P0/P2).
 
 The Phase-0 observer (:mod:`observer.browser`) reads ``[data-node]`` boxes from a
 *synthetic* WorldState HTML. The real deliverable, however, is the compiled
@@ -7,20 +7,27 @@ The Phase-0 observer (:mod:`observer.browser`) reads ``[data-node]`` boxes from 
 A DOM probe sees nothing there — every element lives in pixels.
 
 This module closes that gap. It drives a real Chromium over the *production*
-artifact and asks a canvas-native question: **for each element the upstream plan
-declares, does the running player actually paint ink at the declared box during
-the element's declared life?** It does that by rendering the beat twice — once
-whole, once with the element excluded — and diffing the pixels inside the box.
+artifact and asks canvas-native questions:
 
-That makes the whole chain falsifiable end to end:
+* **Presence (P0).** For each element the upstream plan declares, does the
+  running player actually paint ink at the declared box during its declared life?
+  We render the beat twice — once whole, once with the element excluded — and
+  diff the pixels inside the box.
+* **Transform / Motion (P2).** Does the element *arrive with the motion the
+  director authored*? For elements carrying ``rise`` / ``pop`` / ``sink`` /
+  ``shrink``, we probe the element early and settled and check that the painted
+  ink actually moves down (rise/sink) or shrinks (pop/shrink) per the independent
+  Motion projection (:mod:`observer.motion`), never per the player's own code.
+
+The whole chain is therefore falsifiable end to end:
 
     SRT → Beat → Director → Composition → Motion → HTML Adapter →
     film/index.html → Chromium → Observer → Validator
 
 The *expectation* comes from the upstream plan artifacts (``visual-dsl.json`` +
-``render-plan.json`` + ``entrance-plan.json``) via :func:`build_samples`, never
-from the player's own embedded ``BEATS``. The player under test is asked only
-"what did you draw?", not "what should you have drawn?".
+``render-plan.json`` + ``entrance-plan.json``) plus the independent motion
+contract — never from the player's embedded ``BEATS``. The player under test is
+asked only "what did you draw?", not "what should you have drawn?".
 
 Two design points keep the verdict honest rather than overfit:
 
@@ -44,7 +51,7 @@ import sys
 import tempfile
 from typing import Any, Dict, List, Optional
 
-from . import browser, taxonomy
+from . import browser, motion, taxonomy
 
 # Minimum painted pixels (inside the declared box) that count as "the element was
 # actually drawn". Deliberately small: this is a presence test, not an aesthetic
@@ -55,6 +62,10 @@ INK_MIN_PX = 12
 INK_DIFF = 24
 # Max painted pixels allowed to remain in a box whose element has exited.
 INK_ABSENT_MAX_PX = 4
+
+# Transform (motion) measurement tolerances.
+MOTION_MIN_SHIFT_PX = 3.0      # a rise/sink must move the ink at least this far
+MOTION_MAX_AREA_RATIO = 0.85   # a pop/shrink must reduce the ink area below this
 
 # Element types that MUST paint (the film's semantic content).
 CONTENT_TYPES = {"text", "chart", "motif", "connector", "shape"}
@@ -97,30 +108,33 @@ _PROBE_TEMPLATE = r"""
       for(var s=0;s<PROBES.length;s++){
         var sm=PROBES[s];
         var bi=byId[sm.beat_id];
-        if(bi===undefined){ out.push({id:sm.id, t:sm.t, present:sm.present, error:'beat_not_found'}); continue; }
+        if(bi===undefined){ out.push({id:sm.id,t:sm.t,present:sm.present,probe:sm.probe,phase:sm.phase,error:'beat_not_found'}); continue; }
         var beat=BEATS[bi];
         var x=Math.max(0,Math.floor(sm.box.x));
         var y=Math.max(0,Math.floor(sm.box.y));
         var w=Math.min(W-x, Math.ceil(sm.box.w));
         var h=Math.min(H-y, Math.ceil(sm.box.h));
-        if(w<=0||h<=0){ out.push({id:sm.id, t:sm.t, present:sm.present, error:'empty_box'}); continue; }
+        if(w<=0||h<=0){ out.push({id:sm.id,t:sm.t,present:sm.present,probe:sm.probe,phase:sm.phase,error:'empty_box'}); continue; }
         drawBeat(pctx, beat, sm.t, null, null);
         var excl=new Set(); excl.add(sm.id);
         drawBeat(pctx2, beat, sm.t, excl, null);
-        var A=pctx.getImageData(x,y,w,h).data;
-        var B=pctx2.getImageData(x,y,w,h).data;
-        var ink=0, minx=1e9, miny=1e9, maxx=-1, maxy=-1;
+        var A=pctx.getImageData(0,0,W,H).data;
+        var B=pctx2.getImageData(0,0,W,H).data;
+        var gink=0, gminx=1e9, gminy=1e9, gmaxx=-1, gmaxy=-1, bink=0;
         for(var j=0;j<A.length;j+=4){
           var d=Math.abs(A[j]-B[j])+Math.abs(A[j+1]-B[j+1])+Math.abs(A[j+2]-B[j+2]);
           if(d>%(ink_diff)d){
-            ink++;
-            var pix=j/4, px=pix%%w, py=(pix-px)/w;
-            if(px<minx)minx=px; if(py<miny)miny=py;
-            if(px>maxx)maxx=px; if(py>maxy)maxy=py;
+            var pix=j/4, px=pix%%W, py=(pix-px)/W;
+            gink++;
+            if(px<gminx)gminx=px; if(py<gminy)gminy=py;
+            if(px>gmaxx)gmaxx=px; if(py>gmaxy)gmaxy=py;
+            if(px>=x&&px<x+w&&py>=y&&py<y+h)bink++;
           }
         }
-        out.push({id:sm.id, beat_id:sm.beat_id, t:sm.t, present:sm.present, ink:ink,
-                  bbox: (maxx<0? null : {x:minx,y:miny,w:maxx-minx+1,h:maxy-miny+1}),
+        out.push({id:sm.id, beat_id:sm.beat_id, t:sm.t, present:sm.present,
+                  probe:sm.probe, phase:sm.phase,
+                  ink:bink, gink:gink,
+                  gbbox:(gmaxx<0? null : {x:gminx,y:gminy,w:gmaxx-gminx+1,h:gmaxy-gminy+1}),
                   region:{x:x,y:y,w:w,h:h}});
       }
       report({available:true, backend:'chromium', samples:out,
@@ -167,14 +181,20 @@ def _times(start: float, end: float, enter_at: float, enter_dur: float,
     return seen or [round(min(max(enter_at, start), end - 0.001), 3)]
 
 
+def _clamp_time(t: float, start: float, end: float) -> float:
+    return round(min(max(t, start), end - 0.001), 3)
+
+
 def build_samples(dsl: Dict[str, Any], render_plan: Dict[str, Any],
                   entrance: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Expected paint probes, derived from the UPSTREAM plan layers.
+    """Expected probes, derived from the UPSTREAM plan layers.
 
     For every element we schedule presence probes at several times inside its
     declared alive window (``enter`` resolved → ``exit`` begins) and, when the
     element exits before the beat ends, one absence probe after the exit
-    resolves. Neither the player nor its embedded ``BEATS`` is consulted.
+    resolves. Elements carrying a transform motion additionally get a settle
+    probe and an early probe so the Motion layer can be adjudicated. Neither the
+    player nor its embedded ``BEATS`` is consulted.
     """
     plans = {b["beat_id"]: b for b in render_plan["beats"]}
     ents = {b["beat_id"]: b for b in entrance["beats"]}
@@ -207,6 +227,40 @@ def build_samples(dsl: Dict[str, Any], render_plan: Dict[str, Any],
                 if start <= abs_t < end - 0.001:
                     probes.append({"id": eid, "beat_id": bid, "t": round(abs_t, 3),
                                    "present": False, "kind": kind, "box": boxv})
+
+            # --- transform / motion probes (P2) ---
+            enter_motion = en.get("motion")
+            exit_motion = (ex or {}).get("motion") if ex else None
+            has_t = (enter_motion in motion.TRANSFORM_MOTIONS
+                     or exit_motion in motion.TRANSFORM_MOTIONS)
+            if not has_t:
+                continue
+            etype = el.get("type", "text")
+            settle = enter_at + enter_dur + 0.12
+            if exit_at is not None:
+                settle = min(settle, exit_at - 0.06)
+            settle = _clamp_time(settle, start, end)
+            probes.append({"id": eid, "beat_id": bid, "t": settle,
+                           "present": True, "kind": kind, "box": boxv,
+                           "probe": "transform", "phase": "settle",
+                           "el_type": etype, "motion": None,
+                           "exp": motion.expected_transform(lc, settle)})
+            if enter_motion in motion.TRANSFORM_MOTIONS:
+                t_early = enter_at + max(0.05, 0.18 * max(enter_dur, 0.05))
+                t_early = _clamp_time(t_early, start, end)
+                probes.append({"id": eid, "beat_id": bid, "t": t_early,
+                               "present": True, "kind": kind, "box": boxv,
+                               "probe": "transform", "phase": "early",
+                               "el_type": etype, "motion": enter_motion,
+                               "exp": motion.expected_transform(lc, t_early)})
+            if exit_motion in motion.TRANSFORM_MOTIONS:
+                t_x = exit_at + max(0.05, 0.2 * max(exit_dur, 0.05))
+                t_x = _clamp_time(t_x, start, end)
+                probes.append({"id": eid, "beat_id": bid, "t": t_x,
+                               "present": True, "kind": kind, "box": boxv,
+                               "probe": "transform", "phase": "exit_early",
+                               "el_type": etype, "motion": exit_motion,
+                               "exp": motion.expected_transform(lc, t_x)})
     return probes
 
 
@@ -238,7 +292,7 @@ def _extract(dumped: str) -> Optional[str]:
 
 
 def observe(film_html: str, probes: List[Dict[str, Any]], *,
-            timeout: int = 120) -> Dict[str, Any]:
+            timeout: int = 180) -> Dict[str, Any]:
     """Observe the compiled player: what ink it actually paints. Browser-gated."""
     binary = browser.find_browser()
     if not binary or not browser.available():
@@ -248,7 +302,9 @@ def observe(film_html: str, probes: List[Dict[str, Any]], *,
     with open(film_html, encoding="utf-8") as f:
         html_text = f.read()
 
-    probe = _PROBE_TEMPLATE.replace("__PROBES__", json.dumps(probes))
+    # The probe understands only geometry/identity; expectation fields stay local.
+    wire = [{k: v for k, v in p.items() if k != "exp"} for p in probes]
+    probe = _PROBE_TEMPLATE.replace("__PROBES__", json.dumps(wire))
     tmpdir = tempfile.mkdtemp(prefix="prod-observer-")
     try:
         probe_path = os.path.join(tmpdir, "probe.html")
@@ -260,7 +316,7 @@ def observe(film_html: str, probes: List[Dict[str, Any]], *,
             "--disable-dev-shm-usage", "--hide-scrollbars",
             "--user-data-dir=" + profile,
             "--window-size=1280,720",
-            "--virtual-time-budget=12000",
+            "--virtual-time-budget=15000",
             "--dump-dom", "file://" + os.path.abspath(probe_path),
         ]
         try:
@@ -279,6 +335,16 @@ def observe(film_html: str, probes: List[Dict[str, Any]], *,
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+def _measure(sample: Dict[str, Any]) -> Optional[Dict[str, float]]:
+    """Painted-ink metrics (global bbox center-y and area) or ``None`` if unmeasured."""
+    if not sample or int(sample.get("gink", 0)) < INK_MIN_PX:
+        return None
+    bb = sample.get("gbbox")
+    if not bb:
+        return None
+    return {"cy": bb["y"] + bb["h"] / 2.0, "area": float(bb["w"]) * float(bb["h"])}
+
+
 def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
            dsl: Optional[Dict[str, Any]] = None,
            render_plan: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -289,8 +355,11 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
                 "available": False, "problems": [], "advisory": [],
                 "note": observed.get("error", "no observation")}
 
+    # --- presence dimension ---
     want: Dict[str, Dict[str, Any]] = {}
     for p in probes:
+        if p.get("probe") == "transform":
+            continue
         w = want.setdefault(p["id"], {"kind": p["kind"], "present": False,
                                       "absence": False})
         if p["present"]:
@@ -302,6 +371,8 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     absence_ink: Dict[str, int] = {}
     err: Dict[str, str] = {}
     for s in observed.get("samples", []):
+        if s.get("probe") == "transform":
+            continue
         sid = s.get("id")
         if s.get("error"):
             err[sid] = s["error"]
@@ -337,6 +408,63 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
             problems.append({"kind": "beat_count_mismatch",
                              "detail": [want_beats, got_beats]})
 
+    # --- transform (motion) dimension ---
+    want_t: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for p in probes:
+        if p.get("probe") == "transform":
+            want_t.setdefault(p["id"], {})[p["phase"]] = p
+    obs_t: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    for s in observed.get("samples", []):
+        if s.get("probe") == "transform":
+            obs_t.setdefault(s.get("id"), {})[s.get("phase")] = s
+
+    transform_checked = 0
+    transform_skipped = 0
+    for eid, phases in sorted(want_t.items()):
+        settle_exp = phases.get("settle")
+        o_settle = obs_t.get(eid, {}).get("settle")
+        if not settle_exp or not o_settle or o_settle.get("error"):
+            problems.append({"kind": "motion_probe_missing", "detail": eid})
+            continue
+        m_settle = _measure(o_settle)
+        if m_settle is None:
+            advisory.append({"kind": "motion_unmeasurable", "detail": [eid, "settle"]})
+            continue
+        etype = settle_exp.get("el_type", "text")
+        for phase in ("early", "exit_early"):
+            exp = phases.get(phase)
+            if not exp:
+                continue
+            name = exp.get("motion")
+            # only adjudicate a motion whose channel is actually rendered for
+            # this element type (contract-declared observability, not hardcoded).
+            if not motion.observable(etype, name):
+                transform_skipped += 1
+                continue
+            o = obs_t.get(eid, {}).get(phase)
+            if not o or o.get("error"):
+                problems.append({"kind": "motion_probe_missing",
+                                 "detail": [eid, phase]})
+                continue
+            m = _measure(o)
+            if m is None:
+                advisory.append({"kind": "motion_unmeasurable", "detail": [eid, phase]})
+                continue
+            transform_checked += 1
+            ok = True
+            if name in ("rise", "sink"):
+                need = max(MOTION_MIN_SHIFT_PX, 0.4 * float(exp["exp"]["dy"]))
+                # the early frame must sit LOWER (larger center-y) than settled
+                ok = m["cy"] >= m_settle["cy"] + need
+            elif name in ("pop", "shrink"):
+                ratio = m["area"] / max(1.0, m_settle["area"])
+                ok = ratio <= MOTION_MAX_AREA_RATIO
+            if not ok:
+                problems.append({"kind": "motion_not_applied",
+                                 "detail": [eid, phase, name,
+                                            round(m["cy"], 1), round(m_settle["cy"], 1),
+                                            round(m["area"], 1), round(m_settle["area"], 1)]})
+
     verdict = taxonomy.PASS if not problems else taxonomy.RENDER_FAIL
     return {
         "verdict": verdict,
@@ -347,6 +475,8 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
         "elements": len(want),
         "probes": len(probes),
         "painted": sum(1 for v in present_ink.values() if v >= INK_MIN_PX),
+        "transform_checked": transform_checked,
+        "transform_skipped": transform_skipped,
         "problems": problems,
         "advisory": advisory,
     }
@@ -388,10 +518,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         json.dump(report, f, indent=2, ensure_ascii=False, sort_keys=True)
         f.write("\n")
     print("production-render-contract: %s (%d elements, %d probes, %d painted, "
-          "%d problems, %d advisory) -> %s"
+          "%d motion-checks, %d problems, %d advisory) -> %s"
           % (report["verdict"], report.get("elements", 0), report.get("probes", 0),
-             report.get("painted", 0), len(report.get("problems", [])),
-             len(report.get("advisory", [])), args.out))
+             report.get("painted", 0), report.get("transform_checked", 0),
+             len(report.get("problems", [])), len(report.get("advisory", [])), args.out))
     for p in report.get("problems", [])[:12]:
         print("  [%s] %s" % (p["kind"], p["detail"]))
     for a in report.get("advisory", [])[:6]:

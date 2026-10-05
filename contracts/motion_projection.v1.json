@@ -1,0 +1,25 @@
+{
+  "contract_id": "motion_projection.v1",
+  "_comment": "Independent Motion (transform) projection contract. The Motion layer maps an element's declared entrance/exit motion to a transform state (dy, scale, alpha) at time t. This contract is the EXPECTED side; it must never be imported from the renderer. Pure smoothstep easing, matching the declared production vocabulary.",
+  "easing": {
+    "name": "smoothstep",
+    "formula": "t*t*(3-2*t)",
+    "clamp": [0.0, 1.0]
+  },
+  "enter": {
+    "rise": { "dy": { "max": 26.0 } },
+    "pop": { "scale": { "min": 0.55, "max": 1.0 } },
+    "fade": {},
+    "inherit": { "identity": true }
+  },
+  "exit": {
+    "sink": { "dy": { "max": 34.0 } },
+    "shrink": { "scale": { "min": 0.45 } },
+    "fade": {}
+  },
+  "_observability_comment": "Which element types a transform channel is OBSERVABLE on. 'dy' shifts the element's whole box, so it affects every type. 'scale' is only multiplied into the rendered geometry for text and motif; on chart/decor/shape/connector the scale channel is not applied, so a pop/shrink there is not observable in ink and must NOT be adjudicated (declarative, auditable, not hardcoded).",
+  "observability": {
+    "dy": ["text", "chart", "motif", "connector", "shape", "decor"],
+    "scale": ["text", "motif"]
+  }
+}
