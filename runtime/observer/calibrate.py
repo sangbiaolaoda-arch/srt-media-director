@@ -32,6 +32,46 @@ from . import browser, projection, render, thresholds
 from world_state import compiler
 
 
+# Per-process memo of the environment fingerprint. The fingerprint describes a
+# fixed environment, so within one process it is a constant; caching it makes the
+# value deterministic even if an underlying probe (subprocess launch) is
+# occasionally flaky on a loaded CI runner. The cache key folds in ``binary`` and
+# ``extra`` so callers that ask about a different environment still get a
+# different fingerprint.
+_FP_CACHE: Dict[str, Dict[str, Any]] = {}
+
+
+def _probe_version(binp: str, attempts: int = 3) -> Optional[str]:
+    """Best-effort browser version, retried because a cold launch can be empty."""
+    for _ in range(attempts):
+        try:
+            r = subprocess.run([binp, "--version"], capture_output=True,
+                               text=True, timeout=30)
+            text = ((r.stdout or "") + (r.stderr or "")).strip()
+            if text:
+                return text
+        except Exception:  # noqa: BLE001
+            pass
+    return None
+
+
+def _probe_fonts() -> Tuple[Optional[int], Optional[str], Optional[bool]]:
+    """(font_count, fonts_hash, cjk_present) from the fontconfig listing."""
+    try:
+        out = subprocess.run(["fc-list"], capture_output=True, text=True,
+                             timeout=30).stdout
+    except Exception:  # noqa: BLE001
+        return None, None, None
+    fams = sorted({ln.split(":")[1].strip() for ln in out.splitlines()
+                   if ":" in ln and len(ln.split(":")) > 1})
+    if not fams:
+        return None, None, None
+    fams_hash = hashlib.sha256("\n".join(fams).encode("utf-8")).hexdigest()
+    cjk = any(("CJK" in f or "Noto Sans SC" in f or "Hei" in f or "宋" in f
+               or "黑" in f) for f in fams)
+    return len(fams), fams_hash, cjk
+
+
 def environment_fingerprint(binary: Optional[str] = None,
                             extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Describe the measurement environment so a calibration is auditable.
@@ -41,7 +81,15 @@ def environment_fingerprint(binary: Optional[str] = None,
     OS/arch and the Python version, and fold them into a single stable
     ``environment_hash``. Two calibrations with different hashes are not
     comparable ground truth (Directive v5 §53 step 8).
+
+    The result is memoized per process: the environment does not change mid-run,
+    so repeated calls must return an identical fingerprint (and hash). This also
+    shields the hash from one-off probe flakiness on a loaded runner.
     """
+    cache_key = json.dumps([binary, extra], sort_keys=True, default=str)
+    if cache_key in _FP_CACHE:
+        return dict(_FP_CACHE[cache_key])
+
     env: Dict[str, Any] = {
         "platform": platform.platform(),
         "machine": platform.machine(),
@@ -51,31 +99,16 @@ def environment_fingerprint(binary: Optional[str] = None,
     binp = binary or browser.find_browser()
     if binp:
         env["browser_path"] = binp
-        try:
-            r = subprocess.run([binp, "--version"], capture_output=True,
-                               text=True, timeout=20)
-            env["browser_version"] = ((r.stdout or "") + (r.stderr or "")).strip()
-        except Exception:  # noqa: BLE001
-            env["browser_version"] = None
-    try:
-        out = subprocess.run(["fc-list"], capture_output=True, text=True,
-                             timeout=20).stdout
-        fams = sorted({ln.split(":")[1].strip() for ln in out.splitlines()
-                       if ":" in ln and len(ln.split(":")) > 1})
-        env["font_count"] = len(fams)
-        env["fonts_hash"] = hashlib.sha256(
-            "\n".join(fams).encode("utf-8")).hexdigest()
-        env["cjk_fonts_present"] = any(
-            ("CJK" in f or "Noto Sans SC" in f or "Hei" in f or "宋" in f
-             or "黑" in f) for f in fams)
-    except Exception:  # noqa: BLE001
-        env["font_count"] = None
-        env["fonts_hash"] = None
-        env["cjk_fonts_present"] = None
+        env["browser_version"] = _probe_version(binp)
+    fc, fh, cjk = _probe_fonts()
+    env["font_count"] = fc
+    env["fonts_hash"] = fh
+    env["cjk_fonts_present"] = cjk
     if extra:
         env.update(extra)
     payload = json.dumps(env, sort_keys=True, ensure_ascii=False)
     env["environment_hash"] = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    _FP_CACHE[cache_key] = dict(env)
     return env
 
 
