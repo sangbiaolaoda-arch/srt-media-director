@@ -1,0 +1,90 @@
+name: production-render-contract
+
+# Final Practical Closeout Directive, P0.
+#
+# This lane proves the ACTUAL production rendering chain, not a test renderer:
+#
+#   SRT → Beat → Director → Composition → Motion → HTML Adapter →
+#   film/index.html → Chromium → Observer → Validator
+#
+# It compiles the real film/index.html from a fixed SRT, drives a real Chromium
+# over it, and requires the production observer to confirm every declared element
+# is actually painted. A missing/broken browser is a FAILURE here, never a skip.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: production-render-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  production-chain:
+    name: production render chain (real film/index.html @ chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install functional Chromium
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install CJK font (glyph-sensitive paint probes need real glyphs)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Assert a functional browser exists (FAIL, never skip)
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "runtime")
+          from observer import browser
+          assert browser.find_browser(), "no chromium binary found"
+          assert browser.available(), "chromium present but NOT functional"
+          print("functional browser:", browser.find_browser())
+          PY
+
+      - name: Compile the real production film/index.html
+        run: python runtime/make_sample.py 30 --no-render
+
+      - name: Production render-chain contract
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python -m runtime.observer.production \
+            --film sample/film/index.html \
+            --work sample/work \
+            --out sample/work/production-render-report.json
+
+      - name: Upload production contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-render-evidence
+          path: |
+            sample/work/production-render-report.json
+            sample/work/render-plan.json
+            sample/work/entrance-plan.json
+            sample/work/visual-dsl.json
+          retention-days: 14

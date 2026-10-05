@@ -65,16 +65,35 @@ jobs:
       - name: Browser contract suite (browser-gated tests MUST run)
         env:
           CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: python -m pytest tests -q -rs
+        run: |
+          python -m pytest tests -q -rs --junitxml=/tmp/contract.xml
 
-      - name: Fail if any browser test was skipped
+      - name: Fail if any browser test was skipped (machine-readable)
+        if: always()
         env:
           CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          # A skipped browser test in THIS lane means the render pipeline was not
-          # actually exercised -> the contract is unproven -> fail.
-          python -m pytest tests -q -rs 2>&1 | tee /tmp/pytest.log
-          if grep -q "no functional browser" /tmp/pytest.log; then
-            echo "::error::browser tests were skipped in the render-execution lane"
-            exit 1
-          fi
+          # Directive: a skipped browser test in THIS lane means the render
+          # pipeline was not actually exercised -> the contract is unproven ->
+          # FAIL. We read pytest's structured JUnit XML instead of grepping the
+          # human-readable log, so the decision is machine-readable and does not
+          # depend on message wording.
+          #
+          # Scope: only BROWSER-related skips are forbidden here. The suite also
+          # contains a few *intentional* design skips (e.g. motion primitives
+          # that are non-neutral at p=0 by design); those must NOT fail this lane.
+          # We therefore match on the browser-skip reasons used across the suite.
+          python tools/skip_guard.py --junit /tmp/contract.xml --forbid-skip \
+            --reason-contains "browser" \
+            --reason-contains "chromium" \
+            --summary-out /tmp/skip-summary.json
+
+      - name: Upload contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-contract-evidence
+          path: |
+            /tmp/contract.xml
+            /tmp/skip-summary.json
+          retention-days: 14

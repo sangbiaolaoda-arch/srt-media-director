@@ -1,0 +1,99 @@
+name: calibration
+
+# Final Practical Closeout Directive, P0 — FORMAL browser calibration.
+#
+# The runtime observer compares a real browser against an INDEPENDENT expected
+# projection. The comparison threshold must be *measured* in the very environment
+# it will be enforced in, over a sufficiently large sample (N >= 1000) to be
+# ground truth. This lane produces that auditable artifact: it runs the real
+# calibration, records the environment fingerprint (browser build, fonts, OS,
+# Python) and its hash, and uploads the numbers as evidence.
+#
+# It is scheduled (heavy: many browser launches) and can be dispatched on demand.
+
+on:
+  workflow_dispatch:
+    inputs:
+      reps:
+        description: "Sample size (repetitions) for the calibration"
+        required: false
+        default: "1000"
+  schedule:
+    - cron: "0 6 * * 1"  # weekly, Mondays 06:00 UTC
+
+concurrency:
+  group: calibration-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  calibrate:
+    name: formal calibration (N>=1000)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install functional Chromium
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install CJK font (calibration uses real glyphs)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Assert a functional browser exists (FAIL, never skip)
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "runtime")
+          from observer import browser
+          assert browser.find_browser(), "no chromium binary found"
+          assert browser.available(), "chromium present but NOT functional"
+          print("functional browser:", browser.find_browser())
+          PY
+
+      - name: Run formal calibration (N>=1000)
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          REPS="${{ github.event.inputs.reps || '1000' }}"
+          python -m runtime.observer.calibrate --reps "$REPS" \
+            --anchor cases/cause_effect/anchor.json \
+            --out runtime/observer/calibrated-thresholds.json
+
+      - name: Verify the artifact is auditable (env + hash + N)
+        run: |
+          python - <<'PY'
+          import json
+          thr = json.load(open("runtime/observer/calibrated-thresholds.json"))
+          assert thr["n"] >= 1000, "calibration sample too small: %r" % thr["n"]
+          assert thr.get("environment_hash"), "missing environment_hash"
+          assert thr.get("environment"), "missing environment record"
+          print("calibrated n=%d tol=%.4f env=%s"
+                % (thr["n"], thr["geometry_tol_px"], thr["environment_hash"][:16]))
+          PY
+
+      - name: Upload calibration artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calibration-artifact
+          path: runtime/observer/calibrated-thresholds.json
+          retention-days: 90

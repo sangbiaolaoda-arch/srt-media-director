@@ -19,14 +19,64 @@ Pure derivation (:func:`derive`) is browser-free and unit-testable; only
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
+import platform
+import subprocess
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import browser, projection, render, thresholds
 from world_state import compiler
+
+
+def environment_fingerprint(binary: Optional[str] = None,
+                            extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Describe the measurement environment so a calibration is auditable.
+
+    A calibrated threshold is only meaningful for the environment it was measured
+    in. We therefore record the browser build, the available font families, the
+    OS/arch and the Python version, and fold them into a single stable
+    ``environment_hash``. Two calibrations with different hashes are not
+    comparable ground truth (Directive v5 §53 step 8).
+    """
+    env: Dict[str, Any] = {
+        "platform": platform.platform(),
+        "machine": platform.machine(),
+        "system": platform.system(),
+        "python": platform.python_version(),
+    }
+    binp = binary or browser.find_browser()
+    if binp:
+        env["browser_path"] = binp
+        try:
+            r = subprocess.run([binp, "--version"], capture_output=True,
+                               text=True, timeout=20)
+            env["browser_version"] = ((r.stdout or "") + (r.stderr or "")).strip()
+        except Exception:  # noqa: BLE001
+            env["browser_version"] = None
+    try:
+        out = subprocess.run(["fc-list"], capture_output=True, text=True,
+                             timeout=20).stdout
+        fams = sorted({ln.split(":")[1].strip() for ln in out.splitlines()
+                       if ":" in ln and len(ln.split(":")) > 1})
+        env["font_count"] = len(fams)
+        env["fonts_hash"] = hashlib.sha256(
+            "\n".join(fams).encode("utf-8")).hexdigest()
+        env["cjk_fonts_present"] = any(
+            ("CJK" in f or "Noto Sans SC" in f or "Hei" in f or "宋" in f
+             or "黑" in f) for f in fams)
+    except Exception:  # noqa: BLE001
+        env["font_count"] = None
+        env["fonts_hash"] = None
+        env["cjk_fonts_present"] = None
+    if extra:
+        env.update(extra)
+    payload = json.dumps(env, sort_keys=True, ensure_ascii=False)
+    env["environment_hash"] = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return env
 
 
 def _p99(values: List[float]) -> float:
@@ -53,7 +103,8 @@ def geometry_deltas(observed: Dict[str, Any],
 
 
 def derive(expected_layout: Dict[str, Dict[str, float]],
-           observations: List[Dict[str, Any]], reps: int) -> Dict[str, Any]:
+           observations: List[Dict[str, Any]], reps: int,
+           environment: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Browser-free derivation of the threshold set from raw observations."""
     all_deltas: List[float] = []
     visibility_stable = True
@@ -78,7 +129,7 @@ def derive(expected_layout: Dict[str, Dict[str, float]],
     tol = round(max(1.0, p99 + 0.5), 3)
 
     edge_stable = len(set(edge_sets)) <= 1 if edge_sets else True
-    return {
+    out = {
         "version": "1",
         "source": "calibrated",
         "n": reps,
@@ -91,6 +142,13 @@ def derive(expected_layout: Dict[str, Dict[str, float]],
         "visibility_stable": visibility_stable,
         "edge_stable": edge_stable,
     }
+    # Auditability (Directive v5 §53 step 8): a calibrated number is only ground
+    # truth for the environment it was measured in. Record that environment and
+    # its hash so a reader can tell whether two calibrations are comparable.
+    if environment is not None:
+        out["environment"] = environment
+        out["environment_hash"] = environment.get("environment_hash")
+    return out
 
 
 def collect(html_path: str, expected_layout: Dict[str, Dict[str, float]],
@@ -110,7 +168,9 @@ def calibrate_from_world_state(ws, outdir: str, reps: int,
     # renderer's own layout function (Final Directive v5 §1, §4, §66).
     expected = projection.expected_layout(ws)
     obs = collect(html, expected, reps, observe=observe)
-    return derive(expected, obs, reps)
+    env = environment_fingerprint(extra={"reps_requested": reps,
+                                         "observations_collected": len(obs)})
+    return derive(expected, obs, reps, environment=env)
 
 
 def _anchor(path: str) -> Dict[str, Any]:
@@ -140,8 +200,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     with tempfile.TemporaryDirectory(prefix="calib-") as d:
         thr = calibrate_from_world_state(ws, d, args.reps)
     path = thresholds.save(thr, args.out)
-    print("calibrated: n=%d p99=%.4fpx tol=%.3fpx -> %s"
-          % (thr["n"], thr["p99_geometry_delta_px"], thr["geometry_tol_px"], path))
+    print("calibrated: n=%d p99=%.4fpx tol=%.3fpx env=%s -> %s"
+          % (thr["n"], thr["p99_geometry_delta_px"], thr["geometry_tol_px"],
+             (thr.get("environment_hash") or "n/a")[:12], path))
     return 0
 
 

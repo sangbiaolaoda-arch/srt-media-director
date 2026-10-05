@@ -295,3 +295,64 @@ def repair_with_gate(before_score: float, after_score: float, *,
     survived = candidate if gate["decision"] == "KEEP" else rollback_to
     return {**gate, "survived": survived,
             "workflow": "RESOLVED" if gate["decision"] == "KEEP" else "BLOCKED"}
+
+
+# --- Real wiring: score from SYSTEM OBSERVATION, not a caller claim -----------
+#
+# `improvement_gate` above is only as honest as the numbers handed to it. If a
+# caller can simply *assert* "after = 0.9", the gate is theatre. This wiring
+# derives the before/after scores from actual observation reports produced by the
+# system (production/fidelity/pixel observers), so the gate compares two pieces
+# of evidence it did not take on faith.
+
+# Weight applied per forbidden problem when turning an observation into a score.
+_SCORE_PROBLEM_PENALTY = 0.1
+# Bonus credited to an explicit PASS verdict (structure fully observed).
+_SCORE_PASS_BONUS = 0.25
+
+
+def observation_score(report: Dict[str, Any]) -> float:
+    """A deterministic score in roughly [0, 1+bonus] from an observation report.
+
+    Higher is better. The score is a function of what the system *observed*:
+
+      * ``painted / elements``   — the fraction of declared elements actually
+        rendered (production observer), or the fidelity-OK fraction.
+      * minus a penalty per forbidden problem.
+      * plus a small bonus for an explicit ``PASS`` verdict.
+
+    A report that carries no countable evidence (unavailable observation) scores
+    ``0.0`` — an unobserved system can never look like an improvement.
+    """
+    if not report or report.get("available") is False:
+        return 0.0
+    elements = report.get("elements")
+    painted = report.get("painted")
+    if elements is None or painted is None:
+        # fall back to a fidelity-style report
+        elements = report.get("objects_total", report.get("nodes_expected"))
+        painted = report.get("objects_matched", report.get("nodes_matched"))
+    if not elements:
+        return 0.0
+    base = float(painted) / float(elements)
+    penalty = _SCORE_PROBLEM_PENALTY * len(report.get("problems", []))
+    verdict = report.get("verdict")
+    bonus = _SCORE_PASS_BONUS if verdict in ("PASS", "FIDELITY_OK") else 0.0
+    return round(max(0.0, base - penalty) + bonus, 6)
+
+
+def gate_from_observations(before_report: Dict[str, Any],
+                           after_report: Dict[str, Any], *,
+                           min_gain: float = 0.0) -> Dict[str, Any]:
+    """The real wiring: gate a change using two SYSTEM observation reports.
+
+    The scores are derived from the reports, never supplied by the caller, so a
+    change is kept only when the system's own evidence strictly improves.
+    """
+    before = observation_score(before_report)
+    after = observation_score(after_report)
+    gate = improvement_gate(before, after, min_gain=min_gain)
+    gate["scores_derived_from"] = "system_observation"
+    gate["before_verdict"] = before_report.get("verdict")
+    gate["after_verdict"] = after_report.get("verdict")
+    return gate
