@@ -1,0 +1,36 @@
+{
+  "contract_id": "easing_vocabulary.v1",
+  "_comment": "Canonical easing / time-parameterization vocabulary. This is the SINGLE SOURCE OF TRUTH for what an `easing` name means. The rest of the project (motion runtime, renderers, observers) MUST interpret easing through this vocabulary so that 'the Agent describes, the Runtime implements' holds for motion timing too. Naming rule: bare names are Penner curves (camelCase); the four W3C keyword spellings are exposed under an explicit `css*` prefix to avoid the kebab/camel collision ('ease-out' and 'easeOut' normalize to the same token, so they must mean the same curve).",
+  "canonical": [
+    "linear",
+    "smoothstep",
+    "easeInQuad", "easeOutQuad", "easeInOutQuad",
+    "easeInCubic", "easeOutCubic", "easeInOutCubic",
+    "easeInQuart", "easeOutQuart",
+    "easeInSine", "easeOutSine", "easeInOutSine",
+    "easeInExpo", "easeOutExpo",
+    "easeInBack", "easeOutBack", "easeInOutBack",
+    "easeOutElastic", "easeOutBounce",
+    "cssEase", "cssEaseIn", "cssEaseOut", "cssEaseInOut"
+  ],
+  "css_keywords": {
+    "_comment": "W3C timing-function keywords, reachable explicitly via the css* names (bare 'ease-out'/'easeIn' is the Penner quadratic, not the CSS keyword).",
+    "cssEase": [0.25, 0.1, 0.25, 1.0],
+    "cssEaseIn": [0.42, 0.0, 1.0, 1.0],
+    "cssEaseOut": [0.0, 0.0, 0.58, 1.0],
+    "cssEaseInOut": [0.42, 0.0, 0.58, 1.0]
+  },
+  "aliases": {
+    "_comment": "normalized token (lower-case, separators [-_ ] stripped) -> canonical name. Every canonical name is also its own alias.",
+    "easein": "easeInQuad",
+    "easeout": "easeOutQuad",
+    "easeinout": "easeInOutQuad",
+    "ease": "cssEase"
+  },
+  "forms": {
+    "_comment": "Accepted textual forms for an `easing` value.",
+    "named": "camelCase Penner or css* keyword (case-insensitive; -, _ separators tolerated)",
+    "cubic_bezier": "cubic-bezier(x1,y1,x2,y2) with 4 numbers",
+    "absent": "null/empty -> linear"
+  }
+}
