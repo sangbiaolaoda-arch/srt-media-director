@@ -10,6 +10,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Windows runners default stdout to the legacy cp1252 code page, so the
+  # runtime's unicode output (CJK gate names, em-dash / check-mark glyphs)
+  # raises UnicodeEncodeError in self_test.py. Force UTF-8 I/O everywhere.
+  PYTHONUTF8: "1"
+
 jobs:
   # 真实矩阵：Python 3.9–3.12 × Linux / macOS / Windows。
   # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
