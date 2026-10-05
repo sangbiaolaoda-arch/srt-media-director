@@ -12,9 +12,9 @@ v4.1 视觉政策（用户导演指令）：
 - 主体每拍唯一（文字/图表/图形皆可），但允许 2-3 个 ambient 装饰附体
   （角标/点阵/圆环等，自带归一化 rect，不参与区域预算）丰富画面。
 """
-import hashlib
-import random
 import re
+
+from procedural_canonical import rng as _proc_rng
 
 import style_bible
 import visual_grammar
@@ -147,9 +147,11 @@ _DECOR_COOLDOWN = 4   # 最近 N 拍用过的陪衬装饰冷却（避免邻拍�
 
 
 def _seed_for(beat):
-    """稳定随机种子：跨进程可复现（内置 hash 受 PYTHONHASHSEED 影响，不用）。"""
-    raw = "%s|%s" % (beat.get("beat_id", ""), beat.get("narration", ""))
-    return int(hashlib.md5(raw.encode("utf-8")).hexdigest()[:8], 16)
+    """稳定随机种子（委托 procedural_canonical.rng —— 单一真相源）。
+
+    跨进程可复现；内置 hash 受 PYTHONHASHSEED 影响，不用。
+    """
+    return _proc_rng.stable_seed(_proc_rng.beat_key(beat))
 
 
 def load_overrides(path):
@@ -245,7 +247,7 @@ def _pick_motif(narration, override=None, salt=""):
     for w, name in _MOTIF_MAP:
         if w in narration:
             return name
-    h = int(hashlib.md5((salt + "|" + narration).encode("utf-8")).hexdigest()[:8], 16)
+    h = _proc_rng.stable_seed(salt + "|" + narration)
     return _GENERIC_MOTIFS[h % len(_GENERIC_MOTIFS)]
 
 
@@ -258,7 +260,7 @@ def _decor(strategy, beat_i, ghost_text=None, rng=None, recent=None):
     内真正随拍变化，而不是按模板钉死位置。
     """
     bid = "b%02d" % beat_i
-    rng = rng if rng is not None else random.Random(20261003)
+    rng = rng if rng is not None else _proc_rng.default_rng()
     recent = recent if recent is not None else []
     used = set().union(*recent) if recent else set()
 
@@ -524,7 +526,7 @@ def direct(beats, overrides=None):
     recent_decor = []
     for i, beat in enumerate(beats, 1):
         ov = overrides.get(beat["cue_range"][0], {})
-        rng = random.Random(_seed_for(beat))
+        rng = _proc_rng.rng_for_beat(beat)
         plan, dsl_beat, prev_strategy = _direct_beat(
             beat, i, ov, prev_strategy, None, rng, recent_decor)
         vplans.append(plan)

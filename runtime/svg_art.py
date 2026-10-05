@@ -25,6 +25,11 @@ import re
 import cairosvg
 from PIL import Image
 
+# 晶格坐标只有一个实现（procedural_canonical.layout）——装饰生成器不再手写双重循环。
+from procedural_canonical import layout as _layout
+_lattice = _layout.lattice
+_lattice_idx = _layout.lattice_idx
+
 VIEWBOX = 100
 
 _HEAD = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" '
@@ -306,8 +311,8 @@ def _cumulative():
 
 def _dot_grid():
     dots = "".join('<circle cx="%d" cy="%d" r="2.2" fill="{COLOR}" stroke="none"/>'
-                   % (10 + 20 * c, 12 + 25 * r)
-                   for r in range(4) for c in range(5))
+                   % (cx, cy)
+                   for cx, cy in _lattice(5, 4, 10, 12, 20, 25))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
             + dots + '</svg>')
 
@@ -368,8 +373,8 @@ def _brackets():
 def _halftone():
     """半调渐隐点阵（情绪衰减）。"""
     dots = "".join('<circle cx="%d" cy="%d" r="%.1f" fill="{COLOR}" stroke="none"/>'
-                   % (14 + 12 * c, 20 + 14 * r, 3.2 - 0.5 * (c + r))
-                   for r in range(5) for c in range(6))
+                   % (cx, cy, 3.2 - 0.5 * (c + r))
+                   for c, r, cx, cy in _lattice_idx(6, 5, 14, 20, 12, 14))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
             + dots + '</svg>')
 
@@ -426,7 +431,7 @@ def _plus_field():
     """加号阵（网格 / 体系）。"""
     plus = "".join('<path d="M%d %d h10 M%d %d v10" stroke-width="1.8"/>'
                    % (x - 5, y, x, y - 5)
-                   for y in (22, 50, 78) for x in (22, 50, 78))
+                   for x, y in _lattice(3, 3, 22, 22, 28, 28))
     return (_HEADF + plus + '</svg>')
 
 

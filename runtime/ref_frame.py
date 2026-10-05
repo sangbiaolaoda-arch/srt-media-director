@@ -24,6 +24,8 @@ frame_03_comparison）让 Agent「学会」。关键在于区分：
 复现 ≠ 学会；能泛化才是学会。
 """
 
+from procedural_canonical import layout as _layout
+
 # ---------------------------------------------------------------- 设计令牌
 BG = "#F3F2EF"; PANEL = "#FAFAF8"; INK = "#2B2B2B"
 MID = "#8A8A86"; TMID = "#6B6B67"; ACC = "#C4452B"; MUT = "#D3D2CD"
@@ -53,22 +55,15 @@ def cols(n, x0=MARGIN, total=CONTENT_W, gap=COL_GAP):
       n = 3 时精确复现参考帧 —— w = 150, x = [48, 265, 482]（与手写 SVG 完全一致）。
     因此同一函数既能复现，又能外推到参考帧没画过的 n（2 / 4 / 5 …）。
     """
-    if n < 1:
-        raise ValueError("cols(n>=1)")
-    w = (total - gap * (n - 1)) / n
-    if w <= 0:
-        raise ValueError("n 过大，列宽 <= 0")
-    return [(x0 + i * (w + gap), w) for i in range(n)]
+    return _layout.slots(n, x0, total, gap)
 
 
 def rows(n, y0, total, h_gap=COL_GAP):
-    """n 行等高分行规则（纵向版 cols，用于参考帧没有的堆叠构型）。"""
-    if n < 1:
-        raise ValueError("rows(n>=1)")
-    h = (total - h_gap * (n - 1)) / n
-    if h <= 0:
-        raise ValueError("n 过大，行高 <= 0")
-    return [(y0 + i * (h + h_gap), h) for i in range(n)]
+    """n 行等高分行规则（纵向版 cols，用于参考帧没有的堆叠构型）。
+
+    委托 procedural_canonical.layout.stacks —— 分槽算术只有一个实现。
+    """
+    return _layout.stacks(n, y0, total, h_gap)
 
 
 # ---------------------------------------------------------------- 规则 2：描边角色

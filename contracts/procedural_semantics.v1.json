@@ -1,0 +1,60 @@
+{
+  "contract_id": "procedural_semantics.v1",
+  "_comment": "Canonical PROCEDURAL semantics. SINGLE SOURCE OF TRUTH for 'how generated content is produced deterministically'. Procedural answers exactly two questions -- what seed does this frame/beat use, and how does a count become a layout/lattice -- and must NOT re-implement other subsystems' truth: drawing belongs to primitives (primitive_catalog.v1), time/easing to timeline (easing_vocabulary.v1), space/transform to geometry (transform_vocabulary.v1), motion timing to motion_canonical (motion_semantics.v2). Before this contract the video-level seed 20261003 was hard-coded in two producers (raster_renderer, visual_director) and slot math lived only in ref_frame while svg_art hand-rolled its lattice loops. See runtime/docs/procedural-inventory.md.",
+  "implementation": "runtime/procedural_canonical",
+  "single_source_of_truth_boundary": {
+    "seeded_randomness": "owned by procedural_canonical.rng (DEFAULT_SEED + stable_seed recipe)",
+    "layout_and_lattice": "owned by procedural_canonical.layout (slots/stacks/lattice)",
+    "drawing": "delegated to primitives.catalog (primitive_catalog.v1)",
+    "time_and_easing": "delegated to timeline.easing (easing_vocabulary.v1)",
+    "space_transform": "delegated to geometry.matrix (transform_vocabulary.v1)",
+    "motion_timing": "delegated to motion_canonical (motion_semantics.v2)",
+    "procedural_must_never": [
+      "construct its own random.Random(...) outside procedural_canonical.rng",
+      "hard-code a seed literal outside procedural_canonical.rng",
+      "forge a lattice loop outside procedural_canonical.layout",
+      "depend on any non-stdlib runtime module (it is a leaf)"
+    ]
+  },
+  "determinism": {
+    "_comment": "A picture claim is only meaningful if the numbers behind it are reproducible across processes/machines. PYTHONHASHSEED must not leak into any seed.",
+    "seed_recipe": "stable_seed(text) = int(md5(text)[:8], 16) -- NOT builtin hash() (salted by PYTHONHASHSEED)",
+    "default_seed": 20261003,
+    "beat_seed": "stable_seed(beat_id + '|' + narration)",
+    "guarantees": [
+      "same seed -> same stream within and across processes",
+      "PYTHONHASHSEED does not change stable_seed",
+      "lattice iteration order is row-major (stable SVG bytes)"
+    ]
+  },
+  "owns": {
+    "rng": ["DEFAULT_SEED", "stable_seed", "default_rng", "beat_key", "rng_for_beat", "rng_for_key"],
+    "layout": ["slots", "stacks", "lattice"],
+    "audit": ["determinism_probe", "seed_sources", "summary"]
+  },
+  "boundary_guard": {
+    "_comment": "ref_frame consumes procedural_canonical.layout, so the package must stay a stdlib-only leaf to avoid a cycle and to be auditable.",
+    "must_stay_dependency_free": true,
+    "forbidden_imports": ["ref_frame", "svg_art", "primitives", "geometry", "timeline",
+                          "motion_canonical", "motion", "motion_runtime", "scene",
+                          "visual_director", "raster_renderer", "html_adapter", "pipeline"]
+  },
+  "migration_map": {
+    "_comment": "Behaviour-preserving: every 'from' must reproduce its 'to' byte/value-for-value.",
+    "M1_ref_frame_cols": "ref_frame.cols(n) -> layout.slots(n, MARGIN, CONTENT_W, COL_GAP)",
+    "M2_ref_frame_rows": "ref_frame.rows(n, y0, total, h_gap) -> layout.stacks(n, y0, total, h_gap)",
+    "M3_svg_art_dot_grid": "svg_art._dot_grid loops -> layout.lattice(5, 4, 10, 12, 20, 25)",
+    "M4_svg_art_halftone": "svg_art._halftone loops -> layout.lattice(6, 5, 14, 20, 12, 14)",
+    "M5_svg_art_plus_field": "svg_art._plus_field loops -> layout.lattice(3, 3, 22, 22, 28, 28)",
+    "M6_raster_renderer_seed": "raster_renderer random.Random(20261003) -> rng.default_rng()",
+    "M7_visual_director_decor_seed": "visual_director._decor default random.Random(20261003) -> rng.default_rng()",
+    "M8_visual_director_seed_for": "visual_director._seed_for(beat) -> rng.stable_seed(rng.beat_key(beat))"
+  },
+  "not_migrated": {
+    "_comment": "Tracked deliberately, not silently 'fixed'.",
+    "svg_art._scatter": "hard-coded point list, not a regular lattice",
+    "svg_art._cross_hatch": "clipped diagonal families, not a regular lattice",
+    "svg_art._spiral": "polar spiral, not a regular lattice",
+    "raster_renderer vignette": "pure math.hypot field, no randomness"
+  }
+}

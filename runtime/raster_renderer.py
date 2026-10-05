@@ -15,7 +15,7 @@ v4.2 视觉政策（用户反馈「画面好丑」后的重做）：
 """
 import math
 import os
-import random
+from procedural_canonical import rng as _proc_rng
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -71,7 +71,7 @@ def _vignette_mask():
 def _grain_tile(i):
     global _GRAIN_TILES
     if _GRAIN_TILES is None:
-        rnd = random.Random(20261003)
+        rnd = _proc_rng.default_rng()
         _GRAIN_TILES = []
         for _ in range(8):
             n = 256
