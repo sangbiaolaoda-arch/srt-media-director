@@ -31,6 +31,10 @@ _DEFAULT: Dict[str, Any] = {
     "opacity_min": 0.01,
     "p99_geometry_delta_px": None,
     "max_geometry_delta_px": None,
+    # pixel-signal thresholds (their own family, never mixed with runtime ones)
+    "pixel_region_delta_min": 6.0,
+    "pixel_variance_min": 1.0,
+    "pixel_region_var_min": 4.0,
 }
 
 
