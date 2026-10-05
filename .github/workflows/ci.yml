@@ -54,11 +54,12 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-cairo"
           # cairocffi resolves the library via ctypes.util.find_library ->
           # ffi.dlopen, which on Windows honours the dedicated
-          # CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory). Point it at
-          # the mingw64 bin, and expose it on PATH so dependent DLLs resolve.
-          $cairoBin = 'C:\msys64\mingw64\bin'
-          "CAIROCFFI_DLL_DIRECTORIES=$cairoBin" | Out-File -Append $env:GITHUB_ENV
-          $cairoBin | Out-File -Append $env:GITHUB_PATH
+          # CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory).
+          # NOTE: do NOT add C:\msys64\mingw64\bin to PATH — it ships its own
+          # python.exe that would shadow the runner's interpreter and break
+          # `python -m pip`. add_dll_directory also lets cairo's dependent
+          # DLLs (freetype/fontconfig/glib) resolve from that same directory.
+          "CAIROCFFI_DLL_DIRECTORIES=C:\msys64\mingw64\bin" | Out-File -Append $env:GITHUB_ENV
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
