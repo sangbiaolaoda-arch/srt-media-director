@@ -8,5 +8,7 @@
 每个 check(spec) 返回 issue 列表（空 = PASS）。Critic 汇总它们判决。
 """
 from . import geometry, typography, safe_area, visual_regression  # noqa: F401
+from . import anti_ppt, cognitive_load  # noqa: F401
 
-__all__ = ["geometry", "typography", "safe_area", "visual_regression"]
+__all__ = ["geometry", "typography", "safe_area", "visual_regression",
+           "anti_ppt", "cognitive_load"]

@@ -10,5 +10,7 @@ Agent 在这里回答「这句话该怎么被视觉化」，不回答「怎么�
     critic         —— 机器视觉 Critic（截图 → 判分 → PASS/FAIL → 修复路由）
 """
 from . import grammar, relationship, visual_intent, critic  # noqa: F401
+from . import hierarchy, continuity_graph  # noqa: F401
 
-__all__ = ["grammar", "relationship", "visual_intent", "critic"]
+__all__ = ["grammar", "relationship", "visual_intent", "critic",
+           "hierarchy", "continuity_graph"]

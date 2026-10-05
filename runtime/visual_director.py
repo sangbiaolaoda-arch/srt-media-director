@@ -30,9 +30,6 @@ STRATEGIES = ("single_focus", "left_to_right_flow", "cause_effect",
 ROTATION = ("single_focus", "cause_effect", "center_cluster",
             "comparison", "before_after", "left_to_right_flow")
 
-# P0⑤：邻拍调色板避让顺序（见 direct()），保证背景不整片一个色。
-_PALETTE_ROTATION = ("warm", "cold", "tense", "calm", "night")
-
 SEMANTIC_DEFAULT = {
     "hook": "left_to_right_flow",
     "explanation": "single_focus",
@@ -524,21 +521,12 @@ def direct(beats, overrides=None):
     overrides = overrides or {}
     vplans, dsl_beats = [], []
     prev_strategy = None
-    prev_palette = None
     recent_decor = []
     for i, beat in enumerate(beats, 1):
         ov = overrides.get(beat["cue_range"][0], {})
         rng = random.Random(_seed_for(beat))
         plan, dsl_beat, prev_strategy = _direct_beat(
             beat, i, ov, prev_strategy, None, rng, recent_decor)
-        # P0⑤：调色板 R8 防重复。旧版全片易落同一底色（语义角色常被判定为
-        # 同一类，情绪兜底于是一个颜色），这里保证相邻拍不撞色。
-        if dsl_beat["palette"] == prev_palette:
-            for cand in _PALETTE_ROTATION:
-                if cand != prev_palette:
-                    dsl_beat["palette"] = cand
-                    break
-        prev_palette = dsl_beat["palette"]
         vplans.append(plan)
         dsl_beats.append(dsl_beat)
     vplan = {"global_visual_grammar": {

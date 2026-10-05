@@ -10,20 +10,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 统一设为 UTF-8：self_test 的门禁名/日志含中文，Windows runner 默认 cp1252
-# 控制台会导致 UnicodeEncodeError（与渲染无关的环境问题）。
-env:
-  PYTHONUTF8: "1"
-  PYTHONIOENCODING: utf-8
-
 jobs:
   # 真实矩阵：Python 3.9–3.12 × Linux / macOS / Windows。
-  # cairosvg 的系统依赖是这类渲染管线跨平台最常见的失败点。本项目的设计立场是
-  # 「无系统 cairo 时优雅降级，而非崩溃」：
-  #   - Linux  → 装 libcairo2 + libffi（走 cairosvg 主路径）
-  #   - macOS  → brew cairo + libffi + DYLD_FALLBACK_LIBRARY_PATH
-  #   - Windows→ 不装 cairo：runtime 里 cairosvg 为可选导入，光栅门禁在无后端时
-  #             显式 SKIP，端到端样例仍可 --no-render 通过（见 svg-fallback 作业）
+  # 重点覆盖 cairosvg 的系统依赖——这是这类渲染管线跨平台最常见的失败点：
+  #   Linux  → libcairo2 + libffi
+  #   macOS  → brew cairo + libffi
+  #   Windows→ GTK runtime（cairosvg 依赖其提供的 cairo dll）
   matrix-test:
     name: py${{ matrix.python }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -46,9 +38,10 @@ jobs:
           sudo apt-get install -y -qq libcairo2 libffi-dev
       - name: System cairo libs (macOS)
         if: runner.os == 'macOS'
-        run: |
-          brew install cairo libffi
-          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib:$(brew --prefix libffi)/lib" >> "$GITHUB_ENV"
+        run: brew install cairo libffi
+      - name: System cairo libs (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y gtk-runtime --no-progress
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
@@ -59,8 +52,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: SVG backend probe (must degrade gracefully, not crash)
-        run: python runtime/svg_backend.py --probe
+      - name: cairosvg import probe (fails loudly if system cairo missing)
+        run: python -c "import cairosvg; print('cairosvg', cairosvg.__version__)"
 
       - name: Runtime self-test (Bootstrap Gate, VAL-03)
         run: python runtime/self_test.py
@@ -78,8 +71,6 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install CJK font (golden layout depends on font metrics)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
       - name: pytest (golden hashes)
         run: python -m pytest tests -q

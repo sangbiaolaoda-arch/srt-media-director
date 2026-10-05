@@ -8,5 +8,9 @@ Agent 不在这里。这里把 ``director`` 给的**语义意图**翻译成**可
     svg_compiler  —— 视觉 DSL → SVG / HTML
 """
 from . import composition, constraints, layout, svg_compiler  # noqa: F401
+from . import (anchor_layout, negative_space, visual_budget,  # noqa: F401
+               composition_family, style_lock)
 
-__all__ = ["composition", "constraints", "layout", "svg_compiler"]
+__all__ = ["composition", "constraints", "layout", "svg_compiler",
+           "anchor_layout", "negative_space", "visual_budget",
+           "composition_family", "style_lock"]

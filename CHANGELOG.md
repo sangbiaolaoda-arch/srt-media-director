@@ -1,5 +1,89 @@
 # Changelog
 
+## [7.6.0] — 2026-10-05
+
+**场景编译层（Scene Compiler，Phase 2）：Agent 不再写 HTML，而是编排可编译的视觉场景。**
+
+把「Agent 手写 HTML/CSS/x-y」升级为「Scene Graph → Relation Graph → State
+Graph → Timeline → Render Plan → Constraint Solver → Motion Compiler →
+Visual Runtime」。Agent 只决定「画什么 / 为什么 / 关系 / 如何变化」，Runtime
+负责稳定渲染。
+
+### Added — `runtime/scene/`（15 模块）
+
+- `scene_graph.py`：真正的场景树；父节点变化时子节点自动继承
+  position/scale/rotation/opacity/visibility（Agent 不重算子元素 x/y）。
+- `relation_graph.py`：语义关系图（left_of/right_of/above/below/inside/
+  surround/contain/attach_to/connect/point_to/follow/contrast/cause/result/...）。
+- `state_graph.py`：State + Transition（show/hide/expand/collapse/transform）；
+  状态变化 = 同世界改状态，而非重建画面。
+- `transitions.py`：语义迁移动词 → 动画意图。
+- `timeline.py`：before/after/with/overlap/delay/stagger/follow 调度，杜绝
+  「有元素却没入场逻辑 / 全部同时出现」。
+- `entrance.py`：统一 Entrance Plan，**强制门禁**——可见对象缺 Entrance 即拦。
+- `motion_compiler.py`：语义动作（expand/collapse/surround/...）→
+  position/scale/opacity/rotation/delay/duration/easing，避免「只剩 fade-in」。
+- `constraint_solver.py`：语义约束（center/right_of/above/below/surround/
+  between...）→ 像素；锚点移动自动重算。
+- `visual_weight.py`：Primary/Secondary/Support/Decoration 自动分档。
+- `composition.py`：基础构图约束。
+- `dsl.py`：Agent 面向的 Visual DSL。
+- `render_plan.py`：DSL → Render Plan（一键编译，帧级快照重解关系）。
+- `visual_runtime.py`：Render Plan → 真实 SVG / HTML。
+- `validator.py`：Machine Validator（缺 Entrance / 关系未解析 / 越界 /
+  非法父节点 / 图表无目的 / 全部同时入场 ...）。
+- `continuity.py`：跨镜头连续性（沿用实体 + transform，而非重建 person_02）。
+
+### Added — 验证与文档
+
+- `runtime/scene_test.py`：场景层独立套件（30 项，含「门禁会咬人」正反例）。
+- `examples/phase2_scene_demo.py`：真实 SRT 镜头端到端 demo（DSL → 编译 →
+  Playwright 真实截图 → Validator → 8 条验收）。
+- `skills/17-scene-compiler.md`：场景编译层文档。
+- `render/playwright_renderer.py`：Playwright 自带内核缺失时回退系统 chromium，
+  仍由 Playwright 驱动（真实截图，不静默降级为假能力）。
+
+### Verified
+
+- `self_test` **20/20**（回归未破）、`spec_test` **35/35**、`scene_test` **30/30**。
+- 真实 SRT 镜头（约 9s）8 条验收全过：语义关系 / 子随父动 / 依赖入场 /
+  状态变化非重建 / 不写 x-y / 不写 CSS 动画 / Playwright 截图 / Validator 0 error
+  + 编译确定性。
+
+## [7.5.0] — 2026-10-05
+
+**42 条「视觉导演 + 编译器」行为规范落地为可机器门禁。** 在 7.4.0 六包闭环
+之上，新增 9 个规范模块 + 统一审计注册表 + 独立验证套件，把「导演思维」从
+口号变成 CI 可拦的硬规则。
+
+### Added
+
+- **`runtime/director/hierarchy.py`**（R05/R06）：视觉权重 P0..P3 分级，
+  `audit_hierarchy()` 检测「装饰物越权压过主体」。
+- **`runtime/director/continuity_graph.py`**（R07/R08）：实体级连续性图
+  （默认 PERSIST），`audit_continuity()` 捕获无理由的视觉重置，
+  `persist_ratio()` 量化状态变化优先度。
+- **`runtime/compiler/anchor_layout.py`**（R02/R03/R11/R15/R16）：语义锚点/
+  关系/距离 → 像素约束求解，`rejects_raw_coordinates()` 禁止裸坐标。
+- **`runtime/compiler/negative_space.py`**（R17）：密度与主体留白审计。
+- **`runtime/compiler/visual_budget.py`**（R18/R19）：时长×密度 → 复杂度上限
+  （元素/运动/文本三档预算）。
+- **`runtime/compiler/composition_family.py`**（R36/R37）：16 种构图语法族
+  + 每族 ≥1 策略，语义形状 → 族映射。
+- **`runtime/compiler/style_lock.py`**（R38/R39）：场景级样式锁 +
+  复用优先（entity>motif>style>layout>anim>new）。
+- **`runtime/validation/anti_ppt.py`**（R28/R34）：Anti-PPT 7 项检查 + strict 升级。
+- **`runtime/validation/cognitive_load.py`**（R29）：认知负荷 ≤ 时长承载。
+- **`runtime/spec_audit.py`**：R00–R42 统一注册表，`run_all(plan)` 单一判决。
+- **`runtime/spec_test.py`**：独立验证套件（35 项，逐条证明门禁既放过合规输入、
+  又拦住违规输入）。
+- 技能文档 `skills/16-behavior-spec.md`（42 条逐项映射）。
+
+### Changed
+
+- 三包 `__init__` 暴露新模块（非破坏追加）；版本 `7.4.0` → `7.5.0`。
+- `self_test.py` 保持 **20/20**（回归未破）；`spec_test.py` 为独立入口，不扰动已有门禁。
+
 ## [7.4.0] — 2026-10-05
 
 **Runtime 六包架构 + 生成→截图→Critic→修复闭环。** 把 runtime 从「一堆平铺模块」

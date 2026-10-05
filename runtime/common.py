@@ -129,15 +129,12 @@ def narrative_function_rank(role):
 # --- v4.4 分段情绪背景调色板（回应「背景颜色不好看 / 全片一个色」）-------------
 # 每拍按字幕情绪选一套渐变（top/bottom/accent），渲染器与 HTML 播放器共用。
 PALETTES = {
-    # v7.2 修复「全片一个底色」：v7.1 曾把五种情绪的 top/bottom 全部塌缩成
-    # #F3F2EF，只留 accent 不同——于是背景永远是同一块米白，画面单调。
-    # 这里恢复「同族但确有差异」的柔和纵向渐变：仍在中性暖灰体系内，但每拍
-    # 顶/底色与色温不同，情绪一眼可辨，同时保持低饱和、不刺眼。
-    "night": {"top": "#F3F2EF", "bottom": "#EAE7E0", "accent": "#8A8A86"},
-    "warm":  {"top": "#F8F0E6", "bottom": "#EFDFCC", "accent": "#C4452B"},
-    "cold":  {"top": "#EEF2F4", "bottom": "#DEE7EE", "accent": "#5B7C99"},
-    "tense": {"top": "#F8EDE8", "bottom": "#EFD6CD", "accent": "#C4452B"},
-    "calm":  {"top": "#EFF4EF", "bottom": "#DDEAE0", "accent": "#5E8C7E"},
+    # v7.1：统一中性暖灰底（#F3F2EF），情绪只体现在强调色上（参考帧配色）。
+    "night": {"top": "#F3F2EF", "bottom": "#F3F2EF", "accent": "#8A8A86"},
+    "warm":  {"top": "#F3F2EF", "bottom": "#F3F2EF", "accent": "#C4452B"},
+    "cold":  {"top": "#F3F2EF", "bottom": "#F3F2EF", "accent": "#8A8A86"},
+    "tense": {"top": "#F3F2EF", "bottom": "#F3F2EF", "accent": "#C4452B"},
+    "calm":  {"top": "#F3F2EF", "bottom": "#F3F2EF", "accent": "#5E8C7E"},
 }
 
 # 关键词 → 情绪（命中即返回；顺序敏感，越靠前越优先）
@@ -149,27 +146,10 @@ _MOOD_WORDS = (
 )
 
 
-# 语义角色 → 情绪调色板（关键词未命中时的确定性兜底）。
-# 修复：旧版兜底恒为 "night"，导致无关键词的片子 6 拍全落同一色。
-_ROLE_PALETTE = {
-    "hook": "warm",
-    "explanation": "cold",
-    "comparison": "cold",
-    "turning_point": "tense",
-    "emphasis": "warm",
-    "conclusion": "calm",
-}
-
-
 def mood_palette(narration, semantic_role=None):
-    """按字幕情绪/语义选背景调色板。
-
-    优先级：显性情绪关键词 > 语义角色映射 > night 兜底。
-    """
+    """按字幕情绪/语义选背景调色板（night 为默认暖暗）。"""
     text = narration or ""
     for name, words in _MOOD_WORDS:
         if any(w in text for w in words):
             return name
-    if semantic_role in _ROLE_PALETTE:
-        return _ROLE_PALETTE[semantic_role]
     return "night"
