@@ -49,10 +49,17 @@ jobs:
         run: |
           choco install -y gtk-runtime --no-progress
           # choco updates the *machine* PATH, which the already-running job
-          # process does not reload; add the GTK runtime bin for later steps so
-          # cairocffi can LoadLibrary libcairo-2.dll.
-          $gtkBin = 'C:\Program Files (x86)\GTK2-Runtime\bin'
-          if (Test-Path $gtkBin) { "PATH=$gtkBin;$env:PATH" | Out-File -Append $env:GITHUB_ENV }
+          # process does not reload. cairocffi resolves the library via
+          # ctypes.util.find_library -> ffi.dlopen, which on Windows honours the
+          # dedicated CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory).
+          # Point it at the GTK runtime, and also expose that dir on PATH so the
+          # dependent DLLs (freetype/fontconfig/glib) resolve.
+          $gtk = 'C:\Program Files (x86)\GTK2-Runtime'
+          $dirs = @("$gtk\bin", "$gtk\lib") | Where-Object { Test-Path $_ }
+          if ($dirs.Count -gt 0) {
+            "CAIROCFFI_DLL_DIRECTORIES=$($dirs -join ';')" | Out-File -Append $env:GITHUB_ENV
+            foreach ($d in $dirs) { $d | Out-File -Append $env:GITHUB_PATH }
+          }
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
