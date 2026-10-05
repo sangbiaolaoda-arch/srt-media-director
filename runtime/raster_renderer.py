@@ -16,6 +16,7 @@ v4.2 视觉政策（用户反馈「画面好丑」后的重做）：
 import math
 import os
 from procedural_canonical import rng as _proc_rng
+from aesthetic_canonical import grade as _grade
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -52,19 +53,10 @@ def _theme_bg(palette="night"):
 
 
 def _vignette_mask():
-    """径向暗角蒙版（L 模式，0=中心保留原图，四角=压暗强度*255）。"""
+    """径向暗角蒙版（委托 aesthetic_canonical.grade —— 与 HTML 播放器同一模型）。"""
     global _VIGNETTE
     if _VIGNETTE is None:
-        w, h = 320, 180
-        m = Image.new("L", (w, h), 0)
-        cx, cy = w / 2.0, h / 2.0
-        maxd = math.hypot(cx, cy)
-        strength = THEME["vignette"]
-        for y in range(h):
-            for x in range(w):
-                d = math.hypot(x - cx, y - cy) / maxd
-                m.putpixel((x, y), int(255 * strength * d * d))
-        _VIGNETTE = m.resize((W, H), Image.BILINEAR)
+        _VIGNETTE = _grade.vignette_mask_pil(320, 180, THEME).resize((W, H), Image.BILINEAR)
     return _VIGNETTE
 
 
@@ -86,8 +78,8 @@ def _apply_grade(img, t):
     img = Image.composite(Image.new("RGB", (W, H), (0, 0, 0)),
                           img, _vignette_mask())
     grain = Image.merge("RGB", (_grain_tile(int(t * 24)),) * 3)
-    img = Image.blend(img, grain, THEME["grain"] / 255.0)
-    bar = int(round(H * THEME["letterbox"]))
+    img = Image.blend(img, grain, _grade.grain_strength(THEME) / 255.0)
+    bar = _grade.letterbox_px(H, THEME)
     if bar > 0:
         dr = ImageDraw.Draw(img)
         dr.rectangle([0, 0, W, bar], fill=(0, 0, 0))
@@ -468,7 +460,7 @@ def ink_stats(img):
     与胶片颗粒都视为背景；只有与局部背景差异显著的像素（文字、图形、色块
     的真正边缘与填充）才计为内容墨。这条阈值在暗底/浅底上语义一致。
     """
-    bar = int(round(H * THEME["letterbox"]))
+    bar = _grade.letterbox_px(H, THEME)
     body = img.crop([0, bar, W, H - bar])
     small = body.resize((320, 180)).convert("RGB")
     # 局部背景估计：模糊半径远大于内容笔画宽度，抹掉平滑背景、保留内容高频

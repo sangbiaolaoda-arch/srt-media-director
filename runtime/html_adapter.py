@@ -18,6 +18,7 @@ import os
 
 import svg_art
 from common import CANVAS_W as W, CANVAS_H as H, COLORS, PALETTES, THEME, ensure_dir
+from aesthetic_canonical import grade as _grade
 
 _TEMPLATE = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -57,7 +58,7 @@ const sctx=scene.getContext("2d");
 const pcv=document.createElement("canvas"); pcv.width=W; pcv.height=H;
 const pctx=pcv.getContext("2d");
 const cap=document.getElementById("cap");
-const BAR=Math.round(H*THEME.letterbox);
+const BAR=THEME.letterbox_px;
 
 function clamp01(v){return v<0?0:v>1?1:v;}
 function ease(t){t=clamp01(t);return t*t*(3-2*t);}
@@ -92,7 +93,7 @@ function ensureGrade(){
   BG=ctx.createLinearGradient(0,0,0,H);
   BG.addColorStop(0,THEME.bg_top);BG.addColorStop(1,THEME.bg_bottom);
   const r=Math.hypot(W/2,H/2);
-  VIG=ctx.createRadialGradient(W/2,H/2,r*0.45,W/2,H/2,r);
+  VIG=ctx.createRadialGradient(W/2,H/2,r*THEME.vignette_inner,W/2,H/2,r);
   VIG.addColorStop(0,"rgba(0,0,0,0)");
   VIG.addColorStop(1,"rgba(0,0,0,"+THEME.vignette+")");
 }
@@ -376,7 +377,10 @@ def compile(dsl, render_plan, entrance, title, out_dir):
             .replace("__W__", str(W))
             .replace("__H__", str(H))
             .replace("__COLORS__", json.dumps(COLORS))
-            .replace("__THEME__", json.dumps(THEME))
+            .replace("__THEME__", json.dumps(dict(
+                THEME,
+                vignette_inner=_grade.VIGNETTE_INNER_RATIO,
+                letterbox_px=_grade.letterbox_px(H, THEME))))
             .replace("__PALETTES__", json.dumps(PALETTES))
             .replace("__ARTS__", json.dumps(svg_art.ART))
             .replace("__BEATS__", json.dumps(beats, ensure_ascii=False)))

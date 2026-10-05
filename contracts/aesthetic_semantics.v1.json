@@ -1,0 +1,57 @@
+{
+  "contract_id": "aesthetic_semantics.v1",
+  "_comment": "Canonical AESTHETIC / POST-PROCESS semantics. SINGLE SOURCE OF TRUTH for 'how a finished frame is graded'. The grade is data-driven (common.THEME already single-sources the numbers), but before this contract the grade CODE was implemented twice -- raster_renderer (PIL) and html_adapter (canvas JS) -- with two different vignette falloff models and a hardcoded inner ratio (0.45) owned only by the JS. This contract makes the model and its parameters single-sourced so the raster reference and the HTML player cannot drift. It must NOT re-implement timing (motion_canonical), space (geometry), time (timeline), objects (primitives), or generation (procedural_canonical). The observer's luminance metrics stay independent -- the observer measures, it does not grade.",
+  "implementation": "runtime/aesthetic_canonical",
+  "single_source_of_truth_boundary": {
+    "theme_data": "owned by common.THEME (numbers)",
+    "grade_model": "owned by aesthetic_canonical.grade (falloff + parameters as code)",
+    "raster_surface": "consumes aesthetic_canonical.grade (PIL)",
+    "player_surface": "consumes aesthetic_canonical.grade (canvas JS literals)",
+    "observer_metrics": "independent -- runtime/observer/pixel.py keeps its own _luma",
+    "aesthetic_must_never": [
+      "hardcode a vignette inner ratio / falloff / letterbox formula in a renderer",
+      "re-implement timing/space/time/objects/generation owned by other canonical packages",
+      "import the observer or a renderer (it is a leaf that takes THEME as an argument)"
+    ]
+  },
+  "vignette": {
+    "_comment": "Canonical falloff is the player's model: 0 inside VIGNETTE_INNER_RATIO*r_max, rising linearly to `strength` at r_max.",
+    "inner_ratio": 0.45,
+    "falloff": "t = clamp01((d/r_max - inner) / (1 - inner)); alpha = strength * t",
+    "r_max": "hypot(w/2, h/2)",
+    "strength_from": "THEME['vignette']"
+  },
+  "letterbox": {
+    "formula": "int(round(height * THEME['letterbox']))",
+    "from": "THEME['letterbox']"
+  },
+  "grain": {
+    "strength_from": "THEME['grain']",
+    "blend": "Image.blend(img, grain_rgb, strength/255.0)",
+    "seed": "procedural_canonical.rng.default_rng() (P1)"
+  },
+  "owns": {
+    "grade": ["VIGNETTE_INNER_RATIO", "vignette_strength", "letterbox_px",
+              "grain_strength", "gradient_stops", "vignette_falloff",
+              "vignette_mask_pil", "js_grade_literals"],
+    "audit": ["grade_consumers", "hardcoded_grade_literals", "divergence"]
+  },
+  "boundary_guard": {
+    "must_stay_leaf": true,
+    "forbidden_imports": ["raster_renderer", "html_adapter", "observer", "pipeline",
+                          "visual_director", "ref_frame", "svg_art", "motion_canonical",
+                          "geometry", "timeline", "primitives", "procedural_canonical"]
+  },
+  "migration_map": {
+    "A1_vignette_mask": "raster_renderer._vignette_mask -> grade.vignette_mask_pil(320,180,THEME).resize((W,H))",
+    "A2_letterbox": "raster_renderer int(round(H*THEME['letterbox'])) -> grade.letterbox_px(H, THEME)",
+    "A3_grain": "raster_renderer THEME['grain']/255.0 -> grade.grain_strength(THEME)/255.0",
+    "A4_js_inner_ratio": "html_adapter JS r*0.45 -> grade.VIGNETTE_INNER_RATIO",
+    "A5_js_letterbox": "html_adapter JS Math.round(H*THEME.letterbox) audit-verified vs grade.letterbox_px"
+  },
+  "not_migrated": {
+    "_comment": "Tracked deliberately.",
+    "raster_renderer._theme_bg": "PALETTES mood gradient (raster) vs THEME flat bg (player) are intentionally different surfaces",
+    "observer/pixel.py._luma": "observer stays independent by design"
+  }
+}
