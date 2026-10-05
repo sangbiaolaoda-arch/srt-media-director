@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from world_state.model import WorldState
 
-from . import render, thresholds as thresholds_mod
+from . import projection, thresholds as thresholds_mod
 
 
 def compare(runtime_ws: WorldState, observed: Dict[str, Any],
@@ -54,8 +54,10 @@ def compare(runtime_ws: WorldState, observed: Dict[str, Any],
         if (r.source, r.target, r.type) not in obs_edges:
             problems.append(("edge_missing", (r.source, r.target, r.type)))
 
-    # geometry fidelity: observed layout vs the engine's declared layout
-    expected_layout = render.layout_geometry(render.stable_order(runtime_ws))
+    # geometry fidelity: observed layout vs the INDEPENDENT render projection.
+    # Deliberately NOT render.layout_geometry() — the verifier must not ask the
+    # renderer what the answer is (Final Directive v5 §1, §4, §66).
+    expected_layout = projection.expected_layout(runtime_ws)
     for oid, geo in expected_layout.items():
         n = obs_nodes.get(oid)
         if n is None:
@@ -67,8 +69,11 @@ def compare(runtime_ws: WorldState, observed: Dict[str, Any],
 
     geometry = {n["id"]: {"x": n["x"], "y": n["y"], "w": n["w"], "h": n["h"]}
                 for n in observed.get("nodes", [])}
+    # Fidelity problems are render-execution problems, mapped onto the v5 failure
+    # taxonomy (Directive §44): a faithful renderer would not raise them.
     return {
         "status": "FIDELITY_OK" if not problems else "FIDELITY_FAIL",
+        "failure_class": "PASS" if not problems else "RENDER_FAIL",
         "available": True,
         "backend": observed.get("backend"),
         "thresholds": {"source": thr.get("source"), "n": thr.get("n"),

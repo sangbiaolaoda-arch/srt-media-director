@@ -1,0 +1,40 @@
+{
+  "contract_id": "render_projection.v1",
+  "layer": "RENDER_PROJECTION",
+  "rigidity": "HARD",
+  "note": "Independent audited policy: how a WorldState maps to observable DOM/SVG structure. Deliberately a SEPARATE implementation from the renderer (runtime/observer/render.py). The renderer must never be both the object under test and the answer key (Final Directive v5, principles 1-7, 53, 66).",
+  "provenance": {
+    "authored_from": "human-adjudicated anchor + entailment contract (cases/cause_effect)",
+    "reason": "Break the Renderer<->Validator shared decision source (layout_geometry). The renderer draws; this contract states what observable structure the draw must exhibit.",
+    "author": "phase0-render-projection",
+    "review": "independent-second-implementation"
+  },
+  "projection": {
+    "priority": [
+      "identity",
+      "visibility",
+      "relative_ordering",
+      "relation_endpoint",
+      "focus",
+      "geometry"
+    ],
+    "ordering": {
+      "kind": "first_focus_then_id",
+      "description": "Objects ordered by (first-focus time over the whole timeline, id); ties broken by id.",
+      "first_focus_fallback": 1000000000.0
+    },
+    "slot": {
+      "origin": [60, 140],
+      "step": [220, 0],
+      "box": [180, 80],
+      "description": "Object i (0-based in projection order) occupies an axis-aligned box: x = origin[0] + i*step[0], y = origin[1] + i*step[1], w = box[0], h = box[1]."
+    },
+    "semantics": {
+      "identity": "Every world-state object must appear as exactly one observable node (data-node id == object id).",
+      "visibility": "obj.visible == True must map to a laid-out node that is not hidden, not display:none, with non-zero area and opacity above threshold.",
+      "focus": "obj.focus == True must map to a node carrying the focus marker (render data-focus).",
+      "relations": "Every Relation must map to an observable edge from source endpoint to target endpoint of the same type."
+    },
+    "geometry_contract": "observed box geometry must match the slot-derived expected geometry within the calibrated tolerance; deviation is render infidelity, not a semantic failure."
+  }
+}

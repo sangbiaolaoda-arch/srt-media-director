@@ -25,7 +25,7 @@ import os
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import browser, render, thresholds
+from . import browser, projection, render, thresholds
 from world_state import compiler
 
 
@@ -106,7 +106,9 @@ def collect(html_path: str, expected_layout: Dict[str, Dict[str, float]],
 def calibrate_from_world_state(ws, outdir: str, reps: int,
                                observe=None) -> Dict[str, Any]:
     html = render.render_world_state(ws, os.path.join(outdir, "calib.html"))
-    expected = render.layout_geometry(render.stable_order(ws))
+    # Expected geometry comes from the INDEPENDENT projection, never from the
+    # renderer's own layout function (Final Directive v5 §1, §4, §66).
+    expected = projection.expected_layout(ws)
     obs = collect(html, expected, reps, observe=observe)
     return derive(expected, obs, reps)
 
