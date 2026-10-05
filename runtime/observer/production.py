@@ -51,7 +51,7 @@ import sys
 import tempfile
 from typing import Any, Dict, List, Optional
 
-from . import browser, camera, motion, relation, taxonomy
+from . import browser, camera, motion, relation, taxonomy, temporal
 
 # Minimum painted pixels (inside the declared box) that count as "the element was
 # actually drawn". Deliberately small: this is a presence test, not an aesthetic
@@ -381,6 +381,34 @@ def build_samples(dsl: Dict[str, Any], render_plan: Dict[str, Any],
                            "kind": _kind(etypes.get(target, "text")),
                            "box": {k: float(tbox[k]) for k in ("x", "y", "w", "h")},
                            "probe": "relation", "rel": exp_rel})
+
+        # --- temporal (ordering) probes (P2) ---
+        # Onset: an element must paint nothing before its enter cue (a spoilt
+        # reveal is a real defect). Precedence: a dependency named in enter.after
+        # must already be painting when its dependent enters.
+        if temporal.observable(lifecycle):
+            for el in (b.get("elements") or []):
+                eid = el["id"]
+                lc = lifecycle.get(eid) or {}
+                box = boxes.get(eid)
+                if not box:
+                    continue
+                ot = temporal.onset_time(lc, start, end)
+                if ot is None:
+                    continue
+                probes.append({"id": eid, "beat_id": bid, "t": ot, "present": False,
+                               "kind": "must",
+                               "box": {k: float(box[k]) for k in ("x", "y", "w", "h")},
+                               "probe": "temporal", "phase": "onset"})
+            for claim in temporal.precedence_claims(lifecycle, start, end):
+                dep = claim["dep"]
+                dbox = boxes.get(dep)
+                if not dbox:
+                    continue
+                probes.append({"id": dep, "beat_id": bid, "t": claim["t"],
+                               "present": True, "kind": "must",
+                               "box": {k: float(dbox[k]) for k in ("x", "y", "w", "h")},
+                               "probe": "temporal", "phase": "precedence"})
     return probes
 
 
@@ -478,7 +506,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     # --- presence dimension ---
     want: Dict[str, Dict[str, Any]] = {}
     for p in probes:
-        if p.get("probe") in ("transform", "camera", "relation"):
+        if p.get("probe") in ("transform", "camera", "relation", "temporal"):
             continue
         w = want.setdefault(p["id"], {"kind": p["kind"], "present": False,
                                       "absence": False})
@@ -491,7 +519,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     absence_ink: Dict[str, int] = {}
     err: Dict[str, str] = {}
     for s in observed.get("samples", []):
-        if s.get("probe") in ("transform", "camera", "relation"):
+        if s.get("probe") in ("transform", "camera", "relation", "temporal"):
             continue
         sid = s.get("id")
         if s.get("error"):
@@ -673,6 +701,38 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
                                  "detail": [kk[0], kk[1], "label_off_target",
                                             round(cx, 1), round(tcx, 1)]})
 
+    # --- temporal (ordering) dimension ---
+    want_t: Dict[Any, Dict[str, Any]] = {}
+    for p in probes:
+        if p.get("probe") == "temporal":
+            want_t[(p["beat_id"], p["id"], p["phase"], round(float(p["t"]), 3))] = p
+    obs_t: Dict[Any, Dict[str, Any]] = {}
+    for s in observed.get("samples", []):
+        if s.get("probe") == "temporal":
+            kk = (s.get("beat_id"), s.get("id"), s.get("phase"),
+                  round(float(s.get("t", 0)), 3))
+            obs_t[kk] = s
+
+    temporal_checked = 0
+    for kk, w in sorted(want_t.items()):
+        o = obs_t.get(kk)
+        if o is None or o.get("error"):
+            problems.append({"kind": "temporal_probe_missing",
+                             "detail": [kk[0], kk[1], kk[2], (o or {}).get("error")]})
+            continue
+        ink = int(o.get("ink", 0))
+        if w.get("phase") == "onset":
+            if ink > INK_ABSENT_MAX_PX:
+                problems.append({"kind": "early_visible",
+                                 "detail": [kk[0], kk[1], round(float(kk[3]), 2), ink]})
+                continue
+        elif w.get("phase") == "precedence":
+            if ink < INK_MIN_PX:
+                problems.append({"kind": "precedence_violated",
+                                 "detail": [kk[0], kk[1], round(float(kk[3]), 2), ink]})
+                continue
+        temporal_checked += 1
+
     verdict = taxonomy.PASS if not problems else taxonomy.RENDER_FAIL
     return {
         "verdict": verdict,
@@ -689,6 +749,8 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
         "camera_beats": len(want_cam),
         "relation_checked": relation_checked,
         "relation_expected": len(want_rel),
+        "temporal_checked": temporal_checked,
+        "temporal_expected": len(want_t),
         "problems": problems,
         "advisory": advisory,
     }

@@ -53,6 +53,10 @@ def _obs(samples, ink_of):
                 gb = {"x": cx - 30.0, "y": 0.0, "w": 60.0, "h": 10.0}
             rows.append({"id": s["id"], "beat_id": s["beat_id"], "t": s["t"],
                          "probe": "relation", "gink": 5000, "gbbox": gb})
+        elif s.get("probe") == "temporal":
+            ink = 0 if s.get("phase") == "onset" else 500
+            rows.append({"id": s["id"], "beat_id": s["beat_id"], "t": s["t"],
+                         "probe": "temporal", "phase": s["phase"], "ink": ink})
         else:
             rows.append({"id": s["id"], "t": s["t"], "present": s["present"],
                          "ink": ink_of(s)})
@@ -82,8 +86,8 @@ def test_build_samples_is_deterministic_and_upstream_only():
     a = production.build_samples(dsl, rp, en)
     b = production.build_samples(dsl, rp, en)
     assert a == b and a, a
-    # presence dimension only; transform/camera/relation are separate dimensions
-    presence = [s for s in a if s.get("probe") not in ("transform", "camera", "relation")]
+    # presence dimension only; transform/camera/relation/temporal are separate dimensions
+    presence = [s for s in a if s.get("probe") not in ("transform", "camera", "relation", "temporal")]
     ids = {s["id"] for s in presence}
     assert ids == {"t1", "d1"}
     # multiple times per element (progressive reveal must be sampled, not assumed)

@@ -1,0 +1,18 @@
+{
+  "contract_id": "temporal_projection.v1",
+  "_comment": "Independent Temporal (ordering / visibility-in-time) projection contract (Final Practical Closeout Directive, P2). The production chain's Temporal layer decides WHEN each element is allowed to be visible: an element must paint NOTHING before its enter cue (no early leak), and a dependency named in its enter.after must already be painting when it enters. Until now no independent expectation verified this on the real film: the presence observer sampled only inside and after the alive window, never before it; the motion/camera/relation observers ask about shape and links, not time. This contract is the EXPECTED side; it MUST NOT import the renderer and MUST NOT read the player's embedded BEATS.",
+  "claims": {
+    "onset": {
+      "_comment": "An element must be invisible before its enter cue. If ink appears before enter.at (minus a small margin), the beat has spoilt its own reveal.",
+      "margin_sec": 0.35
+    },
+    "precedence": {
+      "_comment": "A dependency D named in an element E's enter.after must already be painting when E enters. If E appears while D has no ink, E references something that is not yet on screen. Only asserted when the lead (E.at - D.at) is at least min_lead_sec; E is then probed probe_lag_sec after its own cue.",
+      "min_lead_sec": 0.4,
+      "probe_lag_sec": 0.2
+    }
+  },
+  "tolerance": {
+    "ink_min_px": 110
+  }
+}

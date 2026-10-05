@@ -20,7 +20,7 @@ _rt = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 if _rt not in _sys.path:
     _sys.path.insert(0, _rt)
 
-from . import browser, calibrate, camera, fidelity, normalize, pixel, relation, render, thresholds  # noqa: E402
+from . import browser, calibrate, camera, fidelity, normalize, pixel, relation, render, temporal, thresholds  # noqa: E402
 
 __all__ = ["browser", "normalize", "fidelity", "render", "calibrate",
-           "thresholds", "pixel", "camera", "relation"]
+           "thresholds", "pixel", "camera", "relation", "temporal"]
