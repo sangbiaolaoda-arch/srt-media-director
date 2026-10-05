@@ -1,0 +1,22 @@
+{
+  "case_id": "connects_001",
+  "anchor_version": "1.0",
+  "locked": true,
+  "adjudication": {
+    "method": "dual_annotation",
+    "annotators": ["A", "B"],
+    "agreement": true,
+    "challenge_protocol": "Any annotator may file a challenge with counter-evidence; while a challenge is open the anchor is UNLOCKED and the derived oracle is not trusted.",
+    "notes": "Directed connector: sensor feeds the command hub."
+  },
+  "claims": [
+    {
+      "id": "c1",
+      "subject": "sensor",
+      "predicate": "CONNECTS",
+      "object": "command_hub",
+      "contract": "connects.v1",
+      "surface_text": "传感器连线指挥中枢，数据实时回传"
+    }
+  ]
+}

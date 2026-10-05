@@ -5,8 +5,9 @@ In Phase 0 there is no browser and no renderer. To prove the validator is
 to emit a specific defect on demand. This module is that runtime.
 
 It is intentionally tiny and honest: it emits the world state a correct
-director *should* produce for a single CAUSES claim, and flags let a test
-inject exactly one defect the validator must catch.
+director *should* produce for a single-claim anchor, driven by the audited
+contract (so FOLLOWS / CONNECTS / CAUSES all route through the same code), and
+flags let a test inject exactly one defect the validator must catch.
 """
 from __future__ import annotations
 
@@ -14,13 +15,27 @@ from typing import Any, Dict, List, Optional
 
 from .model import Frame, Obj, Relation, WorldState
 
-_PREDICATE_TO_TYPE = {"CAUSES": "causes"}
+
+def _relation_type(contract: Dict[str, Any]) -> Optional[str]:
+    """A contract may (or may not) entail a directed relation."""
+    for rule in contract["entailment"]:
+        if rule["kind"] == "relation_direction":
+            return rule["relation_type"]
+    return None
+
+
+def _resolve_contract(anchor: Dict[str, Any], contract: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if contract is not None:
+        return contract
+    from entailment import load_contract  # local import: keep core import-light
+    return load_contract(anchor["claims"][0]["contract"])
 
 
 def compile_world_state(anchor: Dict[str, Any], *,
+                        contract: Optional[Dict[str, Any]] = None,
                         reverse_direction: bool = False,
                         drop_staging: bool = False) -> WorldState:
-    """Emit a :class:`WorldState` for a single-claim anchor.
+    """Emit a deterministic :class:`WorldState` for a single-claim anchor.
 
     Fault injection (test-only, never used in production paths):
       * ``reverse_direction`` : emit the relation and focus order backwards
@@ -30,31 +45,39 @@ def compile_world_state(anchor: Dict[str, Any], *,
     """
     if len(anchor["claims"]) != 1:
         raise ValueError("Phase 0 compiler handles exactly one claim")
+    contract = _resolve_contract(anchor, contract)
     claim = anchor["claims"][0]
     subj, obj = claim["subject"], claim["object"]
-    rel_type = _PREDICATE_TO_TYPE.get(claim["predicate"], claim["predicate"].lower())
+    rel_type = _relation_type(contract)
+
     if reverse_direction:
         subj, obj = obj, subj
 
-    # objects always keep their canonical identity; only focus-order and the
-    # relation direction are affected by the injected runtime fault.
-    def frame(t: float, focus: str, phase: Optional[str] = None) -> Frame:
+    def frame(t: float, focus: str, phase: Optional[str]) -> Frame:
         objects = {
             claim["subject"]: Obj(claim["subject"], visible=True, focus=False),
             claim["object"]: Obj(claim["object"], visible=True, focus=False),
         }
         objects[focus].focus = True
         relations: List[Relation] = []
-        if phase is not None:
+        if phase is not None and rel_type is not None:
             relations = [Relation(subj, obj, rel_type, phase)]
         return Frame(t, objects, relations)
 
-    phases = ["active"] if drop_staging else ["establishing", "active"]
+    def phase_at(order: int) -> Optional[str]:
+        # order: 1 = first relation keyframe, 2 = subsequent ones
+        if rel_type is None:
+            return None
+        if drop_staging:
+            return "active"
+        return "establishing" if order == 1 else "active"
+
+    # canonical timeline: cause established -> relation engaged -> effect focus
     frames = [
-        frame(0.0, subj),
-        frame(1.0, subj, phases[0]),
-        frame(2.0, subj, phases[-1]),
-        frame(3.0, obj, phases[-1]),
-        frame(4.0, obj, phases[-1]),
+        frame(0.0, subj, None),
+        frame(1.0, subj, phase_at(1)),
+        frame(2.0, subj, phase_at(2)),
+        frame(3.0, obj, phase_at(2)),
+        frame(4.0, obj, None),
     ]
     return WorldState(anchor["case_id"], frames)

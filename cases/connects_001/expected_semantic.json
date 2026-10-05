@@ -1,0 +1,18 @@
+{
+  "case_id": "connects_001",
+  "layer": "SEMANTIC",
+  "rigidity": "HARD",
+  "note": "On trial against the expectation derived from the locked anchor via connects.v1.",
+  "hard_constraints": [
+    {
+      "kind": "relation_direction",
+      "relation_type": "connects",
+      "source": "sensor",
+      "target": "command_hub"
+    },
+    {
+      "kind": "final_focus",
+      "object": "command_hub"
+    }
+  ]
+}

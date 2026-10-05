@@ -1,0 +1,6 @@
+{
+  "case_id": "connects_001",
+  "kind": "srt_source",
+  "srt": "传感器连线指挥中枢，数据实时回传。",
+  "notes": "Phase 0 source is text-only. It carries NO expectation and NO anchor."
+}

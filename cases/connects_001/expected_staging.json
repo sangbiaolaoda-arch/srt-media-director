@@ -1,0 +1,15 @@
+{
+  "case_id": "connects_001",
+  "layer": "STAGING",
+  "rigidity": "SOFT",
+  "note": "Staging is advisory. Deviation is DRIFT, never a hard failure.",
+  "soft_constraints": [
+    {
+      "kind": "phase_sequence",
+      "relation_type": "connects",
+      "source": "sensor",
+      "target": "command_hub",
+      "sequence": ["establishing", "active"]
+    }
+  ]
+}

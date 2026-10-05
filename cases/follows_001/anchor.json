@@ -1,0 +1,22 @@
+{
+  "case_id": "follows_001",
+  "anchor_version": "1.0",
+  "locked": true,
+  "adjudication": {
+    "method": "dual_annotation",
+    "annotators": ["A", "B"],
+    "agreement": true,
+    "challenge_protocol": "Any annotator may file a challenge with counter-evidence; while a challenge is open the anchor is UNLOCKED and the derived oracle is not trusted.",
+    "notes": "Purely temporal relation: alarm precedes evacuation."
+  },
+  "claims": [
+    {
+      "id": "c1",
+      "subject": "alarm",
+      "predicate": "FOLLOWS",
+      "object": "evacuation",
+      "contract": "follows.v1",
+      "surface_text": "警报响起，随后人群撤离"
+    }
+  ]
+}
