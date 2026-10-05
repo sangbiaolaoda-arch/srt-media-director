@@ -51,7 +51,7 @@ import sys
 import tempfile
 from typing import Any, Dict, List, Optional
 
-from . import browser, camera, motion, taxonomy
+from . import browser, camera, motion, relation, taxonomy
 
 # Minimum painted pixels (inside the declared box) that count as "the element was
 # actually drawn". Deliberately small: this is a presence test, not an aesthetic
@@ -332,6 +332,55 @@ def build_samples(dsl: Dict[str, Any], render_plan: Dict[str, Any],
                 probes.append({"id": bid, "beat_id": bid, "t": ct,
                                "present": True, "probe": "camera", "phase": phase,
                                "exp": {"zoom": camera.expected_zoom(cam, start, end, ct)}})
+
+        # --- relation (semantic) probes (P2) ---
+        # A declared relation must be realized as a legible link. We probe the
+        # element that carries the link (the bridging connector, or the bound
+        # label) and adjudicate it against the independent Relation projection.
+        etypes = {el["id"]: el.get("type", "text") for el in (b.get("elements") or [])}
+        for rel in (b.get("relations") or []):
+            rtype = rel.get("type")
+            if not relation.observable(rtype):
+                continue
+            rch = relation.realization(rtype) or {}
+            ch_name = rch.get("channel")
+            frm, to = rel.get("from"), rel.get("to")
+            fb, tb = boxes.get(frm), boxes.get(to)
+            if not fb or not tb:
+                continue
+            exp_rel: Dict[str, Any] = {"type": rtype, "from": frm, "to": to,
+                                       "channel": ch_name}
+            if ch_name == "bridge_corridor":
+                ce = relation.bridge_expectation(fb, tb)
+                if ce is None:
+                    continue
+                exp_rel["corridor"] = ce
+                target = relation.find_bridge(b.get("elements") or [], boxes, ce)
+                if target is None:
+                    cands = [e["id"] for e in (b.get("elements") or [])
+                             if e.get("type") == ch_name and e["id"] in boxes]
+                    for cid in cands:
+                        cx, cy = relation.center(boxes[cid])
+                        if ce["x0"] <= cx <= ce["x1"] and ce["y0"] <= cy <= ce["y1"]:
+                            target = cid
+                            break
+                    if target is None and cands:
+                        target = cands[0]
+            elif ch_name == "align_x":
+                ae = relation.align_expectation(fb, tb)
+                exp_rel["target_cx"] = ae["target_cx"]
+                exp_rel["align_px"] = ae["align_px"]
+                target = frm
+            else:
+                continue
+            tbox = boxes.get(target)
+            if not tbox:
+                continue
+            rt = _clamp_time(start + 0.6 * (end - start), start, end)
+            probes.append({"id": target, "beat_id": bid, "t": rt, "present": True,
+                           "kind": _kind(etypes.get(target, "text")),
+                           "box": {k: float(tbox[k]) for k in ("x", "y", "w", "h")},
+                           "probe": "relation", "rel": exp_rel})
     return probes
 
 
@@ -429,7 +478,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     # --- presence dimension ---
     want: Dict[str, Dict[str, Any]] = {}
     for p in probes:
-        if p.get("probe") in ("transform", "camera"):
+        if p.get("probe") in ("transform", "camera", "relation"):
             continue
         w = want.setdefault(p["id"], {"kind": p["kind"], "present": False,
                                       "absence": False})
@@ -442,7 +491,7 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
     absence_ink: Dict[str, int] = {}
     err: Dict[str, str] = {}
     for s in observed.get("samples", []):
-        if s.get("probe") in ("transform", "camera"):
+        if s.get("probe") in ("transform", "camera", "relation"):
             continue
         sid = s.get("id")
         if s.get("error"):
@@ -574,6 +623,56 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
             if zl + CAMERA_TOL < ze:
                 problems.append({"kind": "camera_reversed", "detail": [bid2, round(ze, 4), round(zl, 4)]})
 
+    # --- relation (semantic) dimension ---
+    want_rel: Dict[Any, Dict[str, Any]] = {}
+    for p in probes:
+        if p.get("probe") == "relation":
+            want_rel[(p["beat_id"], p["id"])] = p
+    obs_rel: Dict[Any, Dict[str, Any]] = {}
+    for s in observed.get("samples", []):
+        if s.get("probe") == "relation":
+            kk = (s.get("beat_id"), s.get("id"))
+            prev = obs_rel.get(kk)
+            if prev is None or int(s.get("gink", 0)) > int(prev.get("gink", 0)):
+                obs_rel[kk] = s
+
+    relation_checked = 0
+    for kk, w in sorted(want_rel.items()):
+        exp_rel = w.get("rel") or {}
+        o = obs_rel.get(kk)
+        if o is None or o.get("error"):
+            problems.append({"kind": "relation_probe_missing",
+                             "detail": [kk[0], kk[1], (o or {}).get("error")]})
+            continue
+        gink = int(o.get("gink", 0))
+        gbb = o.get("gbbox")
+        if gink <= 0 or not gbb:
+            problems.append({"kind": "relation_unrendered",
+                             "detail": [kk[0], kk[1], exp_rel.get("type")]})
+            continue
+        relation_checked += 1
+        cx = float(gbb["x"]) + float(gbb["w"]) / 2.0
+        cy = float(gbb["y"]) + float(gbb["h"]) / 2.0
+        ch_name = exp_rel.get("channel")
+        if ch_name == "bridge_corridor":
+            corr = exp_rel.get("corridor") or {}
+            if not (corr.get("x0", 0) <= cx <= corr.get("x1", 0)
+                    and corr.get("y0", 0) <= cy <= corr.get("y1", 0)):
+                problems.append({"kind": "relation_detached",
+                                 "detail": [kk[0], kk[1], "bridge_outside_corridor",
+                                            round(cx, 1), round(cy, 1)]})
+            elif float(gbb["w"]) < float(corr.get("min_w", 0)):
+                problems.append({"kind": "relation_detached",
+                                 "detail": [kk[0], kk[1], "bridge_too_short",
+                                            round(float(gbb["w"]), 1)]})
+        elif ch_name == "align_x":
+            tol = float(exp_rel.get("align_px", 16))
+            tcx = float(exp_rel.get("target_cx", 0))
+            if abs(cx - tcx) > tol:
+                problems.append({"kind": "relation_detached",
+                                 "detail": [kk[0], kk[1], "label_off_target",
+                                            round(cx, 1), round(tcx, 1)]})
+
     verdict = taxonomy.PASS if not problems else taxonomy.RENDER_FAIL
     return {
         "verdict": verdict,
@@ -588,6 +687,8 @@ def verify(probes: List[Dict[str, Any]], observed: Dict[str, Any], *,
         "transform_skipped": transform_skipped,
         "camera_checked": camera_checked,
         "camera_beats": len(want_cam),
+        "relation_checked": relation_checked,
+        "relation_expected": len(want_rel),
         "problems": problems,
         "advisory": advisory,
     }

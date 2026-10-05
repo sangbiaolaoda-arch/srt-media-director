@@ -40,6 +40,19 @@ def _obs(samples, ink_of):
             rows.append({"id": s["id"], "beat_id": s["beat_id"], "t": s["t"],
                          "present": True, "probe": "camera", "phase": s["phase"],
                          "zw": z, "zh": z})
+        elif s.get("probe") == "relation":
+            rel = s.get("rel") or {}
+            if rel.get("channel") == "bridge_corridor":
+                c = rel["corridor"]
+                cx = (c["x0"] + c["x1"]) / 2.0
+                cy = (c["y0"] + c["y1"]) / 2.0
+                w = max(float(c.get("min_w", 120)), 120.0)
+                gb = {"x": cx - w / 2.0, "y": cy - 2.0, "w": w, "h": 4.0}
+            else:
+                cx = float(rel.get("target_cx", 0))
+                gb = {"x": cx - 30.0, "y": 0.0, "w": 60.0, "h": 10.0}
+            rows.append({"id": s["id"], "beat_id": s["beat_id"], "t": s["t"],
+                         "probe": "relation", "gink": 5000, "gbbox": gb})
         else:
             rows.append({"id": s["id"], "t": s["t"], "present": s["present"],
                          "ink": ink_of(s)})
@@ -69,8 +82,8 @@ def test_build_samples_is_deterministic_and_upstream_only():
     a = production.build_samples(dsl, rp, en)
     b = production.build_samples(dsl, rp, en)
     assert a == b and a, a
-    # presence dimension only; transform/camera probes are separate dimensions
-    presence = [s for s in a if s.get("probe") not in ("transform", "camera")]
+    # presence dimension only; transform/camera/relation are separate dimensions
+    presence = [s for s in a if s.get("probe") not in ("transform", "camera", "relation")]
     ids = {s["id"] for s in presence}
     assert ids == {"t1", "d1"}
     # multiple times per element (progressive reveal must be sampled, not assumed)

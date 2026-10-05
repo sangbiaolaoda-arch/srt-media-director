@@ -1,0 +1,27 @@
+{
+  "contract_id": "relation_projection.v1",
+  "_comment": "Independent Relation (semantic) projection contract (Final Practical Closeout Directive, P2). The production chain's Relation layer realizes the director's declared per-beat relations (visual-dsl.json -> beat.relations, each {from,to,type}) as a *visible link* between the two named elements. Until now no independent expectation verified that layer: the presence observer asked 'did ink appear?' and the motion/camera observers asked about per-element motion and whole-frame magnification — none noticed whether the declared relationship is actually drawn. This contract is the EXPECTED side; it MUST NOT import the renderer and MUST NOT read the player's embedded BEATS.",
+  "realizations": {
+    "_comment": "How each relation type must be realized so the link is *visibly* legible.",
+    "flow_to": {"channel": "bridge_corridor"},
+    "causes": {"channel": "bridge_corridor"},
+    "results_in": {"channel": "bridge_corridor"},
+    "bound_to": {"channel": "align_x"}
+  },
+  "channels": {
+    "bridge_corridor": {
+      "_comment": "A connector element must bridge the two endpoint boxes: the connector's painted ink lies in the horizontal corridor between the endpoints' facing edges, at their vertical middle. A relation with no bridging ink is a dangling claim ('this flows to that' with nothing between them).",
+      "element_type": "connector"
+    },
+    "align_x": {
+      "_comment": "The subject label (from) must be bound onto its target (to): the label's painted ink is horizontally centred on the target and sits within a small margin of it. A relation whose label drifted off its target is a broken binding.",
+      "bind_margin_px": 130
+    }
+  },
+  "tolerance": {
+    "corridor_px": 18,
+    "band_px": 30,
+    "align_px": 16
+  },
+  "min_bridge_px": 110
+}
