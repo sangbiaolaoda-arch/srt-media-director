@@ -157,6 +157,70 @@ def signal(html_path: str, observed: Dict[str, Any], *,
     }
 
 
+def fingerprint_distance(a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
+    """Fraction of coarse cells whose quantized luminance differs.
+
+    Pure function of two fingerprints -> browser-free, unit-testable. This is
+    the *perceptual advisory* signal: it says "the picture looks different", not
+    "the semantics are wrong" (§39). A stable render must keep it at zero.
+    """
+    ca, cb = a.get("cells", []), b.get("cells", [])
+    if not ca or not cb or len(ca) != len(cb):
+        return {"comparable": False, "drift_ratio": None, "changed_cells": None}
+    changed = sum(1 for x, y in zip(ca, cb) if x != y)
+    return {
+        "comparable": True,
+        "changed_cells": changed,
+        "total_cells": len(ca),
+        "drift_ratio": round(changed / len(ca), 4),
+        "identical": changed == 0,
+    }
+
+
+def regression(baseline: Optional[Dict[str, Any]], current: Dict[str, Any],
+               thr: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Pixel regression lane — has the rendered picture drifted (§38, §64 F).
+
+    Compares a stored baseline fingerprint against a freshly captured one. Drift
+    above ``pixel_drift_ratio_max`` is ``PERCEPTUAL_DRIFT``: a *perceptual*
+    finding, explicitly NOT a semantic verdict (§37, §39).
+    """
+    from . import taxonomy
+    thr = thr or {}
+    max_ratio = float(thr.get("pixel_drift_ratio_max", 0.02))
+    if not current.get("available", True):
+        return {"status": "PIXEL_UNAVAILABLE", "available": False,
+                "failure_class": taxonomy.ENVIRONMENT_FAIL,
+                "fault_domain": taxonomy.fault_domain(taxonomy.ENVIRONMENT_FAIL),
+                "drift_ratio": None, "problems": [
+                    {"kind": "no_screenshot", "detail": current.get("error")}]}
+    if baseline is None:
+        return {"status": "NO_BASELINE", "available": True,
+                "failure_class": taxonomy.PASS, "fault_domain": "none",
+                "drift_ratio": None, "problems": [],
+                "note": "no baseline fingerprint recorded"}
+    dist = fingerprint_distance(baseline, current)
+    if not dist["comparable"]:
+        return {"status": "PIXEL_UNAVAILABLE", "available": True,
+                "failure_class": taxonomy.ENVIRONMENT_FAIL, "fault_domain": "environment",
+                "drift_ratio": None,
+                "problems": [{"kind": "fingerprint_mismatch", "detail": "grid mismatch"}]}
+    drift = not dist["identical"] and dist["drift_ratio"] > max_ratio
+    return {
+        "status": "PIXEL_DRIFT" if drift else "PIXEL_OK",
+        "available": True,
+        "failure_class": taxonomy.PERCEPTUAL_DRIFT if drift else taxonomy.PASS,
+        "fault_domain": taxonomy.fault_domain(
+            taxonomy.PERCEPTUAL_DRIFT if drift else taxonomy.PASS),
+        "drift_ratio": dist["drift_ratio"],
+        "max_drift_ratio": max_ratio,
+        "problems": ([{"kind": "perceptual_drift",
+                       "detail": {"ratio": dist["drift_ratio"],
+                                  "changed_cells": dist["changed_cells"]}}]
+                     if drift else []),
+    }
+
+
 def compare(observed: Dict[str, Any], pixel: Dict[str, Any],
             thr: Dict[str, Any], *, background_luma: Optional[float] = None) -> Dict[str, Any]:
     """Cross-check the structural observation against the pixel signal.
@@ -169,8 +233,11 @@ def compare(observed: Dict[str, Any], pixel: Dict[str, Any],
         border around a white fill is low-delta but high-variance, so it is not
         a contradiction.
     """
+    from . import taxonomy
     if not pixel.get("available"):
         return {"status": "PIXEL_UNAVAILABLE", "available": False, "problems": [],
+                "failure_class": taxonomy.ENVIRONMENT_FAIL,
+                "fault_domain": taxonomy.fault_domain(taxonomy.ENVIRONMENT_FAIL),
                 "note": "no screenshot; pixel signal not evaluated (honest degradation)"}
 
     delta_min = float(thr.get("pixel_region_delta_min", 6.0))
@@ -198,9 +265,14 @@ def compare(observed: Dict[str, Any], pixel: Dict[str, Any],
             problems.append(("pixel_region_matches_background",
                              (n["id"], round(r["mean"], 3), round(bg, 3), round(r["var"], 3))))
 
+    # A structural-vs-pixel contradiction is a PERCEPTUAL finding; pixel is NOT
+    # the semantic judge (§37, §39) — it flags "the picture disagrees with the DOM".
+    verdict = taxonomy.PERCEPTUAL_DRIFT if problems else taxonomy.PASS
     return {
         "status": "PIXEL_OK" if not problems else "PIXEL_CONFLICT",
         "available": True,
+        "failure_class": verdict,
+        "fault_domain": taxonomy.fault_domain(verdict),
         "fingerprint_hash": (pixel.get("fingerprint") or {}).get("hash"),
         "background_luma": bg,
         "problems": [{"kind": k, "detail": d} for k, d in problems],

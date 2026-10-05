@@ -35,6 +35,7 @@ _DEFAULT: Dict[str, Any] = {
     "pixel_region_delta_min": 6.0,
     "pixel_variance_min": 1.0,
     "pixel_region_var_min": 4.0,
+    "pixel_drift_ratio_max": 0.02,
 }
 
 
