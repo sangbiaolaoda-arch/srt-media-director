@@ -586,6 +586,46 @@ def g20():
     assert blank["density"] > 0.3 and blank["silence"] is False, blank
 
 
+@gate("21. Motion Runtime（语义运动不变量）")
+def g21():
+    """Runtime Hardening · 语义运动执行层的机器证据门禁。
+
+    验证：① 每个 Motion Primitive 都拥有合法 Contract；
+          ② Scene/Relation/State/Motion/Conflict 可端到端执行且**确定性**；
+          ③ Motion Invariants 全部通过。
+    """
+    import motion_runtime as MR
+    from motion_runtime import (MotionRuntime, SceneGraph, make, Relation,
+                                audit_contracts)
+    # ① 契约自检
+    ac = audit_contracts()
+    assert ac["status"] == "PASS", ac["issues"]
+    assert ac["count"] >= 21, ac["count"]  # 21 个语义运动原语
+    # ② 端到端执行（层级 + 关系 + 运动 + 冲突求解 + Camera）
+    g = SceneGraph()
+    g.add("group", parent="root", x=100, y=100)
+    g.add("person", parent="group", x=0, y=0, w=120, h=200)
+    g.add("choice", parent="root", x=600, y=200, w=140, h=60)
+    rt = MotionRuntime(g)
+    rt.add(make("MOVE", "group", duration=1.0, trigger="t0",
+                params={"offset": (50, 0)}),
+           make("FOLLOW", "person", target="choice", duration=1.0, trigger="t0",
+                params={"lag": 0.2}))
+    rt.add_relation(Relation(source="person", target="choice",
+                             relation_type="CAUSE", lifecycle="STRENGTHEN",
+                             trigger="person.activate"))
+    # 确定性：相同输入必须产生完全相同的采样
+    assert rt.sample(0.5) == rt.sample(0.5), "motion runtime must be deterministic"
+    frames = rt.sample_frames(1.0)
+    assert len(frames) >= 5, frames
+    # ③ 不变量
+    v = rt.validate()
+    assert v["status"] == "PASS", v["failed"]
+    # 冲突求解不是 last-wins：FOLLOW 位移必须保留
+    tr = rt.sample(1.0)["transforms"]["person"]
+    assert tr["dx"] > 50, tr
+
+
 def main():
     print("SRT Media Director — runtime self-test")
     failures = []
