@@ -1,0 +1,95 @@
+{
+  "contract_id": "motion_semantics.v2",
+  "_comment": "Canonical MOTION semantics. This is the SINGLE SOURCE OF TRUTH for 'how state changes over time'. Motion answers exactly one question -- how does state change over time -- and must NOT re-implement the other subsystems' truth: time/easing belongs to timeline (easing_vocabulary.v1), space/transform/box belongs to geometry (transform_vocabulary.v1), visual object identity belongs to primitives (primitive_catalog.v1). This contract replaces the three previously-forked motion vocabularies (runtime/motion, runtime/motion_runtime, runtime/scene) with one canonical set; legacy spellings are preserved ONLY as aliases so behaviour-preserving migration can map old call sites. See runtime/docs/motion-inventory.md for the audit that produced this normalization.",
+  "implementation": "runtime/motion_canonical",
+  "single_source_of_truth_boundary": {
+    "time_and_easing": "delegated to timeline.easing (easing_vocabulary.v1)",
+    "space_transform_box": "delegated to geometry.matrix/box (transform_vocabulary.v1)",
+    "visual_object_identity": "owned by primitives.catalog (primitive_catalog.v1)",
+    "motion_owns": [
+      "which action happens (vocabulary)",
+      "how a chosen action maps to channel deltas over progress",
+      "the relationship/sequence between motions (sequencing)",
+      "state change / cross-beat continuity / entrance lifecycle",
+      "producer-side motion validation"
+    ],
+    "motion_must_never": [
+      "define easing curves (use timeline.easing)",
+      "define matrix algebra (use geometry.matrix)",
+      "declare what visual primitives exist (use primitives.catalog)"
+    ]
+  },
+  "observer_independence": {
+    "_comment": "runtime/observer/* and its projection contracts are a VALIDATOR, not a producer. They stay independent and are deliberately NOT merged into motion_canonical: a validator that reuses the producer's internals proves nothing.",
+    "independent_contracts": [
+      "motion_projection.v1",
+      "temporal_projection.v1",
+      "camera_projection.v1",
+      "relation_projection.v1"
+    ],
+    "rule": "observer must not import motion_canonical internals, and motion_canonical must not import observer"
+  },
+  "channels": ["dx", "dy", "scale", "rotation", "opacity", "connect", "emphasis"],
+  "channel_neutral": {"dx": 0.0, "dy": 0.0, "scale": 1.0, "rotation": 0.0, "opacity": 1.0, "connect": 0.0, "emphasis": 0.0},
+  "categories": {
+    "_comment": "How an action participates in attention: entering, leaving, being emphasized, expressing relationship, changing its own state, continuing from the previous beat, or explicitly not moving.",
+    "enter": "element enters attention",
+    "exit": "element leaves attention",
+    "emphasis": "element is stressed in place",
+    "relational": "a relationship between elements is shown",
+    "state": "the element changes its own state",
+    "continue": "carry the previous beat's state (no re-entrance)",
+    "static": "explicit decision not to move"
+  },
+  "produces": {
+    "_comment": "Channel delta vocabulary an action may touch. Spatial channels (dx/dy/scale/rotation) are turned into a transform by geometry; opacity/connect/emphasis are non-spatial state.",
+    "opacity": "fade amount", "dx": "horizontal offset", "dy": "vertical offset",
+    "scale": "uniform scale", "rotation": "rotation (deg)",
+    "clip": "reveal/wipe/mask coverage", "chars": "typed character count",
+    "stroke": "stroke emphasis", "glow": "glow emphasis",
+    "connect": "relationship/connector progress", "dim_others": "focus/isolate dimming",
+    "emphasis": "generic emphasis strength"
+  },
+  "defaults": {
+    "easing": "linear",
+    "easing_resolution": "every action easing name MUST resolve through timeline.easing; unresolved names are a divergence",
+    "duration": "per-action default in vocabulary.ACTIONS",
+    "motion_span_model": "absolute times are produced by adding duration + delay (same span model as timeline)"
+  },
+  "action_count_floor": 45,
+  "vocabulary": {
+    "_comment": "Canonical actions are declared in runtime/motion_canonical/vocabulary.py; this contract names the categories and the merge provenance, not a frozen list (the list is introspected by the audit).",
+    "merged_from": [
+      "runtime/motion/motion_registry.py:MOTION_PRIMITIVES (21)",
+      "runtime/motion_runtime/contracts.py:PRIMITIVES (22)",
+      "runtime/scene/motion_compiler.py:BASE (38)"
+    ],
+    "production_consumers": {
+      "_comment": "The real pipeline (runtime/pipeline.py) runs on entrance_planner, whose motion vocabulary must map onto canonical actions.",
+      "runtime/entrance_planner.py": {
+        "MOTIONS_ENTER": ["fade", "rise", "pop", "inherit"],
+        "MOTIONS_EXIT": ["fade", "sink", "shrink"],
+        "mapping": {"inherit": "carry_over"}
+      }
+    }
+  },
+  "sequencing": {
+    "_comment": "motion_canonical.sequencing owns WHO goes WHEN and HOW they group; it does not own curve math or absolute time. Grammar -> mode is a semantic intention, not a template.",
+    "modes": ["sequential_stagger", "chain", "left_to_right", "split_two_groups", "focal_last", "ambient_then_focal"],
+    "combinators": ["sequence", "parallel", "stagger", "dependency"]
+  },
+  "known_divergences": {
+    "_comment": "Tracked, not silently 'fixed'. Quantified by runtime/motion_canonical/*.audit().",
+    "easing_forks_removed": [
+      "motion_runtime.contracts.EASINGS -> delegated to timeline.easing (PHASE 3)",
+      "motion_runtime.scene mat_* -> delegated to geometry.matrix (PHASE 3)",
+      "scene.motion_compiler.BASE[ease] -> audited against timeline.easing (PHASE 3)"
+    ],
+    "legacy_packages": {
+      "runtime/motion": "not imported by the production pipeline; NOT in production path (migrate/delete in PHASE 6)",
+      "runtime/motion_runtime": "not imported by the production pipeline; easing/matrix already delegated (migrate/delete in PHASE 6)",
+      "runtime/scene": "not imported by the production pipeline; keeps its visual-compilation role, motion parts converge here"
+    },
+    "observer_smoothstep": "observer's own smoothstep remains intentional and independent"
+  }
+}

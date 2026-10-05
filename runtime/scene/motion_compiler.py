@@ -12,6 +12,16 @@ position / scale / opacity / rotation / delay / duration / easing。
 """
 from __future__ import annotations
 
+# --- canonical delegation bootstrap (single source of truth) ---------------
+# 语义动作里的 easing 名称不再自成体系：它们必须能被唯一真相源
+# timeline.easing 解析。此模块只提供语义→通道参数，不持有任何曲线数学。
+import os as _os
+import sys as _sys
+_RUNTIME_DIR = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if _RUNTIME_DIR not in _sys.path:
+    _sys.path.insert(0, _RUNTIME_DIR)
+from motion_canonical import easing as _canon_easing  # noqa: E402
+
 # 动作 → 通道参数（通道: from → to）
 BASE = {
     # ---- 出现 ----
@@ -93,3 +103,14 @@ def compile_transition(start_state, end_state, actions, targets=None):
             spec["targets"] = list(targets)
         out.append(spec)
     return out
+
+
+def audit_easing():
+    """语义动作的 easing 必须全部可被 canonical 缓动解析（单一真相源）。
+
+    这是行为保持的**契约检查**：只报告，不改动 BASE 或编译输出。
+    """
+    names = sorted({v["ease"] for v in BASE.values()})
+    unknown = [n for n in names if not _canon_easing.is_known(n)]
+    return {"status": "FAIL" if unknown else "PASS",
+            "source": "timeline.easing", "checked": len(names), "unknown": unknown}

@@ -28,6 +28,16 @@ import math
 from dataclasses import dataclass, field, asdict
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
+# --- canonical delegation bootstrap (single source of truth) ---------------
+# Easing lives in exactly one place: timeline.easing. This module no longer
+# owns curve math; it only delegates. See runtime/docs/motion-inventory.md.
+import os as _os
+import sys as _sys
+_RUNTIME_DIR = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if _RUNTIME_DIR not in _sys.path:
+    _sys.path.insert(0, _RUNTIME_DIR)
+from timeline import easing as _canon_easing  # noqa: E402
+
 # ---------------------------------------------------------------- 通道默认值
 CHANNELS = ("dx", "dy", "scale", "rotation", "opacity", "connect", "emphasis")
 CHANNEL_NEUTRAL = {"dx": 0.0, "dy": 0.0, "scale": 1.0, "rotation": 0.0,
@@ -38,50 +48,29 @@ CATEGORIES = ("kinematic", "relational", "state", "attention")
 
 
 # ---------------------------------------------------------------- 缓动
+# 归一化：缓动曲线只有唯一真相源 timeline.easing。此前此处手写的二次/三次
+# 曲线公式已删除，改为对 canonical easing 的委托（行为保持，数值完全一致）。
 def _clamp01(p: float) -> float:
     return 0.0 if p < 0.0 else (1.0 if p > 1.0 else float(p))
 
 
-def ease_linear(p: float) -> float:
-    return _clamp01(p)
+def _canon_ease(name: str):
+    """构造一个对 canonical easing 的委托函数（保留 _clamp01 语义）。"""
+    def _fn(p: float) -> float:
+        return _canon_easing.evaluate(name, _clamp01(p))
+    _fn.__name__ = "ease_%s" % name
+    _fn.__doc__ = "Delegates to timeline.easing.evaluate(%r, .)" % name
+    return _fn
 
 
-def ease_in(p: float) -> float:
-    p = _clamp01(p)
-    return p * p
-
-
-def ease_out(p: float) -> float:
-    p = _clamp01(p)
-    return 1.0 - (1.0 - p) * (1.0 - p)
-
-
-def ease_in_out(p: float) -> float:
-    p = _clamp01(p)
-    return 2 * p * p if p < 0.5 else 1 - 2 * (1 - p) * (1 - p)
-
-
-def ease_out_cubic(p: float) -> float:
-    p = _clamp01(p)
-    return 1.0 - (1.0 - p) ** 3
-
-
-def ease_in_out_cubic(p: float) -> float:
-    p = _clamp01(p)
-    if p < 0.5:
-        return 4 * p * p * p
-    return 1 - (-2 * p + 2) ** 3 / 2
-
-
-def ease_out_back(p: float) -> float:
-    p = _clamp01(p)
-    c1, c3 = 1.70158, 2.70158
-    return 1 + c3 * (p - 1) ** 3 + c1 * (p - 1) ** 2
-
-
-def ease_in_cubic(p: float) -> float:
-    p = _clamp01(p)
-    return p ** 3
+ease_linear = _canon_ease("linear")
+ease_in = _canon_ease("easeIn")
+ease_out = _canon_ease("easeOut")
+ease_in_out = _canon_ease("easeInOut")
+ease_out_cubic = _canon_ease("easeOutCubic")
+ease_in_cubic = _canon_ease("easeInCubic")
+ease_in_out_cubic = _canon_ease("easeInOutCubic")
+ease_out_back = _canon_ease("easeOutBack")
 
 
 EASINGS: Dict[str, Callable[[float], float]] = {

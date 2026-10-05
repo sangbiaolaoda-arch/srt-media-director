@@ -626,6 +626,66 @@ def g21():
     assert tr["dx"] > 50, tr
 
 
+@gate("22. Motion 归一（单一 Canonical Motion，无重复真相源）")
+def g22():
+    """MOTION UNIFICATION · P0 的机器证据门禁。
+
+    验证：① 唯一的 Canonical Motion 包可导入且词汇自审通过；
+          ② Motion 不重复实现缓动 / 变换 —— 对 timeline.easing 与
+             geometry.matrix 的委托零数值偏差；
+          ③ 边界守卫证明 canonical motion 从不 import 旧生产实现；
+          ④ 契约 contracts/motion_semantics.v2.json 存在且类别集合一致。
+    """
+    import motion_canonical as MC
+    from timeline import easing as T_EASING
+    from geometry import matrix as G_MATRIX
+
+    # ① 词汇唯一真相源
+    va = MC.vocabulary.audit()
+    assert va["status"] == "PASS", va["issues"]
+    assert va["canonical_actions"] >= 45, va["canonical_actions"]
+    for n in ("fade", "rise", "pop", "inherit", "sink", "shrink",
+              "MOVE", "SCALE", "ROTATE", "MORPH", "emerge", "wipe"):
+        assert MC.vocabulary.is_canonical(MC.vocabulary.canonical(n)), n
+
+    # ② 缓动 / 进度 / 变换委托零偏差
+    for p in [i / 50.0 for i in range(51)]:
+        assert MC.easing.evaluate("easeOutCubic", p) == \
+            pytest_approx(T_EASING.evaluate("easeOutCubic", p)), p
+    assert MC.progress.progress(0.5, 0.0, 2.0, "easeOutCubic") == \
+        pytest_approx(T_EASING.pr(0.5, 0.0, 2.0, "easeOutCubic"))
+    ch = {"dx": 3.0, "dy": -4.0, "scale": 2.0, "rotation": 30.0}
+    got = MC.transform.channels_to_matrix(x=1, y=2, channels=ch)
+    exp = G_MATRIX.mat_from_parts(1 + 3.0, 2 + (-4.0), 30.0, 2.0)
+    for a, b in zip(got, exp):
+        assert a == pytest_approx(b), (a, b)
+    from motion_runtime import contracts as _C
+    for key, fn in _C.EASINGS.items():
+        assert fn(0.37) == pytest_approx(T_EASING.evaluate(key, 0.37)), key
+
+    # ③ 边界守卫：不得 import 旧生产实现
+    assert MC.boundary_report()["status"] == "PASS", MC.boundary_report()
+    MC.assert_boundaries()
+
+    # ④ 契约存在且类别一致
+    import json
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(root, "contracts", "motion_semantics.v2.json")) as fh:
+        c = json.load(fh)
+    assert c["contract_id"] == "motion_semantics.v2"
+    for cat in c["categories"]:
+        if not cat.startswith("_"):
+            assert cat in MC.vocabulary.CATEGORIES, cat
+
+
+def pytest_approx(x, tol=1e-9):
+    """无需引入 pytest 的近似比较（self_test 是独立可执行脚本）。"""
+    class _A:
+        def __eq__(self, other):
+            return abs(other - x) <= tol
+    return _A()
+
+
 def main():
     print("SRT Media Director — runtime self-test")
     failures = []

@@ -19,32 +19,32 @@ import math
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+# --- canonical delegation bootstrap (single source of truth) ---------------
+# 2D affine transform lives in exactly one place: geometry.matrix. This module
+# no longer owns matrix math; it delegates. See runtime/docs/motion-inventory.md.
+import os as _os
+import sys as _sys
+_RUNTIME_DIR = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if _RUNTIME_DIR not in _sys.path:
+    _sys.path.insert(0, _RUNTIME_DIR)
+from geometry import matrix as _geom  # noqa: E402
+
 Mat = Tuple[float, float, float, float, float, float]  # a,b,c,d,e,f
-IDENTITY_M: Mat = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+IDENTITY_M: Mat = _geom.IDENTITY
 
 
 def mat_mul(m1: Mat, m2: Mat) -> Mat:
-    """世界矩阵合成：world = parent @ local（先 local，再 parent）。"""
-    a1, b1, c1, d1, e1, f1 = m1
-    a2, b2, c2, d2, e2, f2 = m2
-    return (a1 * a2 + c1 * b2,
-            b1 * a2 + d1 * b2,
-            a1 * c2 + c1 * d2,
-            b1 * c2 + d1 * d2,
-            a1 * e2 + c1 * f2 + e1,
-            b1 * e2 + d1 * f2 + f1)
+    """世界矩阵合成：world = parent @ local（委托 geometry.matrix 唯一真相源）。"""
+    return _geom.mat_mul(m1, m2)
 
 
 def mat_apply(m: Mat, x: float, y: float) -> Tuple[float, float]:
-    a, b, c, d, e, f = m
-    return (a * x + c * y + e, b * x + d * y + f)
+    return _geom.mat_apply(m, x, y)
 
 
 def local_matrix(node: "Node") -> Mat:
-    """local = T(x,y) @ R(rotation) @ S(scale)。"""
-    rad = math.radians(node.rotation)
-    cos, sin = math.cos(rad) * node.scale, math.sin(rad) * node.scale
-    return (cos, sin, -sin, cos, node.x, node.y)
+    """local = T(x,y) @ R(rotation) @ S(scale)（委托 geometry.matrix）。"""
+    return _geom.mat_from_parts(node.x, node.y, node.rotation, node.scale)
 
 
 @dataclass
