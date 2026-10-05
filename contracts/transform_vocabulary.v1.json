@@ -1,0 +1,28 @@
+{
+  "contract_id": "transform_vocabulary.v1",
+  "_comment": "Canonical 2D transform / coordinate-system vocabulary. This is the SINGLE SOURCE OF TRUTH for how a node's world transform is built from parent + local parts. The rest of the project (motion_runtime.scene, scene.scene_graph, renderers) MUST interpret a transform through this vocabulary so that 'the Agent describes a local coordinate system, the Runtime composes it the same way everywhere' holds. Before this contract, the two scene systems disagreed: motion_runtime used a full affine (rotation honoured), scene.scene_graph used scalar inheritance (rotation ignored), so a rotated node had two different world boxes.",
+  "model": {
+    "representation": "2D affine, 6-tuple (a,b,c,d,e,f) = | a c e ; b d f ; 0 0 1 |",
+    "identity": [1, 0, 0, 1, 0, 0],
+    "point_apply": "(x', y') = (a*x + c*y + e, b*x + d*y + f)",
+    "parent_child": "world = parent_world @ local  (local applied first, then parent)",
+    "local_decomposition": "local = T(x, y) @ R(rotation) @ S(scale)",
+    "rotation_units": "degrees, clockwise-positive in a y-down pixel space",
+    "scale": "uniform by default; anisotropic scale_y is allowed but off the default path"
+  },
+  "bounding_box": {
+    "_comment": "A node's world box is the axis-aligned bounds of its four transformed corners, so rotation is reflected in the box.",
+    "rule": "box = aabb(apply(world_matrix, (0,0)), (w,0), (w,h), (0,h))",
+    "returns": "[x, y, w, h]"
+  },
+  "conventions": {
+    "parent_move": "moving a parent MUST move every descendant's world transform (no per-child absolute re-edit)",
+    "rotation_inheritance": "child world rotation = sum of the chain's rotations (via matrix composition)",
+    "opacity_inheritance": "child world opacity = product of the chain's opacities",
+    "visibility_inheritance": "a node is visible only if every node in its chain is visible"
+  },
+  "known_divergences": {
+    "_comment": "Tracked, not silently 'fixed'. Quantified by runtime/geometry/audit.py.",
+    "scene.scene_graph.world_box": "scalar inheritance: world_box = [ox, oy, w*s, h*s] and world_origin offsets by parent scale only -> rotation ignored (matches canonical only when every chain rotation is 0)"
+  }
+}
