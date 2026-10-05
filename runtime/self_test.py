@@ -686,6 +686,74 @@ def pytest_approx(x, tol=1e-9):
     return _A()
 
 
+# --- Motion canonicalization: sources allowed to hold curve/matrix math ------
+_MOTION_TRUTH_DIRS = ("timeline", "observer", "motion_canonical", "geometry")
+# 曲线 / 矩阵数学的“指纹”。它们只允许出现在上方的真相源目录里。
+_EASE_FINGERPRINTS = (
+    "1.0 - (1.0 - p)",
+    "1 - (1 - p) ** 3",
+    "1.70158",
+    "2 * p * p",
+    "def ease_out_cubic",
+    "def ease_in_cubic",
+    "def ease_out_back",
+)
+_MAT_FINGERPRINTS = (
+    "a1 * a2 + c1 * b2",
+    "b1 * a2 + d1 * b2",
+    "cos, sin = math.cos(rad)",
+)
+
+
+@gate("23. Motion Canonicalization（无重复缓动 / 矩阵 / 词汇真相源）")
+def g23():
+    """PHASE 7 门禁：证明 Motion 已真正归一。
+
+    ① runtime/ 下除真相源目录(timeline/observer/motion_canonical/geometry)
+       外，不得再出现缓动或矩阵数学的“指纹”；
+    ② scene 语义动作的 easing 必须可被唯一真相源 timeline.easing 解析；
+    ③ motion registry 的 CSS 缓动同样必须可解析；
+    ④ 旧生产实现不得被 canonical motion 反向依赖（边界守卫 PASS）。
+    """
+    root = os.path.dirname(os.path.abspath(__file__))
+
+    offenders = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d != "__pycache__"]
+        rel = os.path.relpath(dirpath, root)
+        top = rel.split(os.sep)[0]
+        if top in _MOTION_TRUTH_DIRS:
+            continue  # 真相源目录允许持有数学
+        for fn in filenames:
+            if not fn.endswith(".py"):
+                continue
+            if fn == os.path.basename(__file__):
+                continue  # 门禁自身持有指纹字符串，不是重复实现
+            p = os.path.join(dirpath, fn)
+            with open(p, encoding="utf-8") as fh:
+                text = fh.read()
+            for fp in _EASE_FINGERPRINTS + _MAT_FINGERPRINTS:
+                if fp in text:
+                    offenders.append((os.path.join(rel, fn), fp))
+    assert not offenders, "重复的缓动/矩阵数学仍存在: %r" % offenders
+
+    # ② scene 语义动作 easing 可解析
+    import scene.motion_compiler as _mc
+    ea = _mc.audit_easing()
+    assert ea["status"] == "PASS", ea["unknown"]
+
+    # ③ motion registry 的 CSS 缓动可解析
+    from timeline import easing as _E
+    import motion.motion_registry as _mr
+    for v in _mr.MOTION_PRIMITIVES.values():
+        e = v.get("easing")
+        assert e is None or _E.is_known(e), e
+
+    # ④ 边界守卫
+    import motion_canonical as MC
+    assert MC.boundary_report()["status"] == "PASS", MC.boundary_report()
+
+
 def main():
     print("SRT Media Director — runtime self-test")
     failures = []
