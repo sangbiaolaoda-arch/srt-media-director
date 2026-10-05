@@ -134,6 +134,20 @@ def available() -> bool:
     return _PROBE_CACHE[binary]
 
 
+def emitted_ids_from_html(html_path: str) -> set:
+    """The node ids the renderer's HTML actually contains (independent signal).
+
+    Read straight from the DOM source (regex over ``data-node``), NOT from an
+    observation. This is what lets fidelity tell a renderer miss from an
+    observer drop (Directive v5 §42).
+    """
+    import re
+    with open(html_path, encoding="utf-8") as f:
+        text = f.read()
+    return set(re.findall(r'data-node\s*=\s*"([^"]+)"', text)) | \
+        set(re.findall(r"data-node\s*=\s*'([^']+)'", text))
+
+
 def _inject(html_text: str, probe: str) -> str:
     marker = "</body>"
     idx = html_text.rfind(marker)

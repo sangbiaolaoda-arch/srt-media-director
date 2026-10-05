@@ -1,0 +1,80 @@
+name: browser-contract
+
+# Directive v5 §31-§34: a REAL render-execution lane.
+#
+# The Python x OS matrix tests runtime portability; its browser tests are
+# legitimately skipped there ("skipped" must NOT be read as "browser contract
+# passed"). This lane's job is render execution, so a missing/broken browser is
+# a FAILURE, not a skip: it asserts a functional Chromium before running the
+# browser-gated suite, so the render pipeline is proven, not assumed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: browser-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  render-execution:
+    name: render execution (real chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install functional Chromium
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Install CJK font (glyph-sensitive probes need real fonts)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Assert a functional browser exists (FAIL, never skip)
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "runtime")
+          from observer import browser
+          assert browser.find_browser(), "no chromium binary found"
+          assert browser.available(), "chromium present but NOT functional"
+          print("functional browser:", browser.find_browser())
+          PY
+
+      - name: Browser contract suite (browser-gated tests MUST run)
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: python -m pytest tests -q -rs
+
+      - name: Fail if any browser test was skipped
+        env:
+          CHROMIUM_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          # A skipped browser test in THIS lane means the render pipeline was not
+          # actually exercised -> the contract is unproven -> fail.
+          python -m pytest tests -q -rs 2>&1 | tee /tmp/pytest.log
+          if grep -q "no functional browser" /tmp/pytest.log; then
+            echo "::error::browser tests were skipped in the render-execution lane"
+            exit 1
+          fi
