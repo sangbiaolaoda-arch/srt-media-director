@@ -64,7 +64,13 @@ _PROBE = r"""
 
 
 def find_browser() -> Optional[str]:
-    """Locate a usable Chromium/Chrome binary, or return None."""
+    """Locate a Chromium/Chrome binary, or return None.
+
+    Existence is necessary but NOT sufficient: some distributions (notably
+    Ubuntu, including GitHub's runner image) ship ``/usr/bin/chromium`` as a
+    **snap wrapper** that cannot launch in a bare CI container. A functional
+    probe in :func:`available` is what actually decides usability.
+    """
     env = os.environ.get("CHROMIUM_BIN")
     if env and os.path.exists(env):
         return env
@@ -83,8 +89,49 @@ def find_browser() -> Optional[str]:
     return None
 
 
+_PROBE_MARKER = "TABBIT_OBSERVER_PROBE_OK"
+_PROBE_HTML = ("<!doctype html><html><body><div data-node='probe' "
+               "style='width:10px;height:10px'></div>"
+               "<script>document.title='%s'</script></body></html>" % _PROBE_MARKER)
+
+
+def _functional_probe(binary: str, timeout: int = 20) -> bool:
+    """Return True only if ``binary`` can actually render + dump the DOM.
+
+    This is the honest gate: a present-but-broken binary (e.g. a snap stub)
+    must be reported as unavailable, never allowed to hang a caller.
+    """
+    tmpdir = tempfile.mkdtemp(prefix="observer-probe-")
+    try:
+        p = os.path.join(tmpdir, "probe.html")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(_PROBE_HTML)
+        cmd = [
+            binary, "--headless", "--no-sandbox", "--disable-gpu",
+            "--disable-dev-shm-usage", "--hide-scrollbars",
+            "--user-data-dir=" + os.path.join(tmpdir, "profile"),
+            "--virtual-time-budget=1000", "--dump-dom", "file://" + p,
+        ]
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        except (subprocess.TimeoutExpired, OSError):
+            return False
+        return _PROBE_MARKER in (proc.stdout or "")
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+_PROBE_CACHE: Dict[str, bool] = {}
+
+
 def available() -> bool:
-    return find_browser() is not None
+    """True only if a browser binary is present AND passes a functional probe."""
+    binary = find_browser()
+    if not binary:
+        return False
+    if binary not in _PROBE_CACHE:
+        _PROBE_CACHE[binary] = _functional_probe(binary)
+    return _PROBE_CACHE[binary]
 
 
 def _inject(html_text: str, probe: str) -> str:
@@ -113,7 +160,7 @@ def observe(html_path: str, *, width: int = 680, height: int = 382,
             timeout: int = 60) -> Dict[str, Any]:
     """Observe ``html_path`` and return raw geometry, or an honest empty result."""
     binary = find_browser()
-    if not binary:
+    if not binary or not available():
         return {"available": False, "backend": None, "nodes": [], "edges": [],
                 "viewport": {"w": width, "h": height}}
 
@@ -134,7 +181,13 @@ def observe(html_path: str, *, width: int = 680, height: int = 382,
             "--virtual-time-budget=2000",
             "--dump-dom", "file://" + os.path.abspath(probe_path),
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return {"available": True, "backend": os.path.basename(binary),
+                    "nodes": [], "edges": [],
+                    "viewport": {"w": width, "h": height},
+                    "error": "observation timed out after %ds" % timeout}
         raw = _extract(proc.stdout)
         if raw is None:
             return {"available": True, "backend": os.path.basename(binary),
@@ -159,8 +212,8 @@ def observe_timeline(ws, outdir: str, *, width: int = 680, height: int = 382,
     from . import render
     frames = render.render_timeline(ws, outdir)
     observations = []
-    available = find_browser() is not None
+    avail = available()
     for path, t in frames:
         obs = observe(path, width=width, height=height, timeout=timeout)
         observations.append((t, obs))
-    return observations, available
+    return observations, avail

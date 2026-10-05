@@ -48,6 +48,34 @@ def test_honest_degradation_when_no_browser(monkeypatch, tmp_path):
     assert rep["status"] == "UNAVAILABLE" and rep["available"] is False
 
 
+def test_present_but_broken_binary_is_unavailable(monkeypatch, tmp_path):
+    """Regression: an existing-but-nonfunctional binary (e.g. the Ubuntu snap
+    stub on CI runners) must be reported unavailable, never allowed to hang."""
+    monkeypatch.setattr(browser, "find_browser", lambda: "/usr/bin/chromium")
+    monkeypatch.setattr(browser, "_functional_probe", lambda *a, **k: False)
+    browser._PROBE_CACHE.clear()
+    assert browser.available() is False
+    p = tmp_path / "x.html"
+    p.write_text("<html><body></body></html>", encoding="utf-8")
+    obs = browser.observe(str(p))
+    assert obs["available"] is False
+    browser._PROBE_CACHE.clear()
+
+
+def test_probe_cache_is_used(monkeypatch):
+    calls = {"n": 0}
+
+    def counting(binary, timeout=20):
+        calls["n"] += 1
+        return True
+
+    monkeypatch.setattr(browser, "_functional_probe", counting)
+    browser._PROBE_CACHE.clear()
+    assert browser.available() and browser.available() and browser.available()
+    assert calls["n"] == 1  # cached after first probe
+    browser._PROBE_CACHE.clear()
+
+
 def test_normalization_deterministic_and_order_independent():
     obs = {"available": True, "backend": "x",
            "nodes": [{"id": "b", "x": 1.2, "y": 0.3, "w": 10.0, "h": 5.0,
