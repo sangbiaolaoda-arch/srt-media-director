@@ -1,0 +1,23 @@
+{
+  "contract_id": "follows.v1",
+  "version": "1.0",
+  "predicate": "FOLLOWS",
+  "review": {
+    "status": "audited",
+    "independent_of_runtime": true,
+    "note": "Data-only contract; not authored by the runtime under test."
+  },
+  "entailment": [
+    {
+      "kind": "temporal_precedence",
+      "before": "$subject",
+      "after": "$object",
+      "rationale": "A FOLLOWS B is purely a temporal ordering claim: A precedes B."
+    },
+    {
+      "kind": "final_focus",
+      "object": "$object",
+      "rationale": "Chronological narration lands on the later event."
+    }
+  ]
+}

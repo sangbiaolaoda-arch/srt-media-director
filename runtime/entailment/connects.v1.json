@@ -1,0 +1,24 @@
+{
+  "contract_id": "connects.v1",
+  "version": "1.0",
+  "predicate": "CONNECTS",
+  "review": {
+    "status": "audited",
+    "independent_of_runtime": true,
+    "note": "Data-only contract; not authored by the runtime under test."
+  },
+  "entailment": [
+    {
+      "kind": "relation_direction",
+      "relation_type": "connects",
+      "source": "$subject",
+      "target": "$object",
+      "rationale": "A CONNECTS B entails a directed connector; the relation has an orientation."
+    },
+    {
+      "kind": "final_focus",
+      "object": "$object",
+      "rationale": "The narrative lands on the downstream endpoint."
+    }
+  ]
+}

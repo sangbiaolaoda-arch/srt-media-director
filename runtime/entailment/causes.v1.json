@@ -1,0 +1,30 @@
+{
+  "contract_id": "causes.v1",
+  "version": "1.0",
+  "predicate": "CAUSES",
+  "review": {
+    "status": "audited",
+    "independent_of_runtime": true,
+    "note": "This contract is data, versioned outside the runtime. It must never be authored by the runtime under test."
+  },
+  "entailment": [
+    {
+      "kind": "relation_direction",
+      "relation_type": "causes",
+      "source": "$subject",
+      "target": "$object",
+      "rationale": "A CAUSES B entails a directed relation from cause to effect; the direction is not reversible."
+    },
+    {
+      "kind": "temporal_precedence",
+      "before": "$subject",
+      "after": "$object",
+      "rationale": "The cause must become salient no later than the effect; the effect cannot precede its cause."
+    },
+    {
+      "kind": "final_focus",
+      "object": "$object",
+      "rationale": "Causal narration resolves onto the effect, not the cause, at the end of the beat."
+    }
+  ]
+}

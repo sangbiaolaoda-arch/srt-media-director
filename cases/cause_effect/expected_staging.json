@@ -1,0 +1,15 @@
+{
+  "case_id": "cause_effect_001",
+  "layer": "STAGING",
+  "rigidity": "SOFT",
+  "note": "Staging is advisory. Deviation is DRIFT, never a hard failure. Same content may be staged differently without failing the semantic contract.",
+  "soft_constraints": [
+    {
+      "kind": "phase_sequence",
+      "relation_type": "causes",
+      "source": "pressure",
+      "target": "stability_failure",
+      "sequence": ["establishing", "active"]
+    }
+  ]
+}
