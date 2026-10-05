@@ -16,6 +16,8 @@ from __future__ import annotations
 import copy
 import math
 
+from geometry import legacy as _geometry_legacy
+
 WEIGHTS = ("primary", "secondary", "support", "decoration")
 # 语义容器：Scene → Background/Typography/Elements/Charts/Camera
 LAYERS = ("background", "typography", "elements", "charts", "camera")
@@ -76,19 +78,11 @@ class SceneNode:
 
     # ------------------------------------------------------------ 变换继承
     def world_scale(self):
-        s = self.scale
-        n = self.parent
-        while n is not None:
-            s *= n.scale
-            n = n.parent
-        return s
+        # delegate to the canonical geometry adapter (behavior-preserving)
+        return _geometry_legacy.scene_world_scale(self)
 
     def world_origin(self):
-        if self.parent is None:
-            return (self.x, self.y)
-        px, py = self.parent.world_origin()
-        ps = self.parent.world_scale()
-        return (px + self.x * ps, py + self.y * ps)
+        return _geometry_legacy.scene_world_origin(self)
 
     def world_rotation(self):
         r = self.rotation
@@ -107,9 +101,8 @@ class SceneNode:
         return o
 
     def world_box(self):
-        ox, oy = self.world_origin()
-        s = self.world_scale()
-        return [ox, oy, self.w * s, self.h * s]
+        # delegate to the canonical geometry adapter (behavior-preserving)
+        return _geometry_legacy.scene_world_box(self)
 
     def world_center(self):
         x, y, w, h = self.world_box()
