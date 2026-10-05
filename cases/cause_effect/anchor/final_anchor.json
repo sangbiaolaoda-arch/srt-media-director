@@ -1,0 +1,31 @@
+{
+  "case_id": "cause_effect_001",
+  "anchor_version": "1.0",
+  "locked": true,
+  "provenance": {
+    "annotation_a": {
+      "annotator": "A",
+      "method": "causal_connective_split",
+      "claim": {"subject": "pressure", "predicate": "CAUSES", "object": "stability_failure"}
+    },
+    "annotation_b": {
+      "annotator": "B",
+      "method": "ontology_term_scan",
+      "claim": {"subject": "pressure", "predicate": "CAUSES", "object": "stability_failure"}
+    },
+    "adjudication": {
+      "method": "independent_dual_annotation",
+      "adjudicator": "phase0-adjudicator",
+      "agree": true
+    }
+  },
+  "claims": [
+    {
+      "id": "c1",
+      "subject": "pressure",
+      "predicate": "CAUSES",
+      "object": "stability_failure",
+      "contract": "causes.v1"
+    }
+  ]
+}

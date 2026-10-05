@@ -1,0 +1,11 @@
+{
+  "annotator": "A",
+  "method": "causal_connective_split",
+  "sees_only": "source.json",
+  "case_id": "cause_effect_001",
+  "claim": {
+    "subject": "pressure",
+    "predicate": "CAUSES",
+    "object": "stability_failure"
+  }
+}
