@@ -5,6 +5,6 @@
 * :mod:`timeline.audit`   -- a divergence audit that measures how far the other
   subsystems' easing implementations drift from the canonical vocabulary.
 """
-from . import audit, easing  # noqa: F401
+from . import audit, easing, legacy  # noqa: F401
 
-__all__ = ["easing", "audit"]
+__all__ = ["easing", "audit", "legacy"]

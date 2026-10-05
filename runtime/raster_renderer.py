@@ -20,6 +20,7 @@ import random
 from PIL import Image, ImageDraw, ImageFilter
 
 import svg_art
+from timeline import legacy as _legacy
 from common import (CANVAS_W as W, CANVAS_H as H, COLORS, PALETTES, THEME,
                     ensure_dir, font, hex2rgb)
 
@@ -101,8 +102,8 @@ def _clamp01(v):
 
 
 def _ease(t):
-    t = _clamp01(t)
-    return t * t * (3 - 2 * t)
+    # Curve math lives in timeline.easing (single source of truth).
+    return _legacy.raster_ease(t)
 
 
 def _rgb(c):

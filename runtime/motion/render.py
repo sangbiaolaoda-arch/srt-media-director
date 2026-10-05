@@ -6,6 +6,7 @@ motion_policy。为可复现与可逐时刻冻结，这里在 Python 侧按原�
 整条链路仍是：RenderPlan → HTML（内联运动状态）→ Playwright → PNG。
 """
 import os, re, html as _html
+from timeline import legacy as _legacy
 from .motion_registry import MOTION_PRIMITIVES, is_valid_motion, STATIC_LIKE
 
 PALETTE_BG = {
@@ -19,14 +20,9 @@ IDENTITY = {"opacity": 1.0, "tx": 0.0, "ty": 0.0, "sx": 1.0, "sy": 1.0,
 
 # ------------------------------------------------------------------ 缓动
 def _ease(name, p):
-    p = max(0.0, min(1.0, p))
-    if name == "linear":
-        return p
-    if name == "ease-out":
-        return 1 - (1 - p) ** 3
-    if name == "ease-in":
-        return p ** 3
-    return p * p * (3 - 2 * p)                 # ease-in-out / 近似 cubic-bezier
+    # Curve math lives in timeline.easing (single source of truth); this adapter
+    # is byte-parity with the previous implementation.
+    return _legacy.render_legacy_ease(name, p)
 
 
 # ------------------------------------------------------------------ 关键帧解析

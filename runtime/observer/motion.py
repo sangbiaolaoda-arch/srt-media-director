@@ -22,6 +22,8 @@ import json
 import os
 from typing import Any, Dict, Optional
 
+from timeline import legacy as _legacy
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(os.path.dirname(_HERE))
 CONTRACT_PATH = os.path.join(_ROOT, "contracts", "motion_projection.v1.json")
@@ -43,12 +45,8 @@ def load_contract(path: Optional[str] = None) -> Dict[str, Any]:
 
 
 def ease(t: float) -> float:
-    """Smoothstep easing, clamped to [0, 1] — reimplemented from the contract."""
-    if t < 0.0:
-        t = 0.0
-    elif t > 1.0:
-        t = 1.0
-    return t * t * (3.0 - 2.0 * t)
+    """Smoothstep easing, clamped to [0, 1] — delegated to the canonical vocabulary."""
+    return _legacy.observer_ease(t)
 
 
 def expected_transform(lc: Dict[str, Any], t: float,
