@@ -1,0 +1,14 @@
+{
+  "contract_id": "box_semantics.v1",
+  "_comment": "Canonical axis-aligned box semantics. SINGLE SOURCE OF TRUTH for 'what a box is' and the geometry questions asked of it (area, center, overlap, normalization). Before this contract, composition_planner and compiler/negative_space each carried their own helpers, with two different box shapes (dict vs tuple) and a divergent area rule.",
+  "box": "(x, y, w, h) in pixels; x,y is the top-left corner",
+  "normalized_box": "(nx, ny, nw, nh) in 0..1; pixels = (nx*W, ny*H, nw*W, nh*H)",
+  "area": "max(0, w) * max(0, h)  -- degenerate boxes contribute zero, never negative",
+  "center": "(x + w/2, y + h/2)",
+  "overlap": "positive intersection area strictly greater than a tolerance (default 2px on each axis)",
+  "clamp": "keep the box inside [0,W]x[0,H]",
+  "known_divergences": {
+    "_comment": "Tracked, not hidden. Quantified by runtime/geometry/audit.py.",
+    "composition_planner._area": "unclamped w*h -> differs from canonical only for degenerate (negative-dimension) boxes"
+  }
+}

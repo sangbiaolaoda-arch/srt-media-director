@@ -14,6 +14,7 @@ re-centered on the *measured* footprint inside their region.
 import math
 
 from common import CANVAS_W as W, CANVAS_H as H, SAFE, measure_text
+from geometry import legacy as _geom_legacy
 
 FONT_SIZES = {
     "eyebrow": 20, "note": 22, "label": 26, "keyword": 44,
@@ -75,22 +76,20 @@ COMPOSITION_POLICY = {
 
 
 def _rect(norm):
-    x, y, w, h = norm
-    return {"x": x * W, "y": y * H, "w": w * W, "h": h * H}
+    # delegate to the canonical box vocabulary (behavior-preserving)
+    return _geom_legacy.planner_rect(norm, W, H)
 
 
 def _intersect(a, b):
-    ox = min(a["x"] + a["w"], b["x"] + b["w"]) - max(a["x"], b["x"])
-    oy = min(a["y"] + a["h"], b["y"] + b["h"]) - max(a["y"], b["y"])
-    return ox > 2 and oy > 2
+    return _geom_legacy.planner_intersect(a, b)
 
 
 def _area(b):
-    return b["w"] * b["h"]
+    return _geom_legacy.planner_area(b)
 
 
 def _center_of(b):
-    return (b["x"] + b["w"] / 2.0, b["y"] + b["h"] / 2.0)
+    return _geom_legacy.planner_center(b)
 
 
 def _proximity_pairs(beat, boxes):

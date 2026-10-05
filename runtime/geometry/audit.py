@@ -93,10 +93,39 @@ def audit_scene_graph() -> List[Dict[str, Any]]:
     ]
 
 
+def audit_box_helpers() -> List[Dict[str, Any]]:
+    """Same box questions answered two ways: measure the drift.
+
+    ``composition_planner._area`` is a raw ``w*h``; canonical clamps to >=0. They
+    agree on every real box and differ only for degenerate (negative-dimension)
+    boxes, which the audit makes explicit.
+    """
+    from . import box as _b
+
+    normal = [(0.0, 0.0, 10.0, 10.0), (5.0, 5.0, 200.0, 80.0)]
+    degen = [(0.0, 0.0, -5.0, 4.0)]
+
+    normal_worst = max(abs(_b.area_unsafe(t) - _b.area(t)) for t in normal)
+    degen_worst = max(abs(_b.area_unsafe(t) - _b.area(t)) for t in degen)
+
+    # intersection rule drift: planner is strict >2px, canonical default tol=2.0
+    a, b = (0.0, 0.0, 10.0, 10.0), (10.0, 0.0, 10.0, 10.0)  # edge-touching
+    cross = 1.0 if _b.overlaps(a, b, tol=2.0) else 0.0
+
+    return [
+        _rec("composition_planner._area", "normal boxes",
+             "geometry.box.area", "unclamped w*h", normal_worst),
+        _rec("composition_planner._area", "degenerate box",
+             "geometry.box.area", "unclamped w*h (canonical clamps to >=0)", degen_worst),
+        _rec("composition_planner._intersect", "edge-touching boxes",
+             "geometry.box.overlaps", "strict >2px both axes", cross),
+    ]
+
+
 def divergences() -> List[Dict[str, Any]]:
     """All divergence records across the audited subsystems."""
     out: List[Dict[str, Any]] = []
-    for fn in (audit_motion_runtime_scene, audit_scene_graph):
+    for fn in (audit_motion_runtime_scene, audit_scene_graph, audit_box_helpers):
         out.extend(fn())
     return out
 

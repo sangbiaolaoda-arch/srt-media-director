@@ -6,17 +6,15 @@ shipping a crowded frame.
 """
 from __future__ import annotations
 
+from geometry import legacy as _geom_legacy
+
 DENSITY_THRESHOLD = 0.58      # total element coverage of the canvas
 PRIMARY_CLEAR_RATIO = 0.06    # minimum free ring around the primary
 
 
 def _area(b):
-    if not b:
-        return 0.0
-    try:
-        return max(0.0, float(b[2])) * max(0.0, float(b[3]))
-    except Exception:
-        return 0.0
+    # delegate to the canonical box vocabulary (behavior-preserving)
+    return _geom_legacy.negspace_area(b)
 
 
 def density(boxes, canvas_w=1.0, canvas_h=1.0):

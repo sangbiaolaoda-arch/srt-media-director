@@ -5,6 +5,6 @@
 * :mod:`geometry.audit`  -- a divergence audit that measures how far the other
   subsystems' transform math drifts from the canonical algebra.
 """
-from . import audit, legacy, matrix  # noqa: F401
+from . import audit, box, legacy, matrix  # noqa: F401
 
-__all__ = ["matrix", "audit", "legacy"]
+__all__ = ["matrix", "audit", "legacy", "box"]
