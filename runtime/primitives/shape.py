@@ -35,3 +35,10 @@ def track(x, y, w, h, rx=20):
 def fill(x, y, w, h, rx=18):
     """进度条填充（强调）。"""
     return f'<rect x="{x:.0f}" y="{y:.0f}" width="{w:.0f}" height="{h:.0f}" rx="{rx}" fill="{R.ACC}"/>'
+
+
+def ring(cx, cy, r, w=6, accent=False, role="secondary"):
+    """圆环 / 环带（甘特环、进度环、聚焦圈的通用零件）。"""
+    col = R.ACC if accent else R.stroke(role)[1]
+    return (f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{r:.0f}" fill="none" '
+            f'stroke="{col}" stroke-width="{w}"/>')

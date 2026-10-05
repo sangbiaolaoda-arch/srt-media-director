@@ -30,3 +30,13 @@ def badge(num, cx, cy, r=12):
     return (f'<circle cx="{cx:.0f}" cy="{cy:.0f}" r="{r}" fill="{R.ACC}"/>'
             f'<text x="{cx:.0f}" y="{cy + r * 0.42:.0f}" text-anchor="middle" fill="#FFFFFF" '
             f'font-size="{r + 1}" font-weight="500" font-family="{R.FONT}">{R._esc(num)}</text>')
+
+
+def multiline(lines, x, y, size=14, lh=1.4, col=None, weight=400, anchor="start"):
+    """多行文本块（等行距）——把段落当可复用零件。"""
+    col = R.TMID if col is None else col
+    step = size * lh
+    return "".join(
+        f'<text x="{x:.0f}" y="{y + i * step:.0f}" text-anchor="{anchor}" fill="{col}" '
+        f'font-size="{size}" font-weight="{weight}" font-family="{R.FONT}">{R._esc(ln)}</text>'
+        for i, ln in enumerate(lines))

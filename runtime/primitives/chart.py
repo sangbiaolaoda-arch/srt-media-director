@@ -24,3 +24,16 @@ def ticks(x0, x1, y, n=6):
         g += (f'<line x1="{x:.0f}" y1="{y:.0f}" x2="{x:.0f}" y2="{y + 6:.0f}" '
               f'stroke="{R.MID}" stroke-width="1.25" stroke-linecap="round"/>')
     return g
+
+
+def sparkline(values, x, y, w, h, accent=False):
+    """迷你趋势线：把一串数值归一化进 (x,y,w,h) 盒子里。"""
+    vals = list(values)
+    if not vals:
+        return ""
+    lo, hi = min(vals), max(vals)
+    span = (hi - lo) or 1.0
+    n = len(vals)
+    pts = [(x + (w * i / (n - 1) if n > 1 else 0.0),
+            y + h * (1.0 - (v - lo) / span)) for i, v in enumerate(vals)]
+    return path.polyline(pts, accent=accent)

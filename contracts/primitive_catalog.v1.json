@@ -1,0 +1,18 @@
+{
+  "contract_id": "primitive_catalog.v1",
+  "_comment": "Canonical catalog of reusable visual primitives. This is the SINGLE SOURCE OF TRUTH for 'what reusable parts exist'. Each primitive is a FUNCTION (takes geometry, returns an SVG fragment) so any composition can reuse it -- never a baked template. runtime/primitives/catalog.py introspects the code against this catalog and runtime/primitives/audit.py reports drift; a primitive that is added in code but not declared here (or declared but missing) is a divergence.",
+  "return_contract": "str -- a self-contained SVG fragment (no <svg> wrapper), styled from the ref_frame palette/roles",
+  "signature_contract": "geometry-first positional args (x/y/w/h or cx/cy/r); optional role/color/accent last",
+  "categories": {
+    "shape":     {"module": "primitives.shape",     "members": ["card", "dot", "bar", "track", "fill", "ring"]},
+    "text":      {"module": "primitives.text",      "members": ["title", "caption", "label", "badge", "multiline"]},
+    "path":      {"module": "primitives.path",      "members": ["line", "arrow", "polyline", "threshold", "arc"]},
+    "chart":     {"module": "primitives.chart",     "members": ["accumulating_bars", "baseline", "ticks", "sparkline"]},
+    "connector": {"module": "primitives.connector", "members": ["elbow", "dashed", "relation_edges"]},
+    "motif":     {"module": "primitives.motif",     "members": ["bell", "focus_break", "bar_half", "door", "phone"]}
+  },
+  "helpers_are_not_primitives": ["registry"],
+  "known_gaps": {
+    "_comment": "Tracked, not hidden. The catalog is intentionally small and grew from a 202-LOC thin layer; undiscovered parts stay visible as divergences until declared."
+  }
+}
