@@ -53,3 +53,45 @@ def test_hash_stable_across_in_process_calls():
     h1 = serializer.world_state_hash(compiler.compile_world_state(a).to_dict())
     h2 = serializer.world_state_hash(compiler.compile_world_state(a).to_dict())
     assert h1 == h2
+
+
+# --- Directive v5 §24-§25: N=100 canonical-identical gate -------------------
+
+@pytest.mark.parametrize("case", ["cause_effect", "follows_001", "connects_001"])
+def test_gate_is_100_canonical_identical(case):
+    """§24: 100/100 runs must collapse to one canonical world-state."""
+    g = determinism.gate(_anchor(case))
+    assert g["reps"] == 100
+    assert g["canonical_identical"] is True
+    assert g["status"] == determinism.DETERMINISM_PASS
+    assert len(g["unique_hashes"]) == 1
+
+
+def test_unstable_runtime_is_classified_env_unstable(monkeypatch):
+    """§25: a non-deterministic runtime -> RUNTIME_ENV_UNSTABLE, never tolerance widening."""
+    a = _anchor("cause_effect")
+
+    # inject non-determinism into the runtime under test: alternate the
+    # canonical serialization of the produced world-state.
+    calls = {"n": 0}
+    real = compiler.compile_world_state
+
+    class FlakyWS:
+        def __init__(self, inner, n):
+            self._inner = inner
+            self._n = n
+
+        def to_dict(self):
+            d = self._inner.to_dict()
+            if self._n % 2 == 0:
+                d["injected_nondeterminism"] = True
+            return d
+
+    def flaky(anchor, *args, **kwargs):
+        calls["n"] += 1
+        return FlakyWS(real(anchor, *args, **kwargs), calls["n"])
+
+    monkeypatch.setattr(determinism.compiler, "compile_world_state", flaky)
+    g = determinism.gate(a, reps=4)
+    assert g["canonical_identical"] is False
+    assert g["status"] == determinism.RUNTIME_ENV_UNSTABLE

@@ -20,6 +20,16 @@ from . import compiler, serializer
 # calving the hashes is cheap, so 1000 is the default.
 DEFAULT_REPS = 1000
 
+# Directive v5 §24: the runtime determinism gate uses N=100 repeats and requires
+# 100/100 canonical world-states to be identical. This is NOT a p99 estimate —
+# it is a hard "is the runtime stable at all" check.
+GATE_REPS = 100
+
+# Directive v5 §25: when the runtime is not deterministic we classify it as an
+# unstable ENVIRONMENT, never relax the contract / widen tolerance.
+RUNTIME_ENV_UNSTABLE = "RUNTIME_ENV_UNSTABLE"
+DETERMINISM_PASS = "PASS"
+
 
 def calibrate(anchor: Dict[str, Any], *,
               contract: Optional[Dict[str, Any]] = None,
@@ -35,6 +45,25 @@ def calibrate(anchor: Dict[str, Any], *,
         "reps": reps,
         "unique_hashes": unique,
         "deterministic": len(unique) == 1,
+    }
+
+
+def gate(anchor: Dict[str, Any], *,\
+         contract: Optional[Dict[str, Any]] = None,\
+         reps: int = GATE_REPS, **faults: Any) -> Dict[str, Any]:
+    """Directive v5 §24-§25 determinism gate: N=100 canonical-identical.
+
+    Returns PASS only when every one of ``reps`` runs collapses to a single
+    canonical hash. Otherwise the verdict is RUNTIME_ENV_UNSTABLE — we do NOT
+    widen any tolerance to hide it (§25).
+    """
+    rep = calibrate(anchor, contract=contract, reps=reps, **faults)
+    canonical_identical = rep["deterministic"] and len(rep["unique_hashes"]) == 1
+    return {
+        "status": DETERMINISM_PASS if canonical_identical else RUNTIME_ENV_UNSTABLE,
+        "reps": reps,
+        "canonical_identical": canonical_identical,
+        "unique_hashes": rep["unique_hashes"],
     }
 
 
