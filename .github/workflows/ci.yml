@@ -47,19 +47,18 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          choco install -y gtk-runtime --no-progress
-          # choco updates the *machine* PATH, which the already-running job
-          # process does not reload. cairocffi resolves the library via
-          # ctypes.util.find_library -> ffi.dlopen, which on Windows honours the
-          # dedicated CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory).
-          # Point it at the GTK runtime, and also expose that dir on PATH so the
-          # dependent DLLs (freetype/fontconfig/glib) resolve.
-          $gtk = 'C:\Program Files (x86)\GTK2-Runtime'
-          $dirs = @("$gtk\bin", "$gtk\lib") | Where-Object { Test-Path $_ }
-          if ($dirs.Count -gt 0) {
-            "CAIROCFFI_DLL_DIRECTORIES=$($dirs -join ';')" | Out-File -Append $env:GITHUB_ENV
-            foreach ($d in $dirs) { $d | Out-File -Append $env:GITHUB_PATH }
-          }
+          # choco's gtk-runtime is 32-bit only (installs to Program Files (x86)),
+          # which the 64-bit runner Python cannot load -> ffi.dlopen fails with
+          # error 0xc1 (ERROR_BAD_EXE_FORMAT). Use the 64-bit cairo from the
+          # MSYS2 toolchain that is preinstalled on the windows runner instead.
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm --needed mingw-w64-x86_64-cairo"
+          # cairocffi resolves the library via ctypes.util.find_library ->
+          # ffi.dlopen, which on Windows honours the dedicated
+          # CAIROCFFI_DLL_DIRECTORIES hook (os.add_dll_directory). Point it at
+          # the mingw64 bin, and expose it on PATH so dependent DLLs resolve.
+          $cairoBin = 'C:\msys64\mingw64\bin'
+          "CAIROCFFI_DLL_DIRECTORIES=$cairoBin" | Out-File -Append $env:GITHUB_ENV
+          $cairoBin | Out-File -Append $env:GITHUB_PATH
 
       - name: Install CJK font (raster probe needs real glyphs)
         if: runner.os == 'Linux'
