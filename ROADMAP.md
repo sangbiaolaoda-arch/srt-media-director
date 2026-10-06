@@ -3,6 +3,16 @@
 方向只有一个：**让「导演决策」与「执行验证」的边界更清晰、更可携带**。
 方法论层（skills/）保持稳定，执行层（runtime/）逐步扩充已验证的能力。
 
+## Current Development State
+
+```text
+META-0 Judge Seal ......... ACCEPTED
+P2-1 Composition .......... ACCEPTED
+P2-2 Execution Layer ...... IN PROGRESS
+P2-3 Cross-beat Continuity  PENDING
+L4 Human Review ........... PENDING
+```
+
 ## v7.0 — 自适应视觉导演（已完成）
 
 **固定审美原则，不固定视觉风格；固定视觉语法体系，不固定表达；
