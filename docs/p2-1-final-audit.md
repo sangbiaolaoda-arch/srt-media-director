@@ -1,5 +1,9 @@
 # P2-1 Final Audit
 
+> **Status (current): `P2-1 ACCEPTED`.** META-0 Judge Seal is complete and passing; the staleness in
+> §6/§7 below is historical (captured before the operator re-seal). Process evidence §1–§5 is
+> preserved unchanged — only the current Status/Verdict is updated.
+
 Scope: verify `c511b4b` (P2-1 core) and correct its evidence; no new features, templates,
 grammar operations, motifs, motion types, anti-cheat, validators, or test cases were added.
 Files touched in this audit: `tools/compare_quality.py`, `runtime/visual_director.py` (dead-code
@@ -130,9 +134,12 @@ dead ROTATION cleaned ......... YES
 no machine-level regression .... YES (0 regressed; per-case scan none)
 L4 composition/semantic/ppt
   review ..................... DONE at minimal qualitative level; L4 scores remain PENDING
-Judge Seal PASS ................ NO — pending operator re-seal
+Judge Seal PASS ................ YES — re-sealed by operator (META-0 complete)
 ```
 
-**Verdict: `ENGINEERING BLOCKED ON JUDGE RE-SEAL`.** P2-1 core is preserved and verified at the
-machine level; the only unmet condition for `P2-1 ACCEPTED` is the operator re-seal of the two golden
-oracles. Do not start P2-2 until the seal passes.
+**Verdict: `P2-1 ACCEPTED`.** P2-1 core is preserved and verified at the machine level, and the two
+golden oracles were re-sealed by the operator after META-0 completed. `judge_guard.verify()` now
+reports a clean seal, and the judge-portability CI job passes on Linux/macOS/Windows. The historical
+process evidence above (§1–§6) is preserved unchanged; only the current Status/Verdict is updated.
+The prior `ENGINEERING BLOCKED ON JUDGE RE-SEAL` verdict is superseded. P2-2 (Execution Layer) is now
+unblocked.
