@@ -1,0 +1,1114 @@
+{
+  "cases": [
+    {
+      "srt": "examples/minimal/attention.srt",
+      "exists": true,
+      "cues": 8,
+      "beats": 5,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:shrink",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0456,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0894,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.021,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0617,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.046,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0527,
+      "colors_mean": 48.0,
+      "contact_sheet": "contact-examples__minimal__attention.png",
+      "contact_size": [
+        1326,
+        516
+      ]
+    },
+    {
+      "srt": "examples/run/attention-30s.srt",
+      "exists": true,
+      "cues": 7,
+      "beats": 6,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0207,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0736,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0246,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0675,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0206,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0924,
+          "distinct_colors": 47
+        }
+      ],
+      "ink_mean": 0.0499,
+      "colors_mean": 47.5,
+      "contact_sheet": "contact-examples__run__attention-30s.png",
+      "contact_size": [
+        1326,
+        516
+      ]
+    },
+    {
+      "srt": "examples/run/10月2日.srt",
+      "exists": true,
+      "cues": 89,
+      "beats": 25,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0226,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.1115,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0245,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0772,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0231,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0505,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0538,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.0739,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.0241,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_10",
+          "ink_ratio": 0.1125,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_11",
+          "ink_ratio": 0.0238,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_12",
+          "ink_ratio": 0.04,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_13",
+          "ink_ratio": 0.0226,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_14",
+          "ink_ratio": 0.0602,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_15",
+          "ink_ratio": 0.0454,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_16",
+          "ink_ratio": 0.107,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_17",
+          "ink_ratio": 0.0201,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_18",
+          "ink_ratio": 0.059,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_19",
+          "ink_ratio": 0.0206,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_20",
+          "ink_ratio": 0.0906,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_21",
+          "ink_ratio": 0.0264,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_22",
+          "ink_ratio": 0.0798,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_23",
+          "ink_ratio": 0.0508,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_24",
+          "ink_ratio": 0.0993,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_25",
+          "ink_ratio": 0.0421,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0545,
+      "colors_mean": 47.8,
+      "contact_sheet": "contact-examples__run__10月2日.png",
+      "contact_size": [
+        1326,
+        2280
+      ]
+    },
+    {
+      "srt": "examples/run/10月4日.srt",
+      "exists": true,
+      "cues": 128,
+      "beats": 36,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0666,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0693,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0406,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.1201,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0238,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0901,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0238,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.092,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.0225,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_10",
+          "ink_ratio": 0.112,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_11",
+          "ink_ratio": 0.029,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_12",
+          "ink_ratio": 0.0473,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_13",
+          "ink_ratio": 0.0872,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_14",
+          "ink_ratio": 0.0205,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_15",
+          "ink_ratio": 0.0761,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_16",
+          "ink_ratio": 0.0225,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_17",
+          "ink_ratio": 0.0706,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_18",
+          "ink_ratio": 0.0236,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_19",
+          "ink_ratio": 0.0479,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_20",
+          "ink_ratio": 0.0251,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_21",
+          "ink_ratio": 0.0855,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_22",
+          "ink_ratio": 0.0269,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_23",
+          "ink_ratio": 0.0919,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_24",
+          "ink_ratio": 0.0214,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_25",
+          "ink_ratio": 0.0995,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_26",
+          "ink_ratio": 0.0502,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_27",
+          "ink_ratio": 0.079,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_28",
+          "ink_ratio": 0.0243,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_29",
+          "ink_ratio": 0.0741,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_30",
+          "ink_ratio": 0.0755,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_31",
+          "ink_ratio": 0.0244,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_32",
+          "ink_ratio": 0.1034,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_33",
+          "ink_ratio": 0.0229,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_34",
+          "ink_ratio": 0.0727,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_35",
+          "ink_ratio": 0.0213,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_36",
+          "ink_ratio": 0.0933,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0577,
+      "colors_mean": 47.8,
+      "contact_sheet": "contact-examples__run__10月4日.png",
+      "contact_size": [
+        1326,
+        3036
+      ]
+    },
+    {
+      "srt": "examples/showcase/01-explanatory-tech/case.srt",
+      "exists": true,
+      "cues": 19,
+      "beats": 11,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0241,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.1116,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0227,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0737,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0203,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0826,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0424,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.1166,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.02,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_10",
+          "ink_ratio": 0.0739,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_11",
+          "ink_ratio": 0.0278,
+          "distinct_colors": 46
+        }
+      ],
+      "ink_mean": 0.056,
+      "colors_mean": 47.5,
+      "contact_sheet": "contact-examples__showcase__01-explanatory-tech__case.png",
+      "contact_size": [
+        1326,
+        1020
+      ]
+    },
+    {
+      "srt": "examples/showcase/02-narrative-emotion/case.srt",
+      "exists": true,
+      "cues": 46,
+      "beats": 20,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0226,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.1106,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0216,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0916,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0219,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0824,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0554,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.0815,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.0244,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_10",
+          "ink_ratio": 0.1013,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_11",
+          "ink_ratio": 0.0211,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_12",
+          "ink_ratio": 0.0597,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_13",
+          "ink_ratio": 0.1093,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_14",
+          "ink_ratio": 0.0233,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_15",
+          "ink_ratio": 0.0633,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_16",
+          "ink_ratio": 0.0251,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_17",
+          "ink_ratio": 0.0799,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_18",
+          "ink_ratio": 0.0221,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_19",
+          "ink_ratio": 0.0525,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_20",
+          "ink_ratio": 0.0783,
+          "distinct_colors": 47
+        }
+      ],
+      "ink_mean": 0.0574,
+      "colors_mean": 47.7,
+      "contact_sheet": "contact-examples__showcase__02-narrative-emotion__case.png",
+      "contact_size": [
+        1326,
+        1776
+      ]
+    },
+    {
+      "srt": "examples/showcase/03-data-comparison/case.srt",
+      "exists": true,
+      "cues": 20,
+      "beats": 9,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0516,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.056,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0173,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0417,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0947,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0208,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0339,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.0922,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.0194,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0475,
+      "colors_mean": 48.0,
+      "contact_sheet": "contact-examples__showcase__03-data-comparison__case.png",
+      "contact_size": [
+        1326,
+        768
+      ]
+    },
+    {
+      "srt": "examples/showcase/04-longform-3min/case.srt",
+      "exists": true,
+      "cues": 74,
+      "beats": 34,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:shrink",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0856,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0232,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0851,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0235,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0714,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0444,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0845,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.0534,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.1075,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_10",
+          "ink_ratio": 0.0221,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_11",
+          "ink_ratio": 0.1111,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_12",
+          "ink_ratio": 0.0216,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_13",
+          "ink_ratio": 0.0796,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_14",
+          "ink_ratio": 0.0249,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_15",
+          "ink_ratio": 0.0563,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_16",
+          "ink_ratio": 0.0479,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_17",
+          "ink_ratio": 0.0229,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_18",
+          "ink_ratio": 0.0799,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_19",
+          "ink_ratio": 0.0237,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_20",
+          "ink_ratio": 0.1234,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_21",
+          "ink_ratio": 0.0854,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_22",
+          "ink_ratio": 0.0672,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_23",
+          "ink_ratio": 0.0218,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_24",
+          "ink_ratio": 0.0502,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_25",
+          "ink_ratio": 0.0276,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_26",
+          "ink_ratio": 0.0856,
+          "distinct_colors": 46
+        },
+        {
+          "beat": "beat_27",
+          "ink_ratio": 0.0246,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_28",
+          "ink_ratio": 0.0465,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_29",
+          "ink_ratio": 0.0218,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_30",
+          "ink_ratio": 0.0783,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_31",
+          "ink_ratio": 0.0232,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_32",
+          "ink_ratio": 0.0808,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_33",
+          "ink_ratio": 0.0196,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_34",
+          "ink_ratio": 0.0533,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0552,
+      "colors_mean": 47.7,
+      "contact_sheet": "contact-examples__showcase__04-longform-3min__case.png",
+      "contact_size": [
+        1326,
+        3036
+      ]
+    },
+    {
+      "srt": "tests/golden/01-minimal/case.srt",
+      "exists": true,
+      "cues": 8,
+      "beats": 5,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:shrink",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0456,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0894,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.021,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0617,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.046,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0527,
+      "colors_mean": 48.0,
+      "contact_sheet": "contact-tests__golden__01-minimal__case.png",
+      "contact_size": [
+        1326,
+        516
+      ]
+    },
+    {
+      "srt": "tests/golden/02-numeric/case.srt",
+      "exists": true,
+      "cues": 20,
+      "beats": 9,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0516,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.056,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0173,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_04",
+          "ink_ratio": 0.0417,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_05",
+          "ink_ratio": 0.0947,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_06",
+          "ink_ratio": 0.0208,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_07",
+          "ink_ratio": 0.0339,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_08",
+          "ink_ratio": 0.0922,
+          "distinct_colors": 48
+        },
+        {
+          "beat": "beat_09",
+          "ink_ratio": 0.0194,
+          "distinct_colors": 48
+        }
+      ],
+      "ink_mean": 0.0475,
+      "colors_mean": 48.0,
+      "contact_sheet": "contact-tests__golden__02-numeric__case.png",
+      "contact_size": [
+        1326,
+        768
+      ]
+    },
+    {
+      "srt": "tests/known-failures/F02-homogeneous-content/case.srt",
+      "exists": true,
+      "cues": 8,
+      "beats": 3,
+      "layout_audit": "PASS",
+      "entrance_audit": "PASS",
+      "entrance_schema_valid": true,
+      "illegal_motion_tokens": 0,
+      "motion_tokens": [
+        "e:fade",
+        "e:pop",
+        "e:rise",
+        "x:fade",
+        "x:sink"
+      ],
+      "ink": [
+        {
+          "beat": "beat_01",
+          "ink_ratio": 0.0534,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_02",
+          "ink_ratio": 0.0226,
+          "distinct_colors": 47
+        },
+        {
+          "beat": "beat_03",
+          "ink_ratio": 0.0832,
+          "distinct_colors": 47
+        }
+      ],
+      "ink_mean": 0.0531,
+      "colors_mean": 47.0,
+      "contact_sheet": "contact-tests__known-failures__F02-homogeneous-content__case.png",
+      "contact_size": [
+        1326,
+        264
+      ]
+    }
+  ],
+  "summary": {
+    "cases": 11,
+    "entrance_schema_valid_and_legal": 11,
+    "all_entrance_pass": true,
+    "note": "F02-homogeneous-content is a documented known-failure case."
+  }
+}
