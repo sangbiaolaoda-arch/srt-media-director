@@ -1,0 +1,75 @@
+{
+  "entity": "revenue_chart",
+  "state_a": {
+    "value": 30.0
+  },
+  "state_b": {
+    "value": 70.0
+  },
+  "identity_matches": [
+    {
+      "entity_id": "revenue_chart",
+      "rule": "same_id",
+      "confidence": 1.0
+    }
+  ],
+  "delta": [
+    {
+      "entity_id": "revenue_chart",
+      "kind": "value",
+      "frm": 30.0,
+      "to": 70.0,
+      "reason": "revenue grew from 30 to 70"
+    }
+  ],
+  "delta_reason": "revenue grew from 30 to 70",
+  "delta_direction": [
+    "up"
+  ],
+  "transition": {
+    "from_beat": "b1",
+    "to_beat": "b2",
+    "type": "transform",
+    "carried": [
+      "revenue_chart"
+    ],
+    "deltas": [
+      {
+        "entity_id": "revenue_chart",
+        "kind": "value",
+        "frm": 30.0,
+        "to": 70.0,
+        "reason": "revenue grew from 30 to 70"
+      }
+    ],
+    "motion_policy": "required"
+  },
+  "motion": {
+    "action": "growth",
+    "span": [
+      0.0,
+      2.0
+    ]
+  },
+  "sampled_value": {
+    "t0": 30.0,
+    "t_mid": 50.0,
+    "t1": 70.0
+  },
+  "rendered_bar_height_px": {
+    "t0": 249,
+    "t_mid": 347,
+    "t1": 444
+  },
+  "frame_sha256": {
+    "t0": "d4cbc53c449dc859b3a147bd66235ae1b6f1a098c7103b445da80b9ca5ae4178",
+    "t_mid": "072e961c0bc32b328691f50e381ed688802e8d61e498ab5b60ce61f474cdc6a7",
+    "t1": "33409174ca2afef19464d5d7c293e10407a19cf9439093241f489ed3eebd7e6d"
+  },
+  "frames": {
+    "t0": "/mnt/work/repo/docs/p2-2-phase1-evidence/frame_t0.png",
+    "t_mid": "/mnt/work/repo/docs/p2-2-phase1-evidence/frame_t_mid.png",
+    "t1": "/mnt/work/repo/docs/p2-2-phase1-evidence/frame_t1.png"
+  },
+  "validate_issues": []
+}
