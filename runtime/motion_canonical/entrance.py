@@ -23,7 +23,9 @@ _WAVE = {"decor": (0.00, "fade"), "top": (0.00, "rise"),
          "subject": (0.16, "pop"), "connector": (0.26, "fade"),
          "emphasis": (0.50, "pop"), "notes": (0.62, "rise")}
 
-_EXIT_MOTION = {"motif": "sink", "chart": "shrink", "connector": "fade_out"}
+# Deployed entrance-plan contract tokens (schema enum + renderers): the serialized
+# exit motion for a connector is "fade" (not the canonical action name "fade_out").
+_EXIT_MOTION = {"motif": "sink", "chart": "shrink", "connector": "fade"}
 
 # Default minimum wave gap (callers may override; production uses common.G_MIN_WAVE_GAP).
 DEFAULT_MIN_WAVE_GAP = 0.35
@@ -87,7 +89,10 @@ def build_lifecycle(beat, incoming, outgoing, beat_index):
         grp = groups[eid]
         m = el.get("motif")
         if m and m in incoming:
-            life[eid] = {"enter": {"at": round(start, 3), "motion": "carry_over",
+            # Carry-over主体序列化为部署契约的 "inherit"（渲染器识别它并在拍首做
+            # 位置插值）；canonical action 名 "carry_over" 由 vocabulary 层维护，
+            # 不属于 entrance-plan 的序列化契约。
+            life[eid] = {"enter": {"at": round(start, 3), "motion": "inherit",
                                    "dur": 0.01, "after": []},
                          "exit": None}
             continue
@@ -100,10 +105,10 @@ def build_lifecycle(beat, incoming, outgoing, beat_index):
             exit_ = None
         elif grp == "notes":
             exit_ = {"at": round(start + PHASES["resolve"] * dur, 3),
-                     "motion": "fade_out", "dur": round(min(0.5, 0.09 * dur), 3)}
+                     "motion": "fade", "dur": round(min(0.5, 0.09 * dur), 3)}
         elif grp in ("subject", "connector"):
             exit_ = {"at": round(start + 0.94 * dur, 3),
-                     "motion": _norm_motion(_EXIT_MOTION.get(el["type"], "fade_out")),
+                     "motion": _norm_motion(_EXIT_MOTION.get(el["type"], "fade")),
                      "dur": round(min(0.45, 0.08 * dur), 3)}
         life[eid] = {"enter": enter, "exit": exit_}
     return life
@@ -293,7 +298,7 @@ def audit(entrance, min_gap=None):
                 issues.append({"gate": "G5_LIFECYCLE", "beat": bid,
                                "msg": "note %s never exits" % eid})
         any_exit = any(lc.get("exit") for lc in life.values())
-        any_inherit = any(lc["enter"]["motion"] == "carry_over"
+        any_inherit = any(lc["enter"]["motion"] == "inherit"
                           for lc in life.values())
         if not any_exit and not any_inherit \
                 and b["handoff"].get("type") not in ("final_hold", "carry_over"):
