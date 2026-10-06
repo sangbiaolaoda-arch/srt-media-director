@@ -9,6 +9,8 @@ Re-seal is a PRIVILEGED, auditable act: it requires the judge signing authority
 (``SMD_JUDGE_KEY``, see ``authority``).  An agent without the key cannot silently
 "fix" the seal after editing a judge — the guard stays FAILED.  Every re-seal
 appends an entry to ``reseal_log.json`` (who / when / how many files / key id).
+``reseal_log.json`` is ITSELF a sealed file, so ``write_manifest`` must write the
+log entry BEFORE computing the seal (see the ordering note in ``write_manifest``).
 
 HONEST LIMITS (see ``audit()``): this is tamper-EVIDENT, not tamper-PROOF.  In a
 single sandbox with arbitrary code execution and the key present, an agent could
@@ -32,6 +34,9 @@ JUDGE_PATTERNS = [
     "runtime/gate_lib.py",
     "runtime/self_test.py",
     "runtime/verification/**/*.py",
+    # The reseal log is itself a judge artifact: seal it too (judge_manifest.json
+    # is excluded by basename in judge_files(); it cannot seal its own hash).
+    "runtime/verification/**/*.json",
     "tools/verify_change.py",
     "tests/golden/**",
     "tests/test_golden.py",
@@ -72,28 +77,54 @@ def seal():
 
 
 def write_manifest(path=MANIFEST, by="operator"):
-    """Re-seal — PRIVILEGED.  Refuses without the judge signing authority."""
+    """Re-seal — PRIVILEGED.  Refuses without the judge signing authority.
+
+    ORDERING MATTERS.  ``reseal_log.json`` is itself a sealed file, so it must be
+    FINAL before ``seal()`` runs.  The old order sealed first and appended the log
+    afterwards, so the manifest committed the log's *pre-write* hash — the act of
+    appending the reseal entry then made ``verify()`` report the log as changed and
+    a "successful" re-seal still failed verify (a self-referential-hash bug).
+
+    Correct order:
+      1. make sure the reseal log exists (so it is part of the sealed set);
+      2. append THIS reseal entry and write the log;
+      3. ``seal()`` — captures the log's final content;
+      4. write ``judge_manifest.json`` with that seal.
+    Then ``write_manifest(...)`` followed by ``verify()`` is consistent (ok=True).
+    """
     from . import authority  # local import: authority imports claims, avoid cycle
     if not authority.signing_available():
         raise PermissionError(
             "re-seal requires the judge signing authority (SMD_JUDGE_KEY); "
             "an agent without the key cannot re-seal the judge system")
-    data = seal()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(data, fh, ensure_ascii=False, indent=2)
-    entry = {"by": by, "count": data["count"],
-             "key": authority.key_fingerprint(),
-             "at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")}
+
+    # 1. Ensure the reseal log exists so judge_files() includes it.
+    if not os.path.isfile(RESEAL_LOG):
+        with open(RESEAL_LOG, "w", encoding="utf-8") as fh:
+            json.dump([], fh)
+    # The sealed-file count is content-independent, so it is stable across the log
+    # write below; the entry records it and it equals data["count"].
+    count = len(judge_files())
+
+    # 2. Append this reseal entry and write the log BEFORE sealing.
     log = []
     if os.path.isfile(RESEAL_LOG):
         try:
             log = json.load(open(RESEAL_LOG, encoding="utf-8"))
         except Exception:  # noqa: BLE001
             log = []
+    entry = {"by": by, "count": count,
+             "key": authority.key_fingerprint(),
+             "at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")}
     log.append(entry)
     with open(RESEAL_LOG, "w", encoding="utf-8") as fh:
         json.dump(log, fh, ensure_ascii=False, indent=2)
+
+    # 3. Seal AFTER the log is final, then 4. write the manifest.
+    data = seal()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, ensure_ascii=False, indent=2)
     return data
 
 

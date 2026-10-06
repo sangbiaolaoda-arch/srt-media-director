@@ -76,3 +76,49 @@ def test_audit_reports_residual_gaps_honestly():
     # residual gaps, not silently claimed as covered.
     assert "residual gap" in a["q5_move_logic_to_unsealed_file"]
     assert "residual gap" in a["q6_import_path_swap"]
+
+
+def test_reseal_log_is_a_sealed_file_in_real_repo():
+    # The reseal log must be sealed (not excluded to dodge the self-hash issue),
+    # while the manifest itself cannot seal its own hash.
+    sealed = {judge_guard._rel(p) for p in judge_guard.judge_files()}
+    assert "runtime/verification/reseal_log.json" in sealed
+    assert "runtime/verification/judge_manifest.json" not in sealed
+
+
+def test_write_manifest_then_verify_is_a_closed_loop(monkeypatch, tmp_path):
+    """Real-behaviour closure test: write_manifest() then verify() must be ok=True.
+
+    Uses a faithful on-disk repo layout (the log lives at
+    ``runtime/verification/reseal_log.json`` *inside* the sealed tree) rather than a
+    repo-external tmp log, so the log genuinely participates in the seal. This is
+    exactly the case the old ordering broke: if the log were sealed but appended to
+    AFTER seal(), verify() would immediately report it changed.
+    """
+    repo = tmp_path / "repo"
+    vdir = repo / "runtime" / "verification"
+    vdir.mkdir(parents=True)
+    (vdir / "judge_code.py").write_text("# sealed judge code\n", encoding="utf-8")
+    logpath = vdir / "reseal_log.json"
+    logpath.write_text("[]\n", encoding="utf-8")
+    mpath = vdir / "judge_manifest.json"
+
+    monkeypatch.setenv("SMD_JUDGE_KEY", "reseal-secret")
+    monkeypatch.setattr(judge_guard, "_REPO", str(repo))
+    monkeypatch.setattr(judge_guard, "RESEAL_LOG", str(logpath))
+
+    # The log is part of the sealed set under this layout.
+    sealed_paths = {judge_guard._rel(p) for p in judge_guard.judge_files()}
+    assert "runtime/verification/reseal_log.json" in sealed_paths
+
+    data = judge_guard.write_manifest(path=str(mpath), by="p2-1-operator")
+
+    # 1) the log really holds THIS reseal ...
+    log = json.load(open(logpath, encoding="utf-8"))
+    assert log[-1]["by"] == "p2-1-operator"
+    # 2) ... and the manifest seals the log's FINAL (post-entry) hash.
+    assert data["files"]["runtime/verification/reseal_log.json"] == judge_guard._hash(str(logpath))
+
+    # 3) the closed loop: the very next verify() must be clean.
+    res = judge_guard.verify(path=str(mpath))
+    assert res["ok"] is True, res
