@@ -6,14 +6,14 @@
 - effect confined to one category: **no**
 
 ## Mean metric deltas
-- `distinct_strategies`: +1.4545
-- `elements`: +1.2727
-- `colors_mean`: +0.275
-- `anti_ppt.encoding_repeat`: -0.2671
-- `anti_ppt.template_repeat`: -0.2671
-- `anti_ppt.text_ratio`: -0.0579
-- `ink_mean`: +0.0159
-- `anti_ppt.fade_only_motion_ratio`: -0.015
+- `distinct_strategies`: +0.7619
+- `elements`: +0.6667
+- `anti_ppt.encoding_repeat`: -0.1399
+- `anti_ppt.template_repeat`: -0.1399
+- `colors_mean`: +0.1048
+- `anti_ppt.text_ratio`: -0.0441
+- `ink_mean`: +0.0121
+- `anti_ppt.fade_only_motion_ratio`: -0.0071
 
 ## Per-case verdicts
 - a01-time.srt                               improved   (+3/-1)

@@ -98,6 +98,7 @@ def main():
     better = worse = same = 0
     # aggregate metric directions
     moved = {}
+    comparable = {}  # metric -> #cases where the metric is present in BOTH versions
     for k in keys:
         b, c = bcases.get(k), ccases.get(k)
         if not b or not c:
@@ -107,9 +108,13 @@ def main():
         deltas = {}
         for metric in sorted(set(bm) | set(cm)):
             bv, cv = bm.get(metric), cm.get(metric)
-            if isinstance(bv, (int, float)) and isinstance(cv, (int, float)) and bv != cv:
-                deltas[metric] = round(cv - bv, 4)
-                moved.setdefault(metric, []).append(cv - bv)
+            if isinstance(bv, (int, float)) and isinstance(cv, (int, float)):
+                # mean delta denominator = #comparable cases (metric present in both),
+                # NOT only the cases where it happened to change.
+                comparable[metric] = comparable.get(metric, 0) + 1
+                if bv != cv:
+                    deltas[metric] = round(cv - bv, 4)
+                    moved.setdefault(metric, []).append(cv - bv)
         # overall direction: count improved vs regressed metrics
         imp = reg = 0
         for metric, d in deltas.items():
@@ -156,11 +161,12 @@ def main():
         "label_before": args.label_before,
         "label_after": args.label_after,
         "summary_counts": {"improved": better, "regressed": worse, "unchanged": same},
-        "metric_deltas_mean": {m: round(sum(v) / len(v), 4) for m, v in moved.items()},
+        "metric_deltas_mean": {m: round(sum(v) / comparable.get(m, len(v)), 4) for m, v in moved.items()},
         "category_breakdown": cats,
         "per_case": per_case,
         "notes": [
             "improved/regressed = count of metrics that moved in the better/worse direction",
+            "metric_deltas_mean = sum(case delta) / (#cases where the metric is comparable), so unchanged/non-comparable cases count as 0",
             "HIGHER_BETTER=%s" % sorted(HIGHER_BETTER),
             "LOWER_BETTER(anti-ppt)=%s" % sorted(LOWER_BETTER),
         ],

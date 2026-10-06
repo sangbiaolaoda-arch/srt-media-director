@@ -26,11 +26,9 @@ CANVAS = {"width": CANVAS_W, "height": CANVAS_H, "fps": 30}
 STRATEGIES = ("single_focus", "left_to_right_flow", "cause_effect",
               "comparison", "center_cluster", "before_after")
 
-# GATE-R8 邻拍避让时的轮换顺序（显式覆写优先，见 direct()）
-ROTATION = ("single_focus", "cause_effect", "center_cluster",
-            "comparison", "before_after", "left_to_right_flow")
-
 # P2：构图策略决策权已收敛进 visual_grammar（导演不再自带决策表）。
+# P2-1：不再有固定 ROTATION 硬轮换——邻拍避让（GATE-R8）现在只是候选集内的软偏好，
+# 由 visual_grammar.composition_candidates + _select_strategy 处理。
 SEMANTIC_DEFAULT = visual_grammar.SEMANTIC_DEFAULT
 
 _RISK_WORDS = ("危险", "风险", "依赖", "害", "伤", "焦虑", "失眠")
