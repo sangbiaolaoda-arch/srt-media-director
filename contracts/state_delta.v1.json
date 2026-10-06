@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "state_delta.v1",
+  "title": "State Delta contract (P2-2 execution layer)",
+  "description": "Behavioral contract for the State -> Delta -> Transition -> Motion execution layer. Lives in contracts/ (not schemas/) because it constrains system behavior, not only data shape.",
+  "version": "1.0.0",
+  "identity": {
+    "field": "identity",
+    "rule": "identity is an EXPLICIT element field. It is NEVER derived from the beat-scoped 'id'. An element without 'identity' is NOT a cross-beat continuous entity.",
+    "matching_rules": ["same_id", "transform", "move", "grow", "shrink", "split", "merge"],
+    "phase1_active_rules": ["same_id", "transform"],
+    "id_fallback": "allowed for local render addressing ONLY; MUST NOT be used as cross-beat continuity evidence"
+  },
+  "delta_kinds": ["value", "position", "scale", "opacity", "status", "visibility"],
+  "delta_requires_reason": true,
+  "transition_types": ["carry", "cut", "dissolve", "transform"],
+  "transition_classification": {
+    "carry": "carried entities, no non-zero delta",
+    "transform": "carried entities WITH non-zero delta (continuous state migration)",
+    "cut": "no carried entities",
+    "dissolve": "semi-transparent hand-off (at least one carried entity)"
+  },
+  "continuity_rules": [
+    {"code": "DELTA_NO_REASON", "when": "StateDelta.reason is empty"},
+    {"code": "DELTA_INSTANT", "when": "transition span <= 1 frame"},
+    {"code": "DELTA_DIRECTION_UNSIGNED", "when": "numeric value delta has zero magnitude"},
+    {"code": "IDENTITY_FORGED", "when": "carried entity has no identity correspondence to previous beat end_state"},
+    {"code": "CARRY_REFLOW_UNREASONED", "when": "carried entity moves beyond tolerance without a transform delta"}
+  ],
+  "temporal_requirements": {
+    "min_frames": 2,
+    "note": "a state change must span more than one frame; a one-frame jump is not continuity"
+  },
+  "forged_continuity_conditions": [
+    "elements matched by id instead of identity",
+    "carried entity regenerated with a new id and no identity"
+  ],
+  "scope": {
+    "phase1": "single entity, two states, growth transition, real renderer t0/t_mid/t1",
+    "not_in_scope": "wiring the 21-case production corpus to the new path"
+  }
+}
