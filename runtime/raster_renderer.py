@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw, ImageFilter
 import svg_art
 from timeline import legacy as _legacy
 from common import (CANVAS_W as W, CANVAS_H as H, COLORS, PALETTES, THEME,
-                    ensure_dir, font, hex2rgb)
+                    ensure_dir, font, format_compact_num, hex2rgb)
 
 TRANS_SEC = 0.45          # 跨拍溶解时长
 DECOR_ALPHA = 0.38        # 装饰附体基础透明度（暗色主题下压低）
@@ -312,7 +312,7 @@ def _draw_bars(dr, b, before, after, color, progress):
         cx = b["x"] + b["w"] * (0.32 + 0.26 * i)
         c = color if i == 1 else hex2rgb(THEME["muted"])
         dr.rectangle([cx - bw / 2, base_y - h, cx + bw / 2, base_y], fill=c)
-        dr.text((cx, base_y + 14), ("%g" % v), font=font(20),
+        dr.text((cx, base_y + 14), format_compact_num(v), font=font(20),
                 fill=hex2rgb(THEME["ink"]), anchor="mm")
     dr.line([b["x"] + b["w"] * 0.12, base_y, b["x"] + b["w"] * 0.88, base_y],
             fill=hex2rgb(THEME["muted"]), width=2)

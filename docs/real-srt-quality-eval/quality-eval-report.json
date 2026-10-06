@@ -1,0 +1,1297 @@
+{
+  "schema_version": "quality-eval-report.v1",
+  "generated_from": "tools/real_srt_quality_eval.py",
+  "metrics_pending": true,
+  "dimensions": [
+    "semantic_expression",
+    "composition",
+    "hierarchy",
+    "motion",
+    "continuity",
+    "visual_richness",
+    "repetition",
+    "ppt_feeling",
+    "overall"
+  ],
+  "corpus": {
+    "root": "tests/corpus/real-content",
+    "count": 21,
+    "categories": {
+      "abstract_philosophy": 3,
+      "adversarial_repetition": 3,
+      "data_comparison": 4,
+      "explanation": 4,
+      "longform": 3,
+      "narrative_emotion": 4
+    }
+  },
+  "cases": [
+    {
+      "srt": "tests/corpus/real-content/abstract_philosophy/a01-time.srt",
+      "category": "abstract_philosophy",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a01-time.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__abstract_philosophy__a01-time.png",
+        "bytes": 68137,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a01-time.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 4,
+        "elements": 32,
+        "distinct_strategies": 3,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "center_cluster": 1,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0716,
+        "colors_mean": 47.8,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.406,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/abstract_philosophy/a02-freedom.srt",
+      "category": "abstract_philosophy",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a02-freedom.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__abstract_philosophy__a02-freedom.png",
+        "bytes": 31790,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a02-freedom.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 2,
+        "elements": 15,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "center_cluster": 1,
+          "single_focus": 1
+        },
+        "ink_mean": 0.0867,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.4,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.467,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/abstract_philosophy/a03-paradox.srt",
+      "category": "abstract_philosophy",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a03-paradox.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__abstract_philosophy__a03-paradox.png",
+        "bytes": 48087,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__abstract_philosophy__a03-paradox.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 26,
+        "distinct_strategies": 3,
+        "strategy_histogram": {
+          "left_to_right_flow": 1,
+          "single_focus": 1,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0672,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.346,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.333,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.538,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.333,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/adversarial_repetition/r01-number-list.srt",
+      "category": "adversarial_repetition",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r01-number-list.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__adversarial_repetition__r01-number-list.png",
+        "bytes": 42333,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r01-number-list.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 24,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0593,
+        "colors_mean": 47.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.417,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.667,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.667,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/adversarial_repetition/r02-repetitive-structure.srt",
+      "category": "adversarial_repetition",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r02-repetitive-structure.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__adversarial_repetition__r02-repetitive-structure.png",
+        "bytes": 34541,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r02-repetitive-structure.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 25,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.066,
+        "colors_mean": 47.7,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.4,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.667,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.52,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.667,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/adversarial_repetition/r03-filler.srt",
+      "category": "adversarial_repetition",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r03-filler.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__adversarial_repetition__r03-filler.png",
+        "bytes": 45030,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__adversarial_repetition__r03-filler.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 24,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0455,
+        "colors_mean": 47.7,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.417,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.667,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.667,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/data_comparison/d01-gdp.srt",
+      "category": "data_comparison",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d01-gdp.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__data_comparison__d01-gdp.png",
+        "bytes": 48587,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d01-gdp.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 4,
+        "elements": 35,
+        "distinct_strategies": 4,
+        "strategy_histogram": {
+          "comparison": 1,
+          "before_after": 1,
+          "single_focus": 1,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0388,
+        "colors_mean": 47.8,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.457,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.25,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.486,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.25,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/data_comparison/d02-market-share.srt",
+      "category": "data_comparison",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d02-market-share.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__data_comparison__d02-market-share.png",
+        "bytes": 39111,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d02-market-share.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 2,
+        "elements": 16,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "center_cluster": 1,
+          "single_focus": 1
+        },
+        "ink_mean": 0.0897,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.375,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/data_comparison/d03-growth-rate.srt",
+      "category": "data_comparison",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d03-growth-rate.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__data_comparison__d03-growth-rate.png",
+        "bytes": 33234,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d03-growth-rate.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 24,
+        "distinct_strategies": 3,
+        "strategy_histogram": {
+          "before_after": 1,
+          "single_focus": 1,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0394,
+        "colors_mean": 47.7,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.417,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.333,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.333,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/data_comparison/d04-benchmark.srt",
+      "category": "data_comparison",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d04-benchmark.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__data_comparison__d04-benchmark.png",
+        "bytes": 35053,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__data_comparison__d04-benchmark.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 2,
+        "elements": 16,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "center_cluster": 1,
+          "single_focus": 1
+        },
+        "ink_mean": 0.0759,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.375,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/explanation/e01-quantum-computing.srt",
+      "category": "explanation",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__explanation__e01-quantum-computing.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__explanation__e01-quantum-computing.png",
+        "bytes": 27613,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__explanation__e01-quantum-computing.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 2,
+        "elements": 19,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 1,
+          "comparison": 1
+        },
+        "ink_mean": 0.0519,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.474,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.474,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/explanation/e02-black-hole.srt",
+      "category": "explanation",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__explanation__e02-black-hole.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__explanation__e02-black-hole.png",
+        "bytes": 76581,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__explanation__e02-black-hole.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 5,
+        "elements": 40,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 3,
+          "cause_effect": 2
+        },
+        "ink_mean": 0.0654,
+        "colors_mean": 47.8,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.425,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.6,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.6,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/explanation/e03-mrna-vaccine.srt",
+      "category": "explanation",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__explanation__e03-mrna-vaccine.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__explanation__e03-mrna-vaccine.png",
+        "bytes": 48091,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__explanation__e03-mrna-vaccine.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 24,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "center_cluster": 2,
+          "single_focus": 1
+        },
+        "ink_mean": 0.0877,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.375,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.667,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.667,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/explanation/e04-cpu-vs-gpu.srt",
+      "category": "explanation",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__explanation__e04-cpu-vs-gpu.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__explanation__e04-cpu-vs-gpu.png",
+        "bytes": 27919,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__explanation__e04-cpu-vs-gpu.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 2,
+        "elements": 16,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 1,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0469,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.438,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/longform/l01-history.srt",
+      "category": "longform",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__longform__l01-history.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__longform__l01-history.png",
+        "bytes": 103379,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__longform__l01-history.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 7,
+        "elements": 60,
+        "distinct_strategies": 3,
+        "strategy_histogram": {
+          "single_focus": 4,
+          "cause_effect": 2,
+          "comparison": 1
+        },
+        "ink_mean": 0.052,
+        "colors_mean": 47.9,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.433,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.571,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.571,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/longform/l02-tutorial.srt",
+      "category": "longform",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__longform__l02-tutorial.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__longform__l02-tutorial.png",
+        "bytes": 51831,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__longform__l02-tutorial.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 4,
+        "elements": 32,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 2
+        },
+        "ink_mean": 0.0519,
+        "colors_mean": 47.8,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.438,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/longform/l03-documentary.srt",
+      "category": "longform",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__longform__l03-documentary.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__longform__l03-documentary.png",
+        "bytes": 79688,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__longform__l03-documentary.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 5,
+        "elements": 41,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 3,
+          "cause_effect": 2
+        },
+        "ink_mean": 0.0685,
+        "colors_mean": 47.8,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.415,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.6,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.512,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.6,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/narrative_emotion/n01-reunion.srt",
+      "category": "narrative_emotion",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n01-reunion.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__narrative_emotion__n01-reunion.png",
+        "bytes": 75682,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n01-reunion.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 6,
+        "elements": 48,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 3,
+          "cause_effect": 3
+        },
+        "ink_mean": 0.0466,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.438,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/narrative_emotion/n02-regret.srt",
+      "category": "narrative_emotion",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n02-regret.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__narrative_emotion__n02-regret.png",
+        "bytes": 57443,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n02-regret.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 4,
+        "elements": 33,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 2
+        },
+        "ink_mean": 0.0506,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.424,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.5,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.515,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.5,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/narrative_emotion/n03-courage.srt",
+      "category": "narrative_emotion",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n03-courage.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__narrative_emotion__n03-courage.png",
+        "bytes": 36352,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n03-courage.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 24,
+        "distinct_strategies": 2,
+        "strategy_histogram": {
+          "single_focus": 2,
+          "cause_effect": 1
+        },
+        "ink_mean": 0.0594,
+        "colors_mean": 47.3,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.417,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.667,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.667,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    },
+    {
+      "srt": "tests/corpus/real-content/narrative_emotion/n04-farewell.srt",
+      "category": "narrative_emotion",
+      "production_path": {
+        "status": "PASS",
+        "stages": [
+          "PLANNED",
+          "GENERATED",
+          "VERIFIED",
+          "RENDERED"
+        ],
+        "next_stage": "EVALUATED",
+        "verdict": "UNRESOLVED",
+        "work_dir": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n04-farewell.srt/work"
+      },
+      "render": {
+        "contact_sheet": "contact-tests__corpus__real-content__narrative_emotion__n04-farewell.png",
+        "bytes": 43178,
+        "film_index": "../m3/baseline/runs/tests__corpus__real-content__narrative_emotion__n04-farewell.srt/film/index.html",
+        "film_exists": true
+      },
+      "machine_metrics": {
+        "cues": null,
+        "beats": 3,
+        "elements": 28,
+        "distinct_strategies": 3,
+        "strategy_histogram": {
+          "single_focus": 1,
+          "cause_effect": 1,
+          "comparison": 1
+        },
+        "ink_mean": 0.0463,
+        "colors_mean": 48.0,
+        "validator_status": "PASS",
+        "l4": "PENDING — semantic/visual review must be done by agent or human",
+        "anti_ppt": {
+          "text_ratio": 0.464,
+          "text_dominant_beats": 0,
+          "template_repeat": 0.333,
+          "max_consecutive_same_strategy": 1,
+          "decoration_ratio": 0.0,
+          "fade_only_motion_ratio": 0.5,
+          "static_beat_ratio": 0.0,
+          "encoding_repeat": 0.333,
+          "_note": "auxiliary signals only; not a PPT verdict (L4 decides)"
+        }
+      },
+      "scores": {
+        "semantic_expression": "PENDING",
+        "composition": "PENDING",
+        "hierarchy": "PENDING",
+        "motion": "PENDING",
+        "continuity": "PENDING",
+        "visual_richness": "PENDING",
+        "repetition": "PENDING",
+        "ppt_feeling": "PENDING",
+        "overall": "PENDING"
+      },
+      "verdict": "PENDING",
+      "notes": ""
+    }
+  ]
+}

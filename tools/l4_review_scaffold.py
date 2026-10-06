@@ -38,6 +38,31 @@ CORPUS = [
     ("tests/golden/02-numeric/case.srt", "contact-tests__golden__02-numeric__case.png"),
 ]
 
+
+def corpus_from_quality_report(report_path):
+    """Drive the L4 scaffold from a real_srt_quality_eval report (21-case corpus).
+
+    M3: the fixed Real Corpus is the unit of review, not the old examples list.
+    The nine quality dimensions are added alongside the four anti-PPT prompts, all
+    starting PENDING (a human/agent must fill them; a gate forbids fake scores).
+    """
+    report = json.load(open(report_path, encoding="utf-8"))
+    dims = report.get("dimensions") or [
+        "semantic_expression", "composition", "hierarchy", "motion", "continuity",
+        "visual_richness", "repetition", "ppt_feeling", "overall"]
+    out = []
+    for c in report["cases"]:
+        sheet = (c.get("render") or {}).get("contact_sheet")
+        item = {"srt": c["srt"], "category": c.get("category"),
+                "contact_sheet": sheet, "scores": {d: "PENDING" for d in dims},
+                "ppt_l4_1_standalone_claim": "PENDING",
+                "ppt_l4_2_template_diversity": "PENDING",
+                "ppt_l4_3_graphic_necessity": "PENDING",
+                "ppt_l4_4_memory_point": "PENDING",
+                "verdict": "PENDING", "notes": ""}
+        out.append(item)
+    return out
+
 PROMPTS = {
     "_l4_intro": "L4 is human/agent work (skills/09 VAL-01). Fill each PENDING verdict after looking at the contact sheet / preview frames.",
     "ppt_l4_1_standalone_claim": "PPT-L4-1 cover-subtitles test: with subtitles covered, can you restate this beat's proposition from the frame alone?",
@@ -73,9 +98,14 @@ def build_report(corpus=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="/mnt/cos/artifacts/p0-real-content-eval/review-report.json")
+    ap.add_argument("--quality-report", default=None,
+                    help="drive the review from a real_srt_quality_eval report (21-case corpus)")
     args = ap.parse_args()
     report = build_report()
-    os.makedirs(os.path.dirname(args.out), exist_ok=True)
+    if args.quality_report:
+        report["cases"] = corpus_from_quality_report(args.quality_report)
+        report["generated_from"] = "tools/l4_review_scaffold.py (real-content corpus)"
+    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     json.dump(report, open(args.out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print("wrote %s (%d cases, all PENDING)" % (args.out, len(report["cases"])))
 

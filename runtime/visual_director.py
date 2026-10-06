@@ -18,8 +18,8 @@ from procedural_canonical import rng as _proc_rng
 
 import style_bible
 import visual_grammar
-from common import (CANVAS_H, CANVAS_W, COLORS, mood_palette,
-                    narrative_function_rank)
+from common import (CANVAS_H, CANVAS_W, COLORS, format_compact_num,
+                    mood_palette, narrative_function_rank)
 
 CANVAS = {"width": CANVAS_W, "height": CANVAS_H, "fps": 30}
 
@@ -386,7 +386,7 @@ def _build_elements(strategy, beat_i, ov, emphasis, encoding, narration,
                     "chart": {"kind": "donut", "value": val},
                     "color_role": "info"})
         els.append({"id": "%s_number" % bid, "slot": "number", "type": "text",
-                    "role": "primary", "text": ov.get("number", "%g%%" % val),
+                    "role": "primary", "text": ov.get("number", format_compact_num(val) + "%"),
                     "size": "number", "color_role": "info", "emphasis": True,
                     "host": "%s_hero" % bid})
         note = ov.get("note")
@@ -405,7 +405,7 @@ def _build_elements(strategy, beat_i, ov, emphasis, encoding, narration,
                     "chart": {"kind": "bars", "before": before, "after": after},
                     "color_role": "positive"})
         els.append(_text_el(bid, "delta", "secondary",
-                            "×%g" % (after / before if before else 1),
+                            "×" + format_compact_num(after / before if before else 1),
                             "display_small", "info", emphasis=True))
         note = ov.get("note")
         if note:

@@ -93,6 +93,38 @@ def measure_text(text, size, bold=False):
     return max(1, bbox[2] - bbox[0]), max(1, bbox[3] - bbox[1])
 
 
+def format_compact_num(x, sig=3):
+    """Bounded, human-legible numeric label shared by every on-canvas producer.
+
+    Root cause behind the d01-gdp layout overflow: producers formatted numbers
+    with ``"%g"``, whose precision (6 significant digits) is unbounded in length,
+    so ``after/before = 0.3088235…`` became the 8-glyph ``×0.308824`` — wider than
+    the fixed ``delta`` region.  A human-readable annotation never needs that
+    precision, so we bound it generically here instead of special-casing a case.
+
+    Examples: 0.3088235 -> "0.31"; 6.8 -> "6.8"; 45 -> "45"; 99.99 -> "100".
+    """
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return str(x)
+    if x != x or x in (float("inf"), float("-inf")):
+        return "0"
+    if x == int(x):
+        return str(int(x))
+    ax = abs(x)
+    if ax >= 100:
+        dec = 0
+    elif ax >= 10:
+        dec = 1
+    else:
+        dec = 2
+    s = ("%%.%df" % dec) % x
+    if "." in s:
+        s = s.rstrip("0").rstrip(".")
+    return s or "0"
+
+
 def ensure_dir(path):
     os.makedirs(path, exist_ok=True)
     return path
