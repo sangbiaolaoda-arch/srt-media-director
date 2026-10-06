@@ -1,0 +1,35 @@
+{
+  "contract_id": "primitive_states.v1",
+  "_comment": "Canonical PRIMITIVE STATE vocabulary: the element-level state animations that the entrance planner EMITS and that BOTH renderers (html_adapter player, raster_renderer) must IMPLEMENT. Before this contract the vocabulary (draw/chart_fill/bars_grow/color_wash/pulse, plus the beat-level settle marker) was emitted by motion_canonical.entrance::interactions and consumed by two renderers with NO contract declaring it -- a shared, unchecked protocol. This contract is the single source of truth; tests/phase0/test_primitive_states.py enforces producer/consumer agreement and forbids undeclared actions.",
+  "implementation": "runtime/primitives/states.py",
+  "single_source_of_truth_boundary": {
+    "producer": "runtime/motion_canonical/entrance.py::interactions (emits primitive-state events)",
+    "consumers": ["runtime/html_adapter.py", "runtime/raster_renderer.py"],
+    "state_actions_owned_here": true,
+    "drawing": "delegated to primitives.catalog (primitive_catalog.v1)",
+    "motion_enter_exit": "delegated to motion_canonical (motion_semantics.v2)",
+    "note": "This contract ONLY covers the per-element STATE-ANIMATION vocabulary layered on top of drawing and motion; it does not redefine shapes or enter/exit motion."
+  },
+  "event_shape": {
+    "at": "number (absolute seconds)",
+    "at_ratio": "number (0..1 within the beat)",
+    "type": "interaction | resolve",
+    "action": "string (a key of state_actions or resolve_actions)",
+    "targets": ["element_id (empty for beat-level resolve)"]
+  },
+  "state_actions": {
+    "draw": {"applies_to": ["connector"], "progress": "0..1", "semantics": "stroke a connector progressively, arrowhead at completion"},
+    "chart_fill": {"applies_to": ["chart.donut"], "progress": "0..1", "semantics": "sweep the donut arc by value*progress"},
+    "bars_grow": {"applies_to": ["chart.bars"], "progress": "0..1", "semantics": "grow the bars from the baseline"},
+    "color_wash": {"applies_to": ["text"], "progress": "0..1", "semantics": "blend text color from ink toward its role color"},
+    "pulse": {"applies_to": ["text"], "progress": "0..1", "semantics": "scale pulse over the host element across the beat"}
+  },
+  "resolve_actions": {
+    "settle": {"applies_to": [], "progress": "n/a", "semantics": "beat-level pacing marker at PHASES.resolve; carried on the beat, not read per element"}
+  },
+  "consumer_obligations": [
+    "every key of state_actions must be handled by every consumer renderer",
+    "producers must emit only declared actions",
+    "resolve_actions are beat-level and need not be read per element"
+  ]
+}
