@@ -12,6 +12,10 @@ generation and declare victory.  The receipt makes that impossible by constructi
 EVALUATED (human/agent review) has no automatic evidence, so a run that has not
 been reviewed ends UNRESOLVED.
 
+P1 evidence binding: the verdict is issued through ``acceptance`` and carries each
+artifact's path + sha256.  Deleting or changing an artifact after the fact breaks
+the evidence digest, so the verdict no longer verifies (see acceptance.evaluate).
+
 The enter-motion "machine teeth" live in validator L1 (LIFECYCLE_ENTER /
 LIFECYCLE_MISSING); the receipt only *records* the independently computed gap list
 for cross-checking — it does not re-implement that gate.
@@ -19,7 +23,7 @@ for cross-checking — it does not re-implement that gate.
 import json
 import os
 
-from verification import adversarial, claims, defaults, stages
+from verification import acceptance, adversarial, claims, defaults, stages
 
 STAGE_WHAT = {
     "PLANNED": "compile SRT -> deterministic artifacts",
@@ -66,33 +70,33 @@ def build(work_dir, film_index, report, changed_paths=None):
     findings = adversarial.scan(dsl=dsl, entrance=entrance, changed_paths=changed_paths)
     gaps = defaults.audit_entrance_completeness(dsl, entrance)
 
-    ptrs = sorted(
-        os.path.relpath(p)
-        for p in (
-            os.path.join(work_dir, "visual-dsl.json"),
-            os.path.join(work_dir, "render-plan.json"),
-            os.path.join(work_dir, "entrance-plan.json"),
-            os.path.join(work_dir, "validation-report.json"),
-            film_index,
-        )
-        if p and os.path.exists(p)
-    )
+    # Evidence is bound to REAL files (path); acceptance re-hashes them, so a
+    # deleted/changed artifact invalidates the verdict.
+    ev_items = []
+    for name in ("visual-dsl.json", "render-plan.json", "entrance-plan.json",
+                 "validation-report.json"):
+        p = os.path.join(work_dir, name)
+        if os.path.exists(p):
+            ev_items.append({"path": p, "observed": "pipeline artifact"})
+    if film_index and os.path.exists(film_index):
+        ev_items.append({"path": film_index, "observed": "film index"})
 
     nxt = sm.expected_next() or "DONE"
-    # Only the independent judge role may issue a verdict; and this path only ever
-    # says UNRESOLVED. PASS/FAIL must come from the human/agent evaluation layer.
-    verdict = claims.issue_verdict("pipeline.run", "UNRESOLVED", by="validator", evidence=ptrs)
+    # Only the independent judge role may issue a verdict; this path only ever says
+    # UNRESOLVED (a run is not a signed acceptance). PASS/FAIL must come from a
+    # signed verification run (tools/verify_change.py with the judge authority).
+    verdict = acceptance.issue("pipeline.run", "UNRESOLVED", by="validator", evidence=ev_items)
 
     receipt = {
         "stages": [r.to_dict() for r in sm.receipts],
         "current_stage": sm.current,
         "next_stage": nxt,
-        "verdict": verdict.to_dict(),
+        "verdict": verdict,
         "blocking_reason": (
             "EVALUATED requires human/agent review evidence; "
             "no automatic evidence exists by design (policy VAL-01)"
         ) if nxt == "EVALUATED" else None,
-        "evidence_pointers": ptrs,
+        "evidence_pointers": [e["path"] for e in ev_items],
         "adversarial_findings": findings,
         "entrance_completeness_gaps": gaps,
         "defaults_ledger": [],

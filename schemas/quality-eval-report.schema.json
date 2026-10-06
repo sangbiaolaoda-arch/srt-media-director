@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Real Content Quality Evaluation record (P0-3)",
+  "_comment": "Product of tools/real_srt_quality_eval.py. Machine metrics are filled automatically; the nine quality dimensions are HUMAN/AGENT reviews and MUST start PENDING. This is deliberately separate from review-report (anti-PPT L4) and from the regression dataset: 'code did not break' (legacy==canonical) and 'the film got better' (this file) are different claims.",
+  "type": "object",
+  "required": ["schema_version", "generated_from", "corpus", "cases", "metrics_pending"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string"},
+    "generated_from": {"type": "string"},
+    "metrics_pending": {
+      "type": "boolean",
+      "description": "true until every case has a non-PENDING verdict"
+    },
+    "dimensions": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "the nine quality dimensions each case is scored on"
+    },
+    "corpus": {
+      "type": "object",
+      "required": ["root", "categories", "count"],
+      "properties": {
+        "root": {"type": "string"},
+        "count": {"type": "integer"},
+        "categories": {"type": "object", "additionalProperties": {"type": "integer"}}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["srt", "category", "production_path", "render", "machine_metrics", "scores", "verdict"],
+        "properties": {
+          "srt": {"type": "string"},
+          "category": {"type": "string"},
+          "production_path": {"type": "object"},
+          "render": {"type": "object"},
+          "machine_metrics": {
+            "type": "object",
+            "description": "objective per-case metrics (not quality scores)"
+          },
+          "scores": {
+            "type": "object",
+            "description": "one entry per dimension; each starts PENDING",
+            "additionalProperties": {"$ref": "#/definitions/dim"}
+          },
+          "verdict": {"$ref": "#/definitions/dim"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "dim": {
+      "oneOf": [
+        {"enum": ["PENDING", "PASS", "FAIL"]},
+        {"type": "number", "minimum": 0, "maximum": 10}
+      ]
+    }
+  }
+}

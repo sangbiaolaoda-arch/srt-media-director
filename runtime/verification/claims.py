@@ -3,6 +3,12 @@
 An agent may emit a proposal / artifact / agent_claim.  It may NOT self-declare a
 verdict (verified / approved / PASS / accepted / done).  Verdicts are issued only
 by an independent judge role.
+
+P0-1: ``by="validator"`` used to be a mere string, so any caller could mint
+``JudgeVerdict(verdict="PASS", by="validator")``.  Now a PASS/FAIL additionally
+requires an ACTIVE judge session AND the signing authority (see ``authority``);
+without them the constructor raises ``Unauthorized``.  The string is still
+validated (cheap, first line of defence), but it is no longer sufficient.
 """
 from dataclasses import dataclass, field
 
@@ -21,7 +27,7 @@ class AgentSelfCertification(Exception):
 
 
 class Unauthorized(Exception):
-    """A non-judge role tried to issue a verdict."""
+    """A non-judge role (or an unprivileged judge) tried to issue a verdict."""
 
 
 def _walk(node, path=()):
@@ -61,6 +67,18 @@ class AgentOutput:
         return {"kind": self.kind, "summary": self.summary, "data": self.data}
 
 
+def _authority_ok(by, evidence):
+    """A PASS/FAIL needs an active matching judge session + signing authority."""
+    from . import authority  # late import: authority imports this module
+    sess = authority.current_session()
+    if not (sess and sess.by == by and authority.signing_available()):
+        return False, ("no signing authority / judge session; a %s verdict cannot be "
+                       "minted by this caller" % "PASS/FAIL")
+    if not evidence:
+        return False, "a PASS/FAIL verdict requires evidence pointers"
+    return True, ""
+
+
 @dataclass
 class JudgeVerdict:
     subject: str
@@ -73,8 +91,10 @@ class JudgeVerdict:
             raise Unauthorized("role %r may not issue a verdict (judges: %s)" % (self.by, JUDGE_ROLES))
         if self.verdict not in VERDICT_VALUES:
             raise ValueError("verdict must be one of %s" % (VERDICT_VALUES,))
-        if self.verdict in ("PASS", "FAIL") and not self.evidence:
-            raise ValueError("a %s verdict requires evidence pointers" % self.verdict)
+        if self.verdict in ("PASS", "FAIL"):
+            ok, why = _authority_ok(self.by, self.evidence)
+            if not ok:
+                raise Unauthorized(why)
 
     def to_dict(self):
         return {"subject": self.subject, "verdict": self.verdict,

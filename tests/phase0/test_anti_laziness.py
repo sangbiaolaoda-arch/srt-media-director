@@ -63,7 +63,12 @@ def test_agent_may_state_unresolved():
 def test_only_independent_judge_issues_verdict():
     with pytest.raises(claims.Unauthorized):
         claims.issue_verdict("svc", "PASS", by="agent", evidence=["e"])
-    assert claims.issue_verdict("svc", "PASS", by="validator", evidence=["e"]).verdict == "PASS"
+    # P0-1: "validator" is no longer sufficient — without the signing authority a
+    # PASS cannot be minted even by a caller naming itself "validator".
+    with pytest.raises(claims.Unauthorized):
+        claims.issue_verdict("svc", "PASS", by="validator", evidence=["e"])
+    # UNRESOLVED needs no authority and is the honest default.
+    assert claims.issue_verdict("svc", "UNRESOLVED", by="validator", evidence=[]).verdict == "UNRESOLVED"
 
 
 def test_stage_promote_is_judge_only():
@@ -71,7 +76,11 @@ def test_stage_promote_is_judge_only():
     m.submit("PLANNED", "x", {"task_contract": "c"})
     with pytest.raises(claims.Unauthorized):
         m.promote("PLANNED", "PASS", by="agent")
-    assert m.promote("PLANNED", "PASS", by="validator").verdict == "PASS"
+    # judge role but no signing authority -> still cannot promote to PASS.
+    with pytest.raises(claims.Unauthorized):
+        m.promote("PLANNED", "PASS", by="validator")
+    # UNRESOLVED promotion is always allowed.
+    assert m.promote("PLANNED", "UNRESOLVED", by="validator").verdict == "UNRESOLVED"
 
 
 # ------------------------------------------------------------------ no silent fallback
@@ -202,10 +211,13 @@ def test_pass_requires_all_three_layers():
     assert v == "UNRESOLVED" and reasons
 
 
-def test_three_layers_with_evidence_passes():
+def test_three_layers_with_evidence_stay_unresolved_without_authority(tmp_path):
+    # The chain is now the full seven layers; and even with every layer evidenced,
+    # no signing authority => UNRESOLVED (see test_verdict_entrypoint for the PASS case).
     led = threelayer.empty_ledger()
-    threelayer.record(led, "tests", "pytest", "ok")
-    threelayer.record(led, "real_srt", "probe", "legacy==canonical")
-    threelayer.record(led, "evaluation", "review-report", "PENDING")
+    for layer in threelayer.LAYERS:
+        ev = tmp_path / (layer + ".txt")
+        ev.write_text("evidence")
+        threelayer.record(led, layer, str(ev), "ok")
     v, reasons = threelayer.verdict(led, by="validator")
-    assert v == "PASS" and reasons == []
+    assert v == "UNRESOLVED" and reasons

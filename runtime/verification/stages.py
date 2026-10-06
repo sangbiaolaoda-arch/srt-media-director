@@ -73,14 +73,21 @@ class StageMachine:
         return r
 
     def promote(self, stage, verdict, by):
-        """Promote a recorded stage's verdict — judge-only (see claims)."""
-        from .claims import JUDGE_ROLES, Unauthorized
+        """Promote a recorded stage's verdict — judge-only AND privileged.
+
+        A PASS/FAIL requires the signing authority (see ``authority``); without it
+        promotion to PASS/FAIL raises Unauthorized, so an agent cannot promote its
+        own stage.  UNRESOLVED needs no authority.
+        """
+        from .claims import JUDGE_ROLES, Unauthorized, _authority_ok
         if by not in JUDGE_ROLES:
             raise Unauthorized("only %s may set a verdict, not %r" % (JUDGE_ROLES, by))
         for r in self.receipts:
             if r.stage == stage:
-                if verdict in ("PASS", "FAIL") and not r.evidence:
-                    raise MissingEvidence("cannot promote %s without evidence" % stage)
+                if verdict in ("PASS", "FAIL"):
+                    ok, why = _authority_ok(by, r.evidence)
+                    if not ok:
+                        raise Unauthorized(why)
                 r.verdict = verdict
                 return r
         raise StageOrderError("stage %s not recorded" % stage)

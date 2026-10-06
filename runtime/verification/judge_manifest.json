@@ -1,6 +1,6 @@
 {
   "sealed": true,
-  "count": 52,
+  "count": 54,
   "files": {
     "runtime/gate_lib.py": "4c49aea37a1a0c8567573d2101986f41c1a3acae42cc3bd9e20259e8a9c48e98",
     "runtime/gates/__init__.py": "686db7ab2ef62c3a322d75f077b9ee82b58b234d8766f14f8a5847ddf6da1a76",
@@ -38,13 +38,15 @@
     "runtime/rep_metrics.py": "9ea2d20630a946fd3813b9df6e4cbebb1d057a598cdb4d4f36c935a7cec88cf2",
     "runtime/self_test.py": "7f63690fdb03dacf704d7f63014f7aeee073cf056f44d4983f583840818ade13",
     "runtime/validator.py": "253da1a09175220f290df6f54a39e5c8ef6d8ee81caa178209f858d518d6ec2f",
-    "runtime/verification/__init__.py": "bde459771a204fe0d5d980b1eb7e718671fac9a59077586ef79da71bbc3fefd1",
-    "runtime/verification/adversarial.py": "d28b739ced4c250d4e240ab5a43068f1e0060f8236dfc036846be26f270f9122",
-    "runtime/verification/claims.py": "ddbc1926cdee78cc5448c39166ebf95ea0d2b89304bec94f9d1427e0ebeed0e4",
+    "runtime/verification/__init__.py": "d071f744197a3e37f9d2a5346961b9d85ca2b1606eb599f226a7cb65fed2f7da",
+    "runtime/verification/acceptance.py": "8a45d3a0a511d9f135c547051fc4b3afa7742b2230fc7ca9ffd4f79e6d11d21d",
+    "runtime/verification/adversarial.py": "a7238a2f2c7044ac348f8bd8a5662151f6fbf89fe3193115da761c9a820e4595",
+    "runtime/verification/authority.py": "6afa17a07b3182486023f7f12510287950e38d1c5c5a8f8f0748d63478d0e2a8",
+    "runtime/verification/claims.py": "7c5191fa3219c0f902d57a8ca5832991792b2b6079221de6c0c1f9e8bc45419c",
     "runtime/verification/defaults.py": "b93c9e3ed818dfa62ca6af52add26aedf19a8fbdedb3147e339cc57a5e6b4a9a",
-    "runtime/verification/judge_guard.py": "49ce975bbf6aee74ca35c85732be59c5b7824cf26d932724b644752a95fd83b0",
-    "runtime/verification/stages.py": "57ac3fc374953a1130d00f22b6f8c4ada25e73063f8e89ddaeae4de4af8ce25a",
-    "runtime/verification/threelayer.py": "762d7b1011e6812ecaa2c05abcf8210accb0beea172e0b924491c96bdb8412e7",
+    "runtime/verification/judge_guard.py": "c9a35a4b4cafc08b59fcab4bf63d5c055fc77c93b751ff53c4da2ceea05d0b05",
+    "runtime/verification/stages.py": "9648e2d9948dd3974d355191eda0b13fe6251558d4b4ed6d38effdd4fbed7056",
+    "runtime/verification/threelayer.py": "9d606b333b2b5d472e892b1236329eadf2190597b65faf96083f182000ed8d11",
     "tests/golden/01-minimal/case.srt": "b7c8adeed89b8aaa540daddc40ff344448145a147a24349c56ef5992cdc6b68e",
     "tests/golden/01-minimal/hashes.json": "c35475c31409aac861d96ee2a7264a2ac031e9cee0bb24e114d05e5d2bd2929d",
     "tests/golden/02-numeric/case.srt": "96400f307134702335e868cc945b0d048b3b6412856335938f411a34dfcbb1e9",
@@ -53,6 +55,6 @@
     "tests/test_known_failures.py": "126c5f8d3a6ecf6be1abbc7a2b0213923201a9b0afc20c3817c3f981b4c93aac",
     "tools/equivalence_probe.py": "43370dd5e693cb4034edc878030f37b786710b7e4d54676d8cbb2b8862d177c7",
     "tools/real_content_eval.py": "04f9360e15a5cdbeda8e7837ab5e18290a66702398a8590889f469c6f7a0f7ce",
-    "tools/verify_change.py": "8330c77114ed4925ef344603e4b4d3cd923fe79de0b99e3f1eec67d629f27d84"
+    "tools/verify_change.py": "cc3ef44454253fef29f710c2c85dd3fea6db5ed590ca7cc025a74ec79b030489"
   }
 }
