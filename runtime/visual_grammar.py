@@ -139,24 +139,112 @@ SECONDARY_RELATIONS = ("concession",)
 
 
 def composition_strategy(beat, encoding):
-    """beat + encoding → 构图策略：构图语法决策的唯一权威。
+    """beat + encoding → 构图策略（单值，向后兼容）。
 
-    优先级（与收敛前 ``visual_director._direct_beat`` 完全一致）：
-      数字/色彩编码 > 特色角色默认 > 语义关系提示 > 通用默认。
-    R8 邻拍避让（同模板轮换）与显式覆写由 Director 在调用本函数后处理。
+    P2-1 起，单一权威决策已升级为**候选集**（见 ``composition_candidates``）；
+    本函数保留为「语义最佳候选」，与收敛前逐字节等价，供旧调用方与
+    ``tests/phase0/test_grammar_owns_strategy.py`` 的等价门禁使用。
     """
+    return composition_candidates(beat, encoding)[0]["strategy"]
+
+
+# ---------------------------------------------------------------------------
+# P2-1 — 构图候选集：一个语法语义 → 多个「语义有效」的构图候选
+# ---------------------------------------------------------------------------
+# 根因（docs/p2-1-root-cause.md）：旧决策是「单值 + 固定映射」，默认分支把大多数
+# 语义压成 single_focus；Director 只能靠固定 ROTATION 硬轮换满足 GATE-R8，导致
+# single_focus↔cause_effect（82%）机械交替。
+# 修复：Grammar 给出每个语义组的**多候选**（``semantic_fit`` 表示贴合度），候选集
+# 即「语义正确性的上界」；Director 只在候选中做连续性/多样性平局打破，绝不越过
+# 语义正确性去换布局。首个候选恒等于旧单值决策（向后兼容）。
+
+# 语义有效阈值：fit ≥ best - MARGIN 视为「同样合理」，可参与平局打破。
+COMPOSITION_MARGIN = 0.2
+
+_CAND_ENCODING = {
+    "part_to_whole": (
+        ("center_cluster", 1.0, "整体—部分：聚拢呈现整体结构"),
+        ("single_focus", 0.8, "聚焦整体，语义仍成立"),
+    ),
+    "change_over_time": (
+        ("before_after", 1.0, "时间变化：前后对照"),
+        ("left_to_right_flow", 0.8, "时序自左向右流动，同样表达变化"),
+    ),
+    "semantic_color_pair": (
+        ("comparison", 1.0, "色彩对照：并列比较"),
+        ("center_cluster", 0.8, "聚拢对照亦成立"),
+    ),
+}
+
+_CAND_ROLE = {
+    "hook": (
+        ("left_to_right_flow", 1.0, "开场铺陈：引入方向"),
+        ("center_cluster", 0.82, "聚拢开场亦成立"),
+        ("single_focus", 0.8, "单一焦点开场亦成立"),
+    ),
+    "comparison": (
+        ("comparison", 1.0, "比较角色：并列"),
+        ("left_to_right_flow", 0.8, "左右并置比较"),
+    ),
+    "emphasis": (
+        ("center_cluster", 1.0, "强调：聚拢聚焦"),
+        ("single_focus", 0.83, "单一焦点强调"),
+    ),
+}
+
+_CAND_RELATION = {
+    "causality": (
+        ("cause_effect", 1.0, "因果：因→果"),
+        ("left_to_right_flow", 0.82, "因果链自左向右流动"),
+        ("center_cluster", 0.8, "因果聚拢呈现"),
+    ),
+    "contrast": (
+        ("comparison", 1.0, "对照/让步：并列"),
+        ("left_to_right_flow", 0.82, "左右并置对照"),
+    ),
+}
+
+_CAND_DEFAULT = (
+    ("single_focus", 1.0, "无显式关系：单一焦点"),
+    ("center_cluster", 0.9, "无显式关系：聚拢呈现"),
+    ("left_to_right_flow", 0.9, "无显式关系：横向铺陈"),
+    ("comparison", 0.82, "无显式关系：并列呈现"),
+)
+
+
+def _candidate_group(beat, encoding):
+    """该拍所属语义组的候选元组 ((strategy, semantic_fit, rationale), …)。"""
     etype = encoding.get("type")
-    if etype in ENCODING_STRATEGY:
-        return ENCODING_STRATEGY[etype]
+    if etype in _CAND_ENCODING:
+        return _CAND_ENCODING[etype]
     role = beat.get("semantic_role")
-    if role == "comparison":
-        return "comparison"
-    role_default = SEMANTIC_DEFAULT.get(role, DEFAULT_STRATEGY)
-    if role_default != DEFAULT_STRATEGY:
-        return role_default
+    if role in _CAND_ROLE:
+        return _CAND_ROLE[role]
     pairs = beat.get("semantic_pairs", [])
     if any(p["type"] in PRIMARY_RELATIONS for p in pairs):
-        return "cause_effect"
+        return _CAND_RELATION["causality"]
     if any(p["type"] in SECONDARY_RELATIONS for p in pairs):
-        return "comparison"
-    return DEFAULT_STRATEGY
+        return _CAND_RELATION["contrast"]
+    return _CAND_DEFAULT
+
+
+def composition_candidates(beat, encoding):
+    """beat + encoding → 语义有效的构图候选集（semantic_fit 降序）。
+
+    返回 ``[{"strategy", "semantic_fit", "rationale"}, …]``。每个候选都是语义
+    成立的表达方式；首个候选恒等于旧 ``composition_strategy``（向后兼容）。
+    """
+    cands = [{"strategy": s, "semantic_fit": f, "rationale": r}
+             for (s, f, r) in _candidate_group(beat, encoding)]
+    cands.sort(key=lambda c: (-c["semantic_fit"], c["strategy"]))
+    return cands
+
+
+def acceptable_candidates(beat, encoding, margin=COMPOSITION_MARGIN):
+    """语义有效阈值内的候选（fit ≥ best - margin）；恒非空且 ≥2（保证可满足 R8）。"""
+    cands = composition_candidates(beat, encoding)
+    best = cands[0]["semantic_fit"]
+    acc = [c for c in cands if c["semantic_fit"] + 1e-9 >= best - margin]
+    if len(acc) < 2 and len(cands) >= 2:
+        acc = cands[:2]
+    return acc

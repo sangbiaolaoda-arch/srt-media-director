@@ -1,0 +1,378 @@
+{
+  "label_before": "baseline-8a9fa50",
+  "label_after": "p2-1-candidate",
+  "summary_counts": {
+    "improved": 15,
+    "regressed": 0,
+    "unchanged": 6
+  },
+  "metric_deltas_mean": {
+    "anti_ppt.encoding_repeat": -0.2671,
+    "anti_ppt.fade_only_motion_ratio": -0.015,
+    "anti_ppt.template_repeat": -0.2671,
+    "anti_ppt.text_ratio": -0.0579,
+    "colors_mean": 0.275,
+    "distinct_strategies": 1.4545,
+    "elements": 1.2727,
+    "ink_mean": 0.0159
+  },
+  "category_breakdown": {
+    "abstract_philosophy": {
+      "improved": 1,
+      "regressed": 0,
+      "unchanged": 2
+    },
+    "data_comparison": {
+      "improved": 2,
+      "regressed": 0,
+      "unchanged": 2
+    },
+    "explanation": {
+      "improved": 2,
+      "regressed": 0,
+      "unchanged": 2
+    },
+    "longform": {
+      "improved": 3,
+      "regressed": 0,
+      "unchanged": 0
+    },
+    "narrative_emotion": {
+      "improved": 4,
+      "regressed": 0,
+      "unchanged": 0
+    },
+    "adversarial_repetition": {
+      "improved": 3,
+      "regressed": 0,
+      "unchanged": 0
+    }
+  },
+  "per_case": [
+    {
+      "case": "a01-time.srt",
+      "category": "abstract_philosophy",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.25,
+        "anti_ppt.fade_only_motion_ratio": -0.014,
+        "anti_ppt.template_repeat": -0.25,
+        "anti_ppt.text_ratio": -0.006,
+        "colors_mean": 0.2,
+        "distinct_strategies": 1,
+        "elements": 3,
+        "ink_mean": -0.0007
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "a02-freedom.srt",
+      "category": "abstract_philosophy",
+      "verdict": "unchanged",
+      "improved_metrics": 0,
+      "regressed_metrics": 0,
+      "metric_deltas": {},
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "a03-paradox.srt",
+      "category": "abstract_philosophy",
+      "verdict": "unchanged",
+      "improved_metrics": 1,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.fade_only_motion_ratio": -0.038,
+        "anti_ppt.text_ratio": -0.013,
+        "elements": -2,
+        "ink_mean": 0.0105
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "d01-gdp.srt",
+      "category": "data_comparison",
+      "verdict": "improved",
+      "improved_metrics": 1,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.text_ratio": -0.057,
+        "ink_mean": 0.0117
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "d02-market-share.srt",
+      "category": "data_comparison",
+      "verdict": "unchanged",
+      "improved_metrics": 0,
+      "regressed_metrics": 0,
+      "metric_deltas": {},
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "d03-growth-rate.srt",
+      "category": "data_comparison",
+      "verdict": "improved",
+      "improved_metrics": 2,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.fade_only_motion_ratio": -0.022,
+        "anti_ppt.text_ratio": -0.069,
+        "colors_mean": 0.3,
+        "elements": -1,
+        "ink_mean": 0.0241
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "d04-benchmark.srt",
+      "category": "data_comparison",
+      "verdict": "unchanged",
+      "improved_metrics": 0,
+      "regressed_metrics": 0,
+      "metric_deltas": {},
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "e01-quantum-computing.srt",
+      "category": "explanation",
+      "verdict": "unchanged",
+      "improved_metrics": 0,
+      "regressed_metrics": 0,
+      "metric_deltas": {},
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "e02-black-hole.srt",
+      "category": "explanation",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.2,
+        "anti_ppt.fade_only_motion_ratio": -0.012,
+        "anti_ppt.template_repeat": -0.2,
+        "anti_ppt.text_ratio": -0.03,
+        "distinct_strategies": 2,
+        "elements": 3,
+        "ink_mean": 0.0136
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "e03-mrna-vaccine.srt",
+      "category": "explanation",
+      "verdict": "unchanged",
+      "improved_metrics": 0,
+      "regressed_metrics": 0,
+      "metric_deltas": {},
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "e04-cpu-vs-gpu.srt",
+      "category": "explanation",
+      "verdict": "improved",
+      "improved_metrics": 1,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.text_ratio": -0.126,
+        "ink_mean": 0.0123
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "l01-history.srt",
+      "category": "longform",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.285,
+        "anti_ppt.fade_only_motion_ratio": -0.008,
+        "anti_ppt.template_repeat": -0.285,
+        "anti_ppt.text_ratio": -0.06,
+        "colors_mean": 0.1,
+        "distinct_strategies": 1,
+        "elements": -1,
+        "ink_mean": 0.0126
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "l02-tutorial.srt",
+      "category": "longform",
+      "verdict": "improved",
+      "improved_metrics": 4,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.25,
+        "anti_ppt.fade_only_motion_ratio": -0.029,
+        "anti_ppt.template_repeat": -0.25,
+        "anti_ppt.text_ratio": -0.026,
+        "colors_mean": 0.2,
+        "distinct_strategies": 2,
+        "elements": 2,
+        "ink_mean": 0.0159
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "l03-documentary.srt",
+      "category": "longform",
+      "verdict": "improved",
+      "improved_metrics": 4,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.2,
+        "anti_ppt.fade_only_motion_ratio": -0.024,
+        "anti_ppt.template_repeat": -0.2,
+        "anti_ppt.text_ratio": -0.02,
+        "colors_mean": 0.2,
+        "distinct_strategies": 2,
+        "elements": 2,
+        "ink_mean": 0.0134
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "n01-reunion.srt",
+      "category": "narrative_emotion",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.167,
+        "anti_ppt.template_repeat": -0.167,
+        "anti_ppt.text_ratio": -0.073,
+        "colors_mean": -0.2,
+        "distinct_strategies": 2,
+        "elements": 4,
+        "ink_mean": 0.0243
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "n02-regret.srt",
+      "category": "narrative_emotion",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.25,
+        "anti_ppt.fade_only_motion_ratio": -0.001,
+        "anti_ppt.template_repeat": -0.25,
+        "anti_ppt.text_ratio": -0.046,
+        "distinct_strategies": 2,
+        "elements": 4,
+        "ink_mean": 0.024
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "n03-courage.srt",
+      "category": "narrative_emotion",
+      "verdict": "improved",
+      "improved_metrics": 3,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.334,
+        "anti_ppt.template_repeat": -0.334,
+        "anti_ppt.text_ratio": -0.084,
+        "colors_mean": 0.4,
+        "distinct_strategies": 1,
+        "ink_mean": 0.0157
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "n04-farewell.srt",
+      "category": "narrative_emotion",
+      "verdict": "improved",
+      "improved_metrics": 1,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.text_ratio": -0.071,
+        "ink_mean": 0.016
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "r01-number-list.srt",
+      "category": "adversarial_repetition",
+      "verdict": "improved",
+      "improved_metrics": 4,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.334,
+        "anti_ppt.fade_only_motion_ratio": 0.02,
+        "anti_ppt.template_repeat": -0.334,
+        "anti_ppt.text_ratio": -0.097,
+        "colors_mean": 1.0,
+        "distinct_strategies": 1,
+        "elements": 1,
+        "ink_mean": 0.0167
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "r02-repetitive-structure.srt",
+      "category": "adversarial_repetition",
+      "verdict": "improved",
+      "improved_metrics": 2,
+      "regressed_metrics": 0,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.334,
+        "anti_ppt.template_repeat": -0.334,
+        "anti_ppt.text_ratio": -0.08,
+        "distinct_strategies": 1,
+        "ink_mean": 0.0118
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    },
+    {
+      "case": "r03-filler.srt",
+      "category": "adversarial_repetition",
+      "verdict": "improved",
+      "improved_metrics": 2,
+      "regressed_metrics": 1,
+      "metric_deltas": {
+        "anti_ppt.encoding_repeat": -0.334,
+        "anti_ppt.fade_only_motion_ratio": -0.022,
+        "anti_ppt.template_repeat": -0.334,
+        "anti_ppt.text_ratio": -0.069,
+        "distinct_strategies": 1,
+        "elements": -1,
+        "ink_mean": 0.0329
+      },
+      "baseline_status": "PASS",
+      "candidate_status": "PASS"
+    }
+  ],
+  "notes": [
+    "improved/regressed = count of metrics that moved in the better/worse direction",
+    "HIGHER_BETTER=['beats', 'colors_mean', 'distinct_strategies', 'elements', 'ink_mean']",
+    "LOWER_BETTER(anti-ppt)=['decoration_ratio', 'encoding_repeat', 'fade_only_motion_ratio', 'max_consecutive_same_strategy', 'static_beat_ratio', 'template_repeat', 'text_dominant_beats', 'text_ratio']"
+  ]
+}

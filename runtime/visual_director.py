@@ -426,22 +426,65 @@ def _title_for(beat, beat_i, ov):
 
 # ---------------------------------------------------------------- directing
 
+def _select_strategy(candidates, prev_strategy, usage):
+    """在语义有效候选中选择：语义正确性 > 有效性 > 连续性 > 多样性。
+
+    - 语义正确性：只在 ``acceptable``（fit ≥ best - MARGIN）内选择；
+    - 有效性：候选本身由 Grammar 保证语义成立（超出阈值的候选一律排除）；
+    - 连续性（GATE-R8）：优先避开上一拍策略；
+    - 多样性：在满足上者的候选中取全片使用次数最少者（平局再比 fit / 固定序）。
+    """
+    best = candidates[0]["semantic_fit"]
+    margin = visual_grammar.COMPOSITION_MARGIN
+    acceptable = [c for c in candidates
+                  if c["semantic_fit"] + 1e-9 >= best - margin]
+    if len(acceptable) < 2 and len(candidates) >= 2:
+        acceptable = candidates[:2]
+
+    pool = acceptable
+    if len(acceptable) > 1:
+        non_prev = [c for c in acceptable if c["strategy"] != prev_strategy]
+        if non_prev:
+            pool = non_prev
+
+    usage = usage if usage is not None else {}
+    order = {s: i for i, s in enumerate(STRATEGIES)}
+    chosen = min(pool, key=lambda c: (usage.get(c["strategy"], 0),
+                                      -c["semantic_fit"],
+                                      order.get(c["strategy"], 99)))
+    decision = {
+        "mode": "grammar_candidates",
+        "chosen": chosen["strategy"],
+        "chosen_fit": chosen["semantic_fit"],
+        "rationale": chosen["rationale"],
+        "prev_strategy": prev_strategy,
+        "acceptable": [c["strategy"] for c in acceptable],
+        "candidates": candidates,
+        "reason": "语义有效候选中避开邻拍并取最少使用（连续性/多样性仅为平局打破）",
+    }
+    return chosen["strategy"], decision
+
+
 def _direct_beat(beat, beat_i, ov, prev_strategy, numbers_index,
-                 rng=None, recent=None):
+                 rng=None, recent=None, usage=None):
     encoding = decide_encoding(beat, rank_emphasis(beat, extract_emphasis(
         beat, numbers_index)))
     emphasis = rank_emphasis(beat, extract_emphasis(beat, numbers_index))
 
-    # P2：构图策略由 visual_grammar 层决断（Director 不再自带决策词汇）。
-    strategy = visual_grammar.composition_strategy(beat, encoding)
+    # P2-1：构图决策词汇由 visual_grammar 拥有——它给出**语义有效的候选集**；
+    # Director 只在候选中做连续性/多样性平局打破，绝不越过语义正确性换布局。
+    candidates = visual_grammar.composition_candidates(beat, encoding)
 
     explicit = "strategy" in ov
-    strategy = ov.get("strategy", strategy)
-    if not explicit and strategy == prev_strategy:  # R8：邻拍不同模板（显式覆写优先）
-        for cand in ROTATION:
-            if cand != prev_strategy:
-                strategy = cand
-                break
+    if explicit:
+        strategy = ov["strategy"]
+        decision = {"mode": "explicit_override", "chosen": strategy,
+                    "prev_strategy": prev_strategy, "candidates": candidates,
+                    "reason": "显式覆写优先于自动构图"}
+    else:
+        strategy, decision = _select_strategy(candidates, prev_strategy, usage)
+    if usage is not None:
+        usage[strategy] = usage.get(strategy, 0) + 1
 
     els, rels = _build_elements(strategy, beat_i, ov, emphasis, encoding,
                                 beat["narration"], numbers_index, rng, recent)
@@ -474,6 +517,8 @@ def _direct_beat(beat, beat_i, ov, prev_strategy, numbers_index,
         "motion_policy": beat["motion_policy"],
         "camera_intent": {"mode": "push_in", "reason": "数字是该拍核心信息"}
         if encoding["type"] == "part_to_whole" else {"mode": "static"},
+        # P2-1：可解释的构图决策记录（候选集 + 选择 + 依据）。
+        "composition_decision": decision,
     }
     dsl_beat = {
         "beat_id": beat["beat_id"], "narration": beat["narration"],
@@ -496,11 +541,12 @@ def direct(beats, overrides=None):
     vplans, dsl_beats = [], []
     prev_strategy = None
     recent_decor = []
+    usage = {}
     for i, beat in enumerate(beats, 1):
         ov = overrides.get(beat["cue_range"][0], {})
         rng = _proc_rng.rng_for_beat(beat)
         plan, dsl_beat, prev_strategy = _direct_beat(
-            beat, i, ov, prev_strategy, None, rng, recent_decor)
+            beat, i, ov, prev_strategy, None, rng, recent_decor, usage)
         vplans.append(plan)
         dsl_beats.append(dsl_beat)
     vplan = {"global_visual_grammar": {

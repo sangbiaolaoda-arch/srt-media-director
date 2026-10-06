@@ -1,0 +1,1212 @@
+{
+  "dimensions": [
+    "semantic_expression",
+    "composition",
+    "hierarchy",
+    "motion",
+    "continuity",
+    "visual_richness",
+    "repetition",
+    "ppt_feeling",
+    "overall"
+  ],
+  "cases": [
+    {
+      "case": "a01-time.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "a02-freedom.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "a03-paradox.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "d01-gdp.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "d02-market-share.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "d03-growth-rate.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "d04-benchmark.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "e01-quantum-computing.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "e02-black-hole.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "e03-mrna-vaccine.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "e04-cpu-vs-gpu.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "l01-history.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "l02-tutorial.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "l03-documentary.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "n01-reunion.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "n02-regret.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "n03-courage.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "n04-farewell.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "r01-number-list.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "r02-repetitive-structure.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    },
+    {
+      "case": "r03-filler.srt",
+      "semantic_expression": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "composition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "hierarchy": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "motion": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "continuity": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "visual_richness": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "repetition": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "ppt_feeling": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      },
+      "overall": {
+        "baseline": "PENDING",
+        "candidate": "PENDING",
+        "comparable": false,
+        "delta": null
+      }
+    }
+  ]
+}

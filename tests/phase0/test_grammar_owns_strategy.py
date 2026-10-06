@@ -50,8 +50,44 @@ def test_director_no_longer_owns_strategy_table():
 
 def test_direct_beat_routes_through_grammar():
     src = inspect.getsource(visual_director._direct_beat)
-    assert "visual_grammar.composition_strategy(" in src
+    # P2-1：Director 消费 Grammar 的**候选集**（决策词汇仍在 Grammar）。
+    assert "visual_grammar.composition_candidates(" in src
     assert 'SEMANTIC_DEFAULT.get(' not in src
+
+
+def test_grammar_owns_composition_candidates():
+    """P2-1：Grammar 拥有多候选；首候选恒等于向后兼容的单值决策；候选∈STRATEGIES。"""
+    combos = [
+        ({}, {"type": "none"}),
+        ({"semantic_role": "hook"}, {"type": "none"}),
+        ({"semantic_role": "emphasis"}, {"type": "none"}),
+        ({"semantic_role": "explanation"}, {"type": "none"}),
+        ({"semantic_role": "explanation"},
+         {"type": "part_to_whole"}),
+        ({"semantic_role": "explanation", "semantic_pairs": [{"type": "answer_to"}]},
+         {"type": "none"}),
+        ({"semantic_role": "explanation", "semantic_pairs": [{"type": "concession"}]},
+         {"type": "none"}),
+    ]
+    for beat, encoding in combos:
+        cands = visual_grammar.composition_candidates(beat, encoding)
+        assert len(cands) >= 2, (beat, encoding, cands)
+        assert cands[0]["strategy"] == visual_grammar.composition_strategy(beat, encoding)
+        assert all(c["strategy"] in visual_director.STRATEGIES for c in cands)
+        fits = [c["semantic_fit"] for c in cands]
+        assert fits == sorted(fits, reverse=True)
+        acc = visual_grammar.acceptable_candidates(beat, encoding)
+        assert len(acc) >= 2 and acc[0]["strategy"] == cands[0]["strategy"]
+
+
+def test_director_uses_decision_record():
+    """P2-1：每拍产出可解释构图决策记录（候选集 + 选择 + 依据）。"""
+    src = inspect.getsource(visual_director)
+    assert "composition_decision" in src
+    assert "_select_strategy" in src
+    # R8 由「固定 ROTATION 硬轮换」升级为「候选集内软偏好」。
+    body = inspect.getsource(visual_director._direct_beat)
+    assert "ROTATION" not in body
 
 
 CASES = [
