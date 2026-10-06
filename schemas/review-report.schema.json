@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "L4 review report (human / agent semantic-visual review)",
+  "_comment": "Stage product of the L4 review (skills/09 VAL-01, skills/10 anti-PPT, skills/coordinator step 8). L4 may NEVER be machine-faked: every verdict starts PENDING and may only be set PASS/FAIL by a human or agent who has actually looked at the preview frames. This schema makes the review report machine-checkable so the no-fake invariant is enforceable.",
+  "type": "object",
+  "required": ["l4_status", "reviewer", "cases"],
+  "additionalProperties": false,
+  "properties": {
+    "l4_status": {
+      "enum": ["PENDING", "REVIEWED"],
+      "description": "PENDING until every case has a non-PENDING verdict and a named reviewer."
+    },
+    "reviewer": {
+      "type": ["string", "null"],
+      "description": "Human or agent identity that performed the review; null while PENDING."
+    },
+    "generated_from": {"type": "string"},
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "srt", "contact_sheet",
+          "ppt_l4_1_standalone_claim", "ppt_l4_2_template_diversity",
+          "ppt_l4_3_graphic_necessity", "ppt_l4_4_memory_point",
+          "verdict"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "srt": {"type": "string"},
+          "contact_sheet": {"type": ["string", "null"]},
+          "ppt_l4_1_standalone_claim": {"$ref": "#/definitions/verdict"},
+          "ppt_l4_2_template_diversity": {"$ref": "#/definitions/verdict"},
+          "ppt_l4_3_graphic_necessity": {"$ref": "#/definitions/verdict"},
+          "ppt_l4_4_memory_point": {"$ref": "#/definitions/verdict"},
+          "verdict": {"$ref": "#/definitions/verdict"},
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "verdict": {"enum": ["PENDING", "PASS", "FAIL"]}
+  }
+}
