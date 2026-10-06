@@ -13,7 +13,7 @@
   /mnt/cos/artifacts/entrance-30s-timeline.json        （每元素入场时刻表）
 """
 import os, sys, json, subprocess, tempfile
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 from PIL import Image, ImageDraw
 from common import CANVAS_W as W, CANVAS_H as H, ensure_dir
 

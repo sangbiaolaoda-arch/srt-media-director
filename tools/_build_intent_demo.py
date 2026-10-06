@@ -5,7 +5,7 @@
   正确（视觉意图）  → 校验通过 → composition_compiler 编译成合法画面 → 渲染
 """
 import sys, io, json
-sys.path.insert(0, "/mnt/work/srt-media-director/runtime")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 import cairosvg
 from PIL import Image
 import ref_frame as R

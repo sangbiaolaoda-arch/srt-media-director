@@ -11,7 +11,7 @@
     /mnt/cos/artifacts/sample30-report.json
 """
 import os, sys, json, subprocess, tempfile
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 from PIL import Image
 import director_loop as DL
 

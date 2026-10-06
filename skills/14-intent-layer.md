@@ -54,5 +54,5 @@ Runtime：composition_compiler.compile_intent(intent)
 
 ```bash
 python runtime/self_test.py          # 含 G17 意图层 + G18 编译器
-python runtime/_build_intent_demo.py # 渲染「意图→构图」证据图
+python tools/_build_intent_demo.py # 渲染「意图→构图」证据图
 ```

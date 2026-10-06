@@ -126,7 +126,7 @@ python runtime/self_test.py     # 含 G16 参考帧构图门禁
 - **机器**：`self_test.py` G16 —— 同一 `cols()` 既给出参考帧精确坐标，又对
   `n=2/4/5` 保持「贴版心、无重叠」合法；`frame_quadrants/timeline/stack`
   三个**参考帧没有**的构型全部通过图层规范校验。
-- **视觉**：`runtime/_build_generalize.py` 渲染「上排复现 / 下排外推」并排图
+- **视觉**：`tools/_build_generalize.py` 渲染「上排复现 / 下排外推」并排图
   （`ref-rule-generalize.png`），外推帧与复现帧结构差异显著，证明不是同图套色。
 
 结论：**能复现只说明会抄；能外推、能被门禁约束，才是真学会。**

@@ -58,7 +58,7 @@ Agent 侧**不写** x/y、不写 CSS animation、不写 transform matrix。
 
 - 独立套件：`python3 runtime/scene_test.py`
 - 端到端：`python3 examples/phase2_scene_demo.py`（真实 SRT 镜头 → DSL → 编译 → Playwright 截图 → Validator → 8 条验收）
-- 回归：`python3 runtime/self_test.py`（20/20）、`python3 runtime/spec_test.py`（35/35）
+- 回归：`python3 runtime/self_test.py`（20/20）、`python3 tools/spec_test.py`（35/35）
 
 ## 两条红线
 

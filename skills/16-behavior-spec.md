@@ -2,7 +2,7 @@
 
 本模块把用户提供的 42 条「视觉导演 + 编译器」规范固化为**可机器门禁**的
 行为契约。每一条都有稳定编号 `R00..R42`，并与运行时代码一一对应：能算的
-就进 `runtime/spec_audit.py` 注册表，由 `runtime/spec_test.py` 独立验证。
+就进 `runtime/spec_audit.py` 注册表，由 `tools/spec_test.py` 独立验证。
 
 > 与 `00-core-contract.md` 的关系：`00` 是「永不可违反」的底线；本模块是
 > 从「生成画面」升级到「导演 + 编译」的**增量行为规范**，`[强制]` 级规则
@@ -44,7 +44,7 @@
 | R23 | 视觉回归对比 | `validation/visual_regression.py` | 强制 |
 | R24 | 失败路由回上游层 | `repair_routing.py` | 强制 |
 | R25 | 表现力指标 | `rep_metrics.py` | 经验 |
-| R26 | 节拍审计 | `beat_audit.py` | 经验 |
+| R26 | 节拍审计 | `tools/beat_audit.py` | 经验 |
 | R27 | 导演 Critic 复核 | `director/critic.py` | 强制 |
 | R28 | Anti-PPT 7 项检查 | `validation/anti_ppt.py::audit` | 强制 |
 | R29 | 认知负荷≤时长承载 | `validation/cognitive_load.py::audit` | 强制 |
@@ -73,4 +73,4 @@ if report["status"] == "FAIL":
 
 `spec_audit.registry_report()` 报告注册表健康度（已接线规则数）。
 
-验证：`python3 runtime/spec_test.py`（独立套件）+ `python3 runtime/self_test.py`（回归，须保持 20/20）。
+验证：`python3 tools/spec_test.py`（独立套件）+ `python3 runtime/self_test.py`（回归，须保持 20/20）。

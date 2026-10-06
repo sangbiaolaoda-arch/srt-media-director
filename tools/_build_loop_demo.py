@@ -4,7 +4,7 @@
 这条闭环真的产出光栅，而不是纸面描述。
 """
 import sys, os, tempfile, json
-sys.path.insert(0, "/mnt/work/srt-media-director/runtime")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 from PIL import Image
 import director_loop as DL
 

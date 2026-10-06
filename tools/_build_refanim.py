@@ -1,6 +1,6 @@
 """逐元素入场动画渲染：用 ref_frame 的图层规范，对每个元素做独立入场。"""
 import os, sys, io, subprocess, shutil
-sys.path.insert(0, "/mnt/work/srt-media-director/runtime")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 import cairosvg
 from PIL import Image
 import imageio_ffmpeg

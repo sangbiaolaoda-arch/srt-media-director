@@ -14,7 +14,7 @@
   v2-report.json            逐元素入场时刻表 + 逐拍差异 + 编码探测
 """
 import os, sys, json, subprocess
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 from PIL import Image, ImageDraw
 import numpy as np
 from common import CANVAS_W as W, CANVAS_H as H

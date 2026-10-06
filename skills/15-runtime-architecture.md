@@ -82,7 +82,7 @@ director/critic  →  判决
 
 ```bash
 python runtime/self_test.py            # 含 G19（六包接线）+ G20（闭环 PASS + 修复路由）
-python runtime/_build_intent_demo.py   # 意图 → 构图 证据图
+python tools/_build_intent_demo.py   # 意图 → 构图 证据图
 ```
 
 机器门禁：`G19` 断言六包与目标文件布局存在且跨包接线可用；`G20` 断言闭环

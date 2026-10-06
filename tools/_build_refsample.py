@@ -1,7 +1,7 @@
 """用参考帧构图语法（ref_frame）重渲 30s 样片。
 内容 = 注意力/分心主题（与参考帧同源）；画面 = 复刻参考帧的构图代码。"""
 import os, sys, glob, subprocess, shutil
-sys.path.insert(0, "/mnt/work/srt-media-director/runtime")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 import cairosvg
 from PIL import Image
 import ref_frame as R

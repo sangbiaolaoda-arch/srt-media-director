@@ -5,7 +5,7 @@
 两张并排图必须都成立，才能说明「复现 + 泛化」= 真学会。
 """
 import os, sys, io
-sys.path.insert(0, "/mnt/work/srt-media-director/runtime")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runtime"))
 import cairosvg
 from PIL import Image
 import ref_frame as R
