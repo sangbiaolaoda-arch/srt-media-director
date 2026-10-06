@@ -121,3 +121,30 @@ jobs:
         run: python -m pip install --upgrade pip pillow jsonschema
       - name: Backend probe (must degrade, not crash)
         run: python runtime/svg_backend.py --probe
+
+
+  # META-0 - judge seal portability. VERIFY ONLY: this job never receives
+  # SMD_JUDGE_KEY and never re-seals; it proves that a clean checkout of the
+  # SAME commit yields the SAME judge verdict on every platform, i.e. the seal
+  # depends on the repository's logical content rather than on the working
+  # tree's line endings. Judge verify is stdlib-only, so no runtime deps here.
+  judge-portability:
+    name: judge portability (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pytest only (judge verify is stdlib-only)
+        run: python -m pip install --upgrade pip pytest
+      - name: Trust domain - CI must NOT hold the judge signing authority
+        run: python -c "from runtime.verification import authority; print('signing_available:', authority.signing_available()); assert not authority.signing_available(), 'CI must be verify-only'"
+      - name: Canonical hashing + line-ending portability tests (T1-T11)
+        run: python -m pytest tests/phase0/test_judge_seal_portability.py -q
+      - name: Real repository judge verify (read-only, no key)
+        run: python -c "from runtime.verification import judge_guard; r = judge_guard.verify(); print(r); assert r['ok'], r"
