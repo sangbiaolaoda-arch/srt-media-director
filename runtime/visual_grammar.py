@@ -104,3 +104,59 @@ def audit(dsl):
 def _iss(bid, code, msg):
     return {"severity": "err", "layer": "grammar", "code": code,
             "beat_id": bid, "msg": msg}
+
+
+# ---------------------------------------------------------------------------
+# P2 — 构图策略决策权（Visual Grammar 接管 Director）
+# ---------------------------------------------------------------------------
+# 语法层现在拥有「一个拍子用什么构图策略」的决策词汇。此前这些表（角色默认 +
+# 语义关系提示 + 编码映射）散落在 visual_director 内部；现集中于此，Director
+# 只是消费者。行为与收敛前逐字节等价，由
+# tests/phase0/test_grammar_owns_strategy.py + tests/test_golden.py 双重校验。
+
+SEMANTIC_DEFAULT = {
+    "hook": "left_to_right_flow",
+    "explanation": "single_focus",
+    "turning_point": "single_focus",
+    "conclusion": "single_focus",
+    "comparison": "comparison",
+    "emphasis": "center_cluster",
+}
+
+DEFAULT_STRATEGY = "single_focus"
+
+# 信息编码类型 → 构图策略（数字/色彩证据优先于语义角色默认）
+ENCODING_STRATEGY = {
+    "part_to_whole": "center_cluster",
+    "change_over_time": "before_after",
+    "semantic_color_pair": "comparison",
+}
+
+# 语义关系 → 因果提示（仅在角色默认为通用 single_focus 时介入）。
+# 因果（answer_to/conclusion）优先于让步（concession），与收敛前一致。
+PRIMARY_RELATIONS = ("answer_to", "conclusion")
+SECONDARY_RELATIONS = ("concession",)
+
+
+def composition_strategy(beat, encoding):
+    """beat + encoding → 构图策略：构图语法决策的唯一权威。
+
+    优先级（与收敛前 ``visual_director._direct_beat`` 完全一致）：
+      数字/色彩编码 > 特色角色默认 > 语义关系提示 > 通用默认。
+    R8 邻拍避让（同模板轮换）与显式覆写由 Director 在调用本函数后处理。
+    """
+    etype = encoding.get("type")
+    if etype in ENCODING_STRATEGY:
+        return ENCODING_STRATEGY[etype]
+    role = beat.get("semantic_role")
+    if role == "comparison":
+        return "comparison"
+    role_default = SEMANTIC_DEFAULT.get(role, DEFAULT_STRATEGY)
+    if role_default != DEFAULT_STRATEGY:
+        return role_default
+    pairs = beat.get("semantic_pairs", [])
+    if any(p["type"] in PRIMARY_RELATIONS for p in pairs):
+        return "cause_effect"
+    if any(p["type"] in SECONDARY_RELATIONS for p in pairs):
+        return "comparison"
+    return DEFAULT_STRATEGY

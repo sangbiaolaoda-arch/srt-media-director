@@ -30,14 +30,8 @@ STRATEGIES = ("single_focus", "left_to_right_flow", "cause_effect",
 ROTATION = ("single_focus", "cause_effect", "center_cluster",
             "comparison", "before_after", "left_to_right_flow")
 
-SEMANTIC_DEFAULT = {
-    "hook": "left_to_right_flow",
-    "explanation": "single_focus",
-    "turning_point": "single_focus",
-    "conclusion": "single_focus",
-    "comparison": "comparison",
-    "emphasis": "center_cluster",
-}
+# P2：构图策略决策权已收敛进 visual_grammar（导演不再自带决策表）。
+SEMANTIC_DEFAULT = visual_grammar.SEMANTIC_DEFAULT
 
 _RISK_WORDS = ("危险", "风险", "依赖", "害", "伤", "焦虑", "失眠")
 _SAFE_WORDS = ("安全", "保护", "边界", "自律", "找回")
@@ -438,30 +432,8 @@ def _direct_beat(beat, beat_i, ov, prev_strategy, numbers_index,
         beat, numbers_index)))
     emphasis = rank_emphasis(beat, extract_emphasis(beat, numbers_index))
 
-    if encoding["type"] == "part_to_whole":
-        strategy = "center_cluster"
-    elif encoding["type"] == "change_over_time":
-        strategy = "before_after"
-    elif encoding["type"] == "semantic_color_pair" or \
-            beat["semantic_role"] == "comparison":
-        strategy = "comparison"
-    else:
-        # v4.3 语义检索提示：问答/让步/因果对同拍时，构图直接服务语义关系。
-        # 优先级：显式覆写 > 数字编码 > 特色角色默认 > 语义提示 > 通用默认；
-        # R8 邻拍避让仍生效。语义提示只在角色默认是通用 single_focus 时介入
-        # ——hook→flow 等特色角色默认不抢占（覆写的 flow_pair 等字段依赖它）。
-        sem_pairs = beat.get("semantic_pairs", [])
-        hinted = None
-        if any(p["type"] in ("answer_to", "conclusion") for p in sem_pairs):
-            hinted = "cause_effect"          # 问=铺垫/陈述 → 答=揭示/所以
-        elif any(p["type"] == "concession" for p in sem_pairs):
-            hinted = "comparison"            # 铺垫 vs 转折
-        role_default = SEMANTIC_DEFAULT.get(beat["semantic_role"],
-                                            "single_focus")
-        if role_default != "single_focus":
-            strategy = role_default
-        else:
-            strategy = hinted or "single_focus"
+    # P2：构图策略由 visual_grammar 层决断（Director 不再自带决策词汇）。
+    strategy = visual_grammar.composition_strategy(beat, encoding)
 
     explicit = "strategy" in ov
     strategy = ov.get("strategy", strategy)
