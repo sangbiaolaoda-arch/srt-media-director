@@ -178,6 +178,46 @@ def derive(dsl, render_plan, entrance, W, H):
     return out
 
 
+# ------------------------------------------------------------------ state delta (P2-2)
+def derive_state_delta(prev_beat_dsl, cur_beat_dsl, prev_boxes, cur_boxes,
+                       *, from_beat=None, to_beat=None,
+                       reason="adjacent-beat semantic change"):
+    """P2-2 派生：把相邻两拍的**稳态差分**显式化为 StateDelta / Transition。
+
+    与 derive() 互补——derive() 只产出 end_state/transition_in 并做相邻拍校验，
+    本函数把「同一 identity 跨拍变化」显式化为 Delta 对象，供执行层消费。
+    identity 是独立字段（见 runtime/state_delta.py），绝不从拍内 id 推导；
+    缺 identity 的元素不会被声明为跨拍连续实体。
+    """
+    import state_delta as sd
+
+    pe = prev_beat_dsl.get("elements", [])
+    ce = cur_beat_dsl.get("elements", [])
+    matches = sd.match_identity(pe, ce)
+    carried = [m["entity_id"] if isinstance(m, dict) else m.entity_id for m in
+               [sd.as_dict(x) for x in matches]]
+
+    by_prev = {sd.element_identity(e): e for e in pe if sd.element_identity(e)}
+    by_cur = {sd.element_identity(e): e for e in ce if sd.element_identity(e)}
+    deltas = []
+    for ident in carried:
+        pbox = prev_boxes.get(by_prev[ident]["id"]) if by_prev.get(ident) else None
+        cbox = cur_boxes.get(by_cur[ident]["id"]) if by_cur.get(ident) else None
+        ps = sd.entity_state(by_prev[ident], pbox)
+        cs = sd.entity_state(by_cur[ident], cbox)
+        deltas.extend(sd.derive_delta(ps, cs, reason))
+
+    trans = sd.classify_transition(from_beat, to_beat, carried, deltas)
+    return {
+        "from_beat": from_beat,
+        "to_beat": to_beat,
+        "matches": [sd.as_dict(m) for m in matches],
+        "carried": carried,
+        "deltas": [sd.as_dict(d) for d in deltas],
+        "transition": sd.as_dict(trans),
+    }
+
+
 def _primary_id(beat, boxes):
     for e in beat["elements"]:
         if e.get("role") == "primary":
