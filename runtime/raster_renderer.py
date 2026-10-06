@@ -320,6 +320,26 @@ def _draw_bars(dr, b, before, after, color, progress):
 
 # ---------------------------------------------------------------- 场景装配
 
+def _draw_growth(dr, b, value, vmax, color):
+    """P2-2 Phase-1：单实体数值「增长」——一根柱，高度按 value 连续插值。
+
+    State-driven：调用方每帧传入由 State Delta 采样出的 value（见 state_delta.py），
+    渲染器本身只负责把该 value 画成真实像素。既有 kind（donut/bars）行为不变。
+    """
+    base_y = b["y"] + b["h"] * 0.90
+    top_y = b["y"] + b["h"] * 0.08
+    full = base_y - top_y
+    frac = 0.0 if vmax <= 0 else max(0.0, min(1.0, value / float(vmax)))
+    h = full * frac
+    bw = b["w"] * 0.20
+    cx = b["x"] + b["w"] * 0.5
+    dr.rectangle([cx - bw / 2, base_y - h, cx + bw / 2, base_y], fill=tuple(color))
+    dr.line([b["x"] + b["w"] * 0.12, base_y, b["x"] + b["w"] * 0.88, base_y],
+            fill=hex2rgb(THEME["muted"]), width=2)
+    dr.text((cx, base_y + 16), format_compact_num(value), font=font(20),
+            fill=hex2rgb(THEME["ink"]), anchor="mm")
+
+
 def _render_scene(beat_dsl, plan_beat, entrance_beat, t,
                   exclude=(), box_override=None):
     """渲染一拍在时刻 t 的完整场景（不含质感后期——后期在 draw_frame 统一做，
@@ -375,7 +395,10 @@ def _render_scene(beat_dsl, plan_beat, entrance_beat, t,
             _draw_arrow(dr, b, _fade(accent, a * 0.85), p)
         elif tpe == "chart":
             ch = el["chart"]
-            if ch["kind"] == "donut":
+            if ch["kind"] == "growth":
+                _draw_growth(dr, b, ch.get("value", 0.0), ch.get("vmax", 100.0),
+                             _fade(hex2rgb(COLORS["positive"]), a))
+            elif ch["kind"] == "donut":
                 p = next((p for act, p in evs if act == "chart_fill"), 1.0)
                 _draw_donut(dr, b, ch["value"],
                             _fade(hex2rgb(COLORS["info"]), a), p)
