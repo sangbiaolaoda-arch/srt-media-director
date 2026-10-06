@@ -98,4 +98,11 @@ def run(srt_path, out_dir, overrides_path=None, render_previews=True, log=print)
     log("  校验结果: %s" % report["status"])
     for i in report["issues"][:8]:
         log("  [%s] %s %s" % (i["layer"], i["code"], i["msg"]))
+
+    log("→ 运行回执（状态机 WHAT/EVIDENCE/VERDICT/NEXT，机器裁决 UNRESOLVED）")
+    import run_receipt
+    receipt = run_receipt.build(work, os.path.join(film, "index.html"), report)
+    dump_json(receipt, os.path.join(work, "run-receipt.json"))
+    log("  回执: %s（下一阶段 %s）"
+        % (receipt["verdict"]["verdict"], receipt["next_stage"]))
     return report
