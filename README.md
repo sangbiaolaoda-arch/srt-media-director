@@ -25,48 +25,54 @@ validation-report（机器证据）`——每一层落盘、每一层可校验�
 > Critic，PASS 才前进，FAIL 就带修复目标层回到上游重编重截。见
 > [`skills/15-runtime-architecture.md`](skills/15-runtime-architecture.md)。
 
-## 真实样例库（先看画面，再谈方法）
+## 排版库（110 套构图蓝图）
 
-「反 PPT / 画面会讲故事」是本项目最大的卖点，所以它必须可被外人验证——
-不是只放最好的一段，而是**覆盖不同内容类型 + 主动公开失败案例**。
-全部样例在 [`examples/showcase/`](examples/showcase/)：
+「反 PPT」的核心不是堆特效，而是**构图词汇的厚度**。项目内置 110 套归一化排版
+蓝图（[`runtime/capability_library/layout_library.py`](runtime/capability_library/layout_library.py)），
+按内容类型分为三族：
 
-| 样例 | 内容类型 | 时长 | 看点 |
-|---|---|---|---|
-| [01-explanatory-tech](examples/showcase/01-explanatory-tech/) | 技术讲解 | 1m11s | 因果链 / 流程排序；中英混排（gradient checkpointing、BF16） |
-| [02-narrative-emotion](examples/showcase/02-narrative-emotion/) | 叙事抒情 | 1m54s | 问答断句、让步转折、跨拍交接 |
-| [03-data-comparison](examples/showcase/03-data-comparison/) | 数据对比 | 1m00s | 数字/前后变化；语义色分离（正负对比） |
-| [04-longform-3min](examples/showcase/04-longform-3min/) | 长片 | 3m41s | 模板复用率、调色板分布是否漂移 |
+| 族 | 数量 | 覆盖 |
+|---|---|---|
+| 文字 | 42 | 堆叠 / 标题主角 / 双栏·三栏 / 引用金句 / 叠层 / 大数字 |
+| 图像 | 34 | 主图配文 / 图文分栏 / 图集 / 满幅 / 竖幅 / 对照 / 画中画 |
+| 图表 | 34 | 环形 / 柱状（横竖） / 折线 / KPI 行 / 散点 / 瀑布 |
 
-> 下方 GIF 为各成片前 6 秒的降采样预览（工程内可离线复现完整 MP4）。
+每套蓝图是**归一化区域图**（坐标 0–1，安全区 0.07），与渲染器解耦：
+导演层可直接引用，也可单独在浏览器预览——不是截图，是可复现的构图语法。
 
-**01 · 技术讲解（因果链 / 中英混排）**
+**全览 · 25 套代表**
 
-![01-explanatory-tech preview](examples/showcase/01-explanatory-tech/preview.gif)
+![layout overview](examples/layout-gallery/overview.svg)
 
-**02 · 叙事抒情（问答 / 让步 / 转折）**
+**文字排版 · 42 套**
 
-![02-narrative-emotion preview](examples/showcase/02-narrative-emotion/preview.gif)
+![text layouts](examples/layout-gallery/text.svg)
 
-**03 · 数据对比（数字 / 前后变化）**
+**图像排版 · 34 套**
 
-![03-data-comparison preview](examples/showcase/03-data-comparison/preview.gif)
+![image layouts](examples/layout-gallery/image.svg)
 
-**04 · 长片（3m41s，模板复用与调色板分布）**
+**图表排版 · 34 套**
 
-![04-longform-3min preview](examples/showcase/04-longform-3min/preview.gif)
+![chart layouts](examples/layout-gallery/chart.svg)
 
-复现：
+> 每张卡片：圆角框 = 区域槽位，角标数字 = 阅读顺序，左上角 = 蓝图 id / 族。
+
+复现画廊（进入 `runtime/` 目录，仅依赖 Pillow）：
 ```bash
-python runtime/render_video.py \
-  --srt examples/showcase/01-explanatory-tech/case.srt \
-  --out out/01-tech.mp4
+python -m capability_library.render_gallery --out ../examples/layout-gallery
 ```
 
-**已知失败案例与局限**：[`examples/known-failures/`](examples/known-failures/)
-——包括 SRT 解析敏感性（F01）、同质内容不被误判（F02）、曾存在的跨进程
-不可复现（F03，已修复 + 回归测试）、缺失的 CJK 排版门禁（F04）、构图模板
-覆盖缺口（F05）。**公开失败比只展示高光更可信。**
+契约门禁：
+```bash
+python -m pytest tests/phase0/test_capability_library.py -q   # 17 项
+```
+
+配套能力：**50 套 GSAP 入场**（`entrance_library.py`）与 **50 套元素动态关系**
+（`relation_library.py`），编译成浏览器可用包：
+```bash
+python -m capability_library.gsap_emit --out capability_library/dist
+```
 
 ## 快速开始
 
