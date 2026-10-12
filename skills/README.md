@@ -1,6 +1,6 @@
 # skills/ — 模块技能导航
 
-原 v3.0 单文档（约 6900 行）按主题拆分为 16 个可独立阅读的模块技能，
+原 v3.0 单文档（约 6900 行）按主题拆分为 18 个可独立阅读的模块技能，
 外加一个**主协调器**（`coordinator.md`）负责按顺序调用它们。
 
 拆分原则：**一个模块只回答一类问题**。复杂度被完整保留——所有硬规则
@@ -27,6 +27,8 @@
 | 13 | [13-reference-frames.md](13-reference-frames.md) | 参考帧的手写 SVG 构图语法怎么复用（规则引擎）？ | `runtime/ref_frame.py` |
 | 14 | [14-intent-layer.md](14-intent-layer.md) | Agent 如何输出视觉意图而非选模板？ | `visual-intent.schema.json` / `runtime/intent_layer.py` |
 | 15 | [15-runtime-architecture.md](15-runtime-architecture.md) | Runtime 六包如何分工、闭环怎么转？ | `runtime/{director,compiler,render,validation,primitives,schemas}/` |
+| 16 | [16-behavior-spec.md](16-behavior-spec.md) | 行为规范 42 条如何被机器门禁？ | `spec_audit.py` / `tools/spec_test.py` |
+| 17 | [17-scene-compiler.md](17-scene-compiler.md) | 场景编译器如何把意图编译成场景图？ | `runtime/scene/`（Scene Graph / Relation Graph / Render Plan） |
 | ★ | [coordinator.md](coordinator.md) | **主协调器：什么时候调哪个模块、出错怎么办** | 端到端流水线 |
 
 ## 给 Agent 的用法
