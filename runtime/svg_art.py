@@ -22,8 +22,12 @@ import io
 import math
 import re
 
-import cairosvg
 from PIL import Image
+
+try:  # cairosvg 是可选增强：仅在真正光栅化 SVG 时才需要，缺失时导入不应崩溃。
+    import cairosvg
+except ImportError:  # pragma: no cover - 依赖环境
+    cairosvg = None
 
 # 晶格坐标只有一个实现（procedural_canonical.layout）——装饰生成器不再手写双重循环。
 from procedural_canonical import layout as _layout
@@ -542,6 +546,10 @@ def audit_all():
 def render_png(art, color, w, h):
     """cairosvg 光栅化为 RGBA PIL Image（带 LRU 缓存，视频渲染友好）。"""
     svg = ART[art].replace("{COLOR}", color)
+    if cairosvg is None:
+        raise RuntimeError(
+            "render_png 需要 cairosvg 才能把 SVG 光栅化为 PNG；"
+            "请 `pip install cairosvg`（或走 svg_backend 的 resvg 回退）。")
     png = cairosvg.svg2png(bytestring=svg.encode("utf-8"),
                            output_width=max(1, int(w)),
                            output_height=max(1, int(h)))
