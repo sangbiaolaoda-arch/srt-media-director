@@ -166,7 +166,7 @@ python runtime/svg_backend.py --probe   # SVG 后端可用性
 ## 参与贡献
 
 见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。核心约定：**新增 [强制] 级规则
-必须附带机器检查**（self_test 或 validator），没有牙齿的规则不进主干。
+必须附带机器检查**（self_test 或 validator），没有牙齿的规则不进主干。协作与汇报纪律见 [docs/adhd-collaboration-guide.md](docs/adhd-collaboration-guide.md)。
 
 ## License
 
