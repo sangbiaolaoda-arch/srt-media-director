@@ -107,7 +107,7 @@ python runtime/make_sample.py 30 --no-render  # 只编译 + 门禁（2 秒级）
 
 - **统筹技能包**：[`skills/coordinator.md`](skills/coordinator.md)——
   Agent 先读它，按阶段调用表加载单个模块，避免上下文过载。
-- **模块技能**：[`skills/`](skills/README.md) 下 11 个主题文档，
+- **模块技能**：[`skills/`](skills/README.md) 下 18 个模块文档（00–17），
   规则带唯一编号（`CORE-nn` / `GATE-R8` …），修复日志按编号引用。
 - **参考 Runtime**：[`runtime/`](runtime/)——Pillow 单依赖，
   `self_test.py` 是可执行的规格说明。
