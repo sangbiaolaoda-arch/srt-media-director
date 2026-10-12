@@ -1,35 +1,23 @@
 ---
 name: srt-media-director
-version: 7.6.0
-status: public-learning-and-execution
-language: zh-CN
-agent_created: false
-license: MIT
 description: >-
-  面向 AI Agent 的开源信息图动画导演 Skill：SRT → 语义分析 → Beat → 叙事形状 →
-  Visual Claim → 强调与信息编码 → 视觉叙事 → 全局语法 → 构图 → 时序编排 →
-  Visual DSL → 布局/编译 Runtime → 适配器 → 分层验证 → 局部修复。
-  v4.0 将 v3.0 单文档重组为「14 个模块技能 + 主协调器 + 可运行参考 Runtime」，
-  全部硬规则保留并配上机器门禁（runtime/self_test.py 25 道门禁已验证）。
-  v6.0 增补生成后契约（转场三类型 / 停留下限 / 视线路径 / ambient / 反空话）、
-  风格锁定扫描、节拍表与末帧联系表、故障→修复层路由与单变量重拍预算。
-  v7.0 「固定视觉规则 → 自适应视觉导演」：固定审美原则不固定视觉风格、
-  固定视觉语法体系不固定表达、固定编译验证规则不固定长相。新增 Visual Grammar
-  （抽象语法替代素材名）、Style Bible（视频级视觉人格）、Visual Necessity
-  （必要性替代数量门禁），构图模板降为建议锚点。
-  v7.1 参考帧构图语法：把参考帧的手写 SVG 构图学成可复用模块（版心网格 /
-  圆角卡片 / 线稿图标 / 连接箭头 / 强调纪律 / 逐元素入场编排），而非只抄配色。
-  v7.2 把参考帧学习从「模板动物园」升级为「规则引擎」：坐标改为规则的**解**
-  （cols(n)/rows(n)），强调改为**预算**（一帧一处、一个元素），并新增
-  quadrants/timeline/stack 三个参考帧没有的新构型，证明学到的是可泛化规则。
-  v7.3 「语义视觉意图层」：把 Agent 从**模板选择器**改造为**只输出视觉意图**
-  （Visual Claim / Visual Grammar / Focal Point / Relationship Graph / Density /
-  Silence / Motion Intent），几何一律由 Runtime 的 composition_compiler 决定；
-  明令拒斥 strategy/template/像素泄漏（门禁 G17）；Agent 不再「画画」。
-  语法词汇新增 accumulation / trajectory / threshold（门禁 G18 验证语法 1:N 实现）。
+  面向 AI Agent 的开源信息图动画导演 Skill：把一段带时间轴的字幕（SRT）编译成
+  有视觉层级、空间关系、信息编码与时间节奏的动画信息场景，而不是把字幕排成 PPT。
+  流水线为 SRT → 语义分析 → Beat → 叙事形状 → Visual Claim → 强调与信息编码 →
+  视觉叙事 → 全局语法 → 构图 → 时序编排 → Visual DSL → 布局/编译 Runtime →
+  适配器 → 分层验证 → 局部修复；规则分 [强制]/[经验]/[建议] 三级，[强制] 级全部
+  配有机器门禁（runtime/self_test.py）。当用户需要从 .srt/字幕生成信息图动画、
+  需要「固定审美原则 + 自适应视觉风格」的可验证视觉导演，或需要一套带机器门禁的
+  开源参考实现时使用。
+license: MIT
+metadata:
+  version: "7.6.0"
+  status: public-learning-and-execution
+  language: zh-CN
+  agent-created: false
 ---
 
-# SRT Media Director（v4.0 开源版入口）
+# SRT Media Director
 
 > 本文件是仓库级入口。执行任务的 Agent 请直接跳转：
 > **统筹技能包 → [`skills/coordinator.md`](skills/coordinator.md)**
@@ -44,10 +32,10 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 
 | v3.0 | v4.0 |
 |---|---|
-| 单文档 ~6900 行 | 11 个模块技能 + 主协调器（`skills/`） |
+| 单文档 ~6900 行 | 18 个模块技能 + 主协调器（`skills/`） |
 | 编号重叠（§10.16 出现两次）、版本残留 | 全仓库唯一规则编号（`CORE-nn` 等），编号不随文档重组变化 |
 | 规则靠自觉 | 规则分 [强制]/[经验]/[建议] 三级；[强制] 级全部有机器门禁 |
-| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 25 道门禁 CI 可跑 |
+| Runtime 是「应有」 | Runtime 是「已有」：`runtime/` 参考实现 + `self_test.py` 20 道门禁 CI 可跑 |
 
 ### v7.1：参考帧构图语法
 
@@ -83,7 +71,7 @@ v4.0 相对 v3.0 的变更：方法论不变，载体重组。
 pip install pillow jsonschema
 
 # 1. 先验证 Runtime（Bootstrap Gate，VAL-03）
-python runtime/self_test.py          # 25 道门禁 → SELF-TEST VERIFIED ✔
+python runtime/self_test.py          # 20 道门禁 → SELF-TEST VERIFIED ✔
 
 # 2. 跑最小示例（8 条字幕 / 38 秒 / 5 种构图模板）
 python cli.py examples/minimal/attention.srt \
@@ -117,7 +105,11 @@ srt-media-director/
 │  ├─ 10-anti-ppt.md         #   防退化质量底线
 │  ├─ 11-visual-grammar.md   #   视觉语法体系（抽象语法替代素材名）
 │  ├─ 12-style-bible.md      #   视频级视觉人格（风格随内容自适应）
-│  └─ 13-reference-frames.md #   参考帧构图语法（学构图代码，非抄配色）
+│  ├─ 13-reference-frames.md #   参考帧构图语法（学构图代码，非抄配色）
+│  ├─ 14-intent-layer.md     #   语义视觉意图层（Agent 不再「画画」）
+│  ├─ 15-runtime-architecture.md   # Runtime 六包架构 + 生成-截图-评审-修复闭环
+│  ├─ 16-behavior-spec.md    #   行为规范 42 条（视觉导演 + 编译器）
+│  └─ 17-scene-compiler.md   #   场景编译层（Scene Compiler）
 ├─ runtime/                  # 参考实现（怎么算 / 机器事实）
 │  ├─ srt_parser.py  beat_planner.py  visual_director.py
 │  ├─ composition_planner.py  entrance_planner.py
