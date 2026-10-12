@@ -472,6 +472,21 @@ def draw_frame(beat_dsl, plan_beat, entrance_beat, t, prev=None):
     return _apply_grade(img, t)
 
 
+def _flat_pixels(im):
+    """把像素规范化为「扁平通道整数列表」。
+
+    弃用 getdata() 后改用 get_flattened_data()；不同 Pillow 构建的返回形态不同
+    （扁平整型 vs 逐像素元组），这里统一成扁平整数列表。
+    """
+    data = list(im.get_flattened_data())
+    if data and isinstance(data[0], tuple):
+        out = []
+        for px in data:
+            out.extend(px)
+        return out
+    return data
+
+
 def ink_stats(img):
     """(ink_ratio, distinct_colors)。遮幅黑条不算内容，先裁掉。
 
@@ -488,14 +503,15 @@ def ink_stats(img):
     small = body.resize((320, 180)).convert("RGB")
     # 局部背景估计：模糊半径远大于内容笔画宽度，抹掉平滑背景、保留内容高频
     bg_est = small.filter(ImageFilter.GaussianBlur(radius=10))
-    px = list(small.getdata())
-    bpx = list(bg_est.getdata())
+    px = _flat_pixels(small)
+    bpx = _flat_pixels(bg_est)
     ink = 0
-    for p, q in zip(px, bpx):
-        if abs(p[0] - q[0]) + abs(p[1] - q[1]) + abs(p[2] - q[2]) > 40:
+    for i in range(0, len(px), 3):
+        if (abs(px[i] - bpx[i]) + abs(px[i + 1] - bpx[i + 1])
+                + abs(px[i + 2] - bpx[i + 2])) > 40:
             ink += 1
     q = body.convert("P", palette=Image.ADAPTIVE, colors=48)
-    return ink / float(len(px)), len(q.getcolors())
+    return ink / float(len(px) // 3), len(q.getcolors())
 
 
 def render_previews(dsl, render_plan, entrance, out_dir):
