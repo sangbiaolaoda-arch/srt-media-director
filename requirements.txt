@@ -7,7 +7,7 @@ jsonschema>=4.0        # 中间产物 schema 校验
 # 测试（黄金回归 / CI）：
 pytest>=7.4            # tests/ 黄金哈希回归
 
-# 可选增强：
+# 可选增强（惰性导入：仅在真正光栅化 SVG 画法时才需要，缺失不会让 self_test 崩溃）：
 cairosvg>=2.7          # SVG 画法光栅化（主后端；缺省则尝试 resvg → 退化基础几何）
 imageio-ffmpeg>=0.4    # MP4 成片编码（runtime/render_video.py；自带静态 ffmpeg）
 
