@@ -58,7 +58,7 @@ validation-report（机器证据）`——每一层落盘、每一层可校验�
 
 > 每张卡片：圆角框 = 区域槽位，角标数字 = 阅读顺序，左上角 = 蓝图 id / 族。
 
-复现画廊（进入 `runtime/` 目录，仅依赖 Pillow）：
+复现画廊（进入 `runtime/` 目录，仅依赖标准库）：
 ```bash
 python -m capability_library.render_gallery --out ../examples/layout-gallery
 ```
@@ -78,7 +78,7 @@ python -m capability_library.gsap_emit --out capability_library/dist
 
 ```bash
 pip install pillow jsonschema cairosvg
-python runtime/self_test.py        # Bootstrap Gate：20 道门禁
+python runtime/self_test.py        # Bootstrap Gate：25 道门禁
 python cli.py examples/minimal/attention.srt \
   --out sample --overrides examples/minimal/director_overrides.json
 ```
@@ -126,7 +126,7 @@ python runtime/make_sample.py 30 --no-render  # 只编译 + 门禁（2 秒级）
 ## 范围与边界（诚实声明）
 
 - 参考 Runtime 是**最小可运行实现**：6 套构图模板、**24 种非拟人 SVG 主体
-  画法 + 16 种装饰附体画法**（`runtime/svg_art.py`，合计 41 种矢量画法）、
+  画法 + 16 种装饰附体画法**（`runtime/svg_art.py`，合计 40 种矢量画法）、
   5 套情绪背景调色板、1 种镜头运动。它是「经过验证的基线」，不是功能全集
   ——扩展方式见 `CONTRIBUTING.md`。
 - 每拍至少 3 个图形/图表/文字要素；装饰在规则内受控随机（种子 =
@@ -158,7 +158,7 @@ python runtime/make_sample.py 30 --no-render  # 只编译 + 门禁（2 秒级）
   cairo 时优雅降级」。
 
 ```bash
-python runtime/self_test.py     # 12 道 Bootstrap Gate
+python runtime/self_test.py     # 25 道 Bootstrap Gate
 python -m pytest tests -q       # 黄金哈希回归
 python runtime/svg_backend.py --probe   # SVG 后端可用性
 ```
