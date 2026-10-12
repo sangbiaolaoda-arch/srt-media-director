@@ -46,9 +46,12 @@ def test_strength_readers_default_to_zero():
 def test_pil_mask_matches_falloff_and_is_zero_when_disabled():
     m = grade.vignette_mask_pil(32, 18, {"vignette": 0.0})
     assert m.size == (32, 18)
-    assert set(m.getdata()) == {0}
+    def _flat(im):
+        d = list(im.get_flattened_data())
+        return [c for px in d for c in px] if d and isinstance(d[0], tuple) else d
+    assert set(_flat(m)) == {0}
     m2 = grade.vignette_mask_pil(32, 18, {"vignette": 1.0})
-    assert max(m2.getdata()) > 0
+    assert max(_flat(m2)) > 0
 
 
 def test_js_mirror_reports_canonical_inner_ratio():
