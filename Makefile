@@ -8,7 +8,7 @@ OUT ?= sample/out
 
 help:
 	@echo "make install   安装依赖（含 SVG / MP4 / pytest）"
-	@echo "make test      运行 runtime/self_test.py（8 道门禁）"
+	@echo "make test      运行 runtime/self_test.py（25 道门禁）"
 	@echo "make golden    运行 tests/（黄金哈希回归 + 失败案例回归）"
 	@echo "make sample    编译并渲染前 30 秒样例（sample/out/）"
 	@echo "make video     渲染完整示例 MP4（examples/minimal）"
