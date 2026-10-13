@@ -1,0 +1,265 @@
+{
+  "status": "PASS",
+  "layers": {
+    "schema": "PASS",
+    "l1": "PASS",
+    "l2": "see work/layout-audit.json (runs fail-fast inside composition_planner)",
+    "l3": "PASS",
+    "l4": "PENDING — semantic/visual review must be done by agent or human"
+  },
+  "issues": [],
+  "raster": {
+    "beat_01": {
+      "frame": "/mnt/work/full-out/preview/beat_01/final-10.3s.png",
+      "t": 10.33,
+      "ink_ratio": 0.0287,
+      "distinct_colors": 48
+    },
+    "beat_02": {
+      "frame": "/mnt/work/full-out/preview/beat_02/final-16.5s.png",
+      "t": 16.48,
+      "ink_ratio": 0.1011,
+      "distinct_colors": 48
+    },
+    "beat_03": {
+      "frame": "/mnt/work/full-out/preview/beat_03/final-22.4s.png",
+      "t": 22.38,
+      "ink_ratio": 0.0172,
+      "distinct_colors": 48
+    },
+    "beat_04": {
+      "frame": "/mnt/work/full-out/preview/beat_04/final-26.5s.png",
+      "t": 26.46,
+      "ink_ratio": 0.0916,
+      "distinct_colors": 48
+    },
+    "beat_05": {
+      "frame": "/mnt/work/full-out/preview/beat_05/final-31.7s.png",
+      "t": 31.67,
+      "ink_ratio": 0.0184,
+      "distinct_colors": 48
+    },
+    "beat_06": {
+      "frame": "/mnt/work/full-out/preview/beat_06/final-35.2s.png",
+      "t": 35.19,
+      "ink_ratio": 0.1119,
+      "distinct_colors": 48
+    },
+    "beat_07": {
+      "frame": "/mnt/work/full-out/preview/beat_07/final-41.8s.png",
+      "t": 41.79,
+      "ink_ratio": 0.0195,
+      "distinct_colors": 48
+    },
+    "beat_08": {
+      "frame": "/mnt/work/full-out/preview/beat_08/final-48.2s.png",
+      "t": 48.16,
+      "ink_ratio": 0.118,
+      "distinct_colors": 48
+    },
+    "beat_09": {
+      "frame": "/mnt/work/full-out/preview/beat_09/final-55.0s.png",
+      "t": 55.02,
+      "ink_ratio": 0.021,
+      "distinct_colors": 48
+    },
+    "beat_10": {
+      "frame": "/mnt/work/full-out/preview/beat_10/final-61.0s.png",
+      "t": 60.99,
+      "ink_ratio": 0.0207,
+      "distinct_colors": 48
+    },
+    "beat_11": {
+      "frame": "/mnt/work/full-out/preview/beat_11/final-70.3s.png",
+      "t": 70.29,
+      "ink_ratio": 0.1209,
+      "distinct_colors": 48
+    },
+    "beat_12": {
+      "frame": "/mnt/work/full-out/preview/beat_12/final-76.1s.png",
+      "t": 76.13,
+      "ink_ratio": 0.0202,
+      "distinct_colors": 48
+    },
+    "beat_13": {
+      "frame": "/mnt/work/full-out/preview/beat_13/final-83.1s.png",
+      "t": 83.12,
+      "ink_ratio": 0.1037,
+      "distinct_colors": 48
+    },
+    "beat_14": {
+      "frame": "/mnt/work/full-out/preview/beat_14/final-90.5s.png",
+      "t": 90.46,
+      "ink_ratio": 0.0206,
+      "distinct_colors": 48
+    },
+    "beat_15": {
+      "frame": "/mnt/work/full-out/preview/beat_15/final-96.7s.png",
+      "t": 96.74,
+      "ink_ratio": 0.114,
+      "distinct_colors": 48
+    },
+    "beat_16": {
+      "frame": "/mnt/work/full-out/preview/beat_16/final-100.2s.png",
+      "t": 100.16,
+      "ink_ratio": 0.0218,
+      "distinct_colors": 48
+    },
+    "beat_17": {
+      "frame": "/mnt/work/full-out/preview/beat_17/final-103.2s.png",
+      "t": 103.22,
+      "ink_ratio": 0.0869,
+      "distinct_colors": 48
+    },
+    "beat_18": {
+      "frame": "/mnt/work/full-out/preview/beat_18/final-109.3s.png",
+      "t": 109.33,
+      "ink_ratio": 0.0202,
+      "distinct_colors": 48
+    },
+    "beat_19": {
+      "frame": "/mnt/work/full-out/preview/beat_19/final-113.2s.png",
+      "t": 113.23,
+      "ink_ratio": 0.0951,
+      "distinct_colors": 48
+    },
+    "beat_20": {
+      "frame": "/mnt/work/full-out/preview/beat_20/final-119.9s.png",
+      "t": 119.86,
+      "ink_ratio": 0.0245,
+      "distinct_colors": 48
+    },
+    "beat_21": {
+      "frame": "/mnt/work/full-out/preview/beat_21/final-127.7s.png",
+      "t": 127.71,
+      "ink_ratio": 0.0541,
+      "distinct_colors": 48
+    },
+    "beat_22": {
+      "frame": "/mnt/work/full-out/preview/beat_22/final-134.2s.png",
+      "t": 134.23,
+      "ink_ratio": 0.021,
+      "distinct_colors": 48
+    },
+    "beat_23": {
+      "frame": "/mnt/work/full-out/preview/beat_23/final-138.9s.png",
+      "t": 138.89,
+      "ink_ratio": 0.1046,
+      "distinct_colors": 48
+    },
+    "beat_24": {
+      "frame": "/mnt/work/full-out/preview/beat_24/final-144.8s.png",
+      "t": 144.78,
+      "ink_ratio": 0.0645,
+      "distinct_colors": 48
+    },
+    "beat_25": {
+      "frame": "/mnt/work/full-out/preview/beat_25/final-148.9s.png",
+      "t": 148.91,
+      "ink_ratio": 0.0988,
+      "distinct_colors": 48
+    },
+    "beat_26": {
+      "frame": "/mnt/work/full-out/preview/beat_26/final-154.5s.png",
+      "t": 154.54,
+      "ink_ratio": 0.0222,
+      "distinct_colors": 48
+    },
+    "beat_27": {
+      "frame": "/mnt/work/full-out/preview/beat_27/final-164.6s.png",
+      "t": 164.57,
+      "ink_ratio": 0.121,
+      "distinct_colors": 48
+    },
+    "beat_28": {
+      "frame": "/mnt/work/full-out/preview/beat_28/final-170.6s.png",
+      "t": 170.64,
+      "ink_ratio": 0.0205,
+      "distinct_colors": 48
+    },
+    "beat_29": {
+      "frame": "/mnt/work/full-out/preview/beat_29/final-176.0s.png",
+      "t": 175.99,
+      "ink_ratio": 0.1358,
+      "distinct_colors": 48
+    },
+    "beat_30": {
+      "frame": "/mnt/work/full-out/preview/beat_30/final-183.3s.png",
+      "t": 183.26,
+      "ink_ratio": 0.0197,
+      "distinct_colors": 48
+    },
+    "beat_31": {
+      "frame": "/mnt/work/full-out/preview/beat_31/final-189.9s.png",
+      "t": 189.87,
+      "ink_ratio": 0.1419,
+      "distinct_colors": 48
+    },
+    "beat_32": {
+      "frame": "/mnt/work/full-out/preview/beat_32/final-193.4s.png",
+      "t": 193.41,
+      "ink_ratio": 0.0194,
+      "distinct_colors": 48
+    },
+    "beat_33": {
+      "frame": "/mnt/work/full-out/preview/beat_33/final-197.6s.png",
+      "t": 197.59,
+      "ink_ratio": 0.0209,
+      "distinct_colors": 48
+    },
+    "beat_34": {
+      "frame": "/mnt/work/full-out/preview/beat_34/final-201.3s.png",
+      "t": 201.28,
+      "ink_ratio": 0.0185,
+      "distinct_colors": 48
+    },
+    "beat_35": {
+      "frame": "/mnt/work/full-out/preview/beat_35/final-206.6s.png",
+      "t": 206.55,
+      "ink_ratio": 0.1047,
+      "distinct_colors": 48
+    },
+    "beat_36": {
+      "frame": "/mnt/work/full-out/preview/beat_36/final-213.5s.png",
+      "t": 213.53,
+      "ink_ratio": 0.0206,
+      "distinct_colors": 48
+    },
+    "beat_37": {
+      "frame": "/mnt/work/full-out/preview/beat_37/final-221.6s.png",
+      "t": 221.56,
+      "ink_ratio": 0.0457,
+      "distinct_colors": 48
+    },
+    "beat_38": {
+      "frame": "/mnt/work/full-out/preview/beat_38/final-229.2s.png",
+      "t": 229.18,
+      "ink_ratio": 0.0675,
+      "distinct_colors": 48
+    },
+    "beat_39": {
+      "frame": "/mnt/work/full-out/preview/beat_39/final-234.4s.png",
+      "t": 234.36,
+      "ink_ratio": 0.0217,
+      "distinct_colors": 48
+    },
+    "beat_40": {
+      "frame": "/mnt/work/full-out/preview/beat_40/final-239.8s.png",
+      "t": 239.77,
+      "ink_ratio": 0.0227,
+      "distinct_colors": 48
+    },
+    "beat_41": {
+      "frame": "/mnt/work/full-out/preview/beat_41/final-246.7s.png",
+      "t": 246.72,
+      "ink_ratio": 0.1264,
+      "distinct_colors": 48
+    },
+    "beat_42": {
+      "frame": "/mnt/work/full-out/preview/beat_42/final-253.3s.png",
+      "t": 253.31,
+      "ink_ratio": 0.0206,
+      "distinct_colors": 48
+    }
+  }
+}
