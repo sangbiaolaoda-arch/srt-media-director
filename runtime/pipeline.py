@@ -16,50 +16,63 @@ import html_adapter
 import srt_parser
 import validator
 import visual_director
-from common import dump_json, ensure_dir
+from common import dump_json, ensure_dir, load_json
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def run(srt_path, out_dir, overrides_path=None, render_previews=True, log=print):
+def run(srt_path, out_dir, overrides_path=None, render_previews=True,
+        resume=False, log=print):
     work = ensure_dir(os.path.join(out_dir, "work"))
     preview = ensure_dir(os.path.join(out_dir, "preview"))
     film = ensure_dir(os.path.join(out_dir, "film"))
     ensure_dir(os.path.join(out_dir, "final"))
 
-    log("→ SRT 解析与语义分析")
-    analysis = srt_parser.analyze(srt_path)
-    dump_json(analysis, os.path.join(work, "srt-analysis.json"))
-    if analysis["errors"]:
-        raise SystemExit("SRT 解析存在 ERROR: %s" % analysis["errors"])
+    dsl_file = os.path.join(work, "visual-dsl.json")
+    rp_file = os.path.join(work, "render-plan.json")
+    ep_file = os.path.join(work, "entrance-plan.json")
 
-    log("→ Beat 基线切分")
-    beats = beat_planner.plan_beats(analysis["cues"])
-    dump_json({"timing_source": "srt",
-               "total_duration_sec": analysis["total_duration_sec"],
-               "beats": beats}, os.path.join(work, "beat-plan.json"))
-    log("  %d cues → %d beats" % (len(analysis["cues"]), len(beats)))
+    if resume and all(os.path.exists(p) for p in (dsl_file, rp_file, ep_file)):
+        # 后置阶段（契约 / 节拍表 / 编译 / 风格 / 校验）只需要 dsl + render_plan
+        # + entrance；跳过前置四阶段可省掉重复的解析与构图求解开销。
+        log("→ [Resume] 复用 work/ 前置规划缓存（跳过解析/导演/构图/入场）")
+        dsl = load_json(dsl_file)
+        render_plan = load_json(rp_file)
+        entrance = load_json(ep_file)
+    else:
+        log("→ SRT 解析与语义分析")
+        analysis = srt_parser.analyze(srt_path)
+        dump_json(analysis, os.path.join(work, "srt-analysis.json"))
+        if analysis["errors"]:
+            raise SystemExit("SRT 解析存在 ERROR: %s" % analysis["errors"])
 
-    log("→ 导演层（Visual Claim / 强调 / 信息编码 / 策略）")
-    overrides = visual_director.load_overrides(overrides_path)
-    visual_plan, dsl = visual_director.direct(beats, overrides)
-    dump_json(visual_plan, os.path.join(work, "visual-plan.json"))
-    dump_json(dsl, os.path.join(work, "visual-dsl.json"))
+        log("→ Beat 基线切分")
+        beats = beat_planner.plan_beats(analysis["cues"])
+        dump_json({"timing_source": "srt",
+                   "total_duration_sec": analysis["total_duration_sec"],
+                   "beats": beats}, os.path.join(work, "beat-plan.json"))
+        log("  %d cues → %d beats" % (len(analysis["cues"]), len(beats)))
 
-    log("→ 构图求解（Blueprint → Render Plan，一次算完）")
-    render_plan, layout_intent, footprint, layout_audit = composition_planner.plan(dsl)
-    dump_json(render_plan, os.path.join(work, "render-plan.json"))
-    dump_json(layout_intent, os.path.join(work, "layout-intent.json"))
-    dump_json(footprint, os.path.join(work, "content-footprint.json"))
-    dump_json(layout_audit, os.path.join(work, "layout-audit.json"))
+        log("→ 导演层（Visual Claim / 强调 / 信息编码 / 策略）")
+        overrides = visual_director.load_overrides(overrides_path)
+        visual_plan, dsl = visual_director.direct(beats, overrides)
+        dump_json(visual_plan, os.path.join(work, "visual-plan.json"))
+        dump_json(dsl, dsl_file)
 
-    log("→ 入场编排（cue 序列 / 节奏预算 / handoff）")
-    entrance = entrance_planner.plan(dsl)
-    ent_audit = entrance_planner.audit(entrance)
-    if ent_audit["status"] != "PASS":
-        dump_json(entrance, os.path.join(work, "entrance-plan.json"))
-        raise SystemExit("入场编排门禁未通过: %s" % ent_audit["issues"])
-    dump_json(entrance, os.path.join(work, "entrance-plan.json"))
+        log("→ 构图求解（Blueprint → Render Plan，一次算完）")
+        render_plan, layout_intent, footprint, layout_audit = composition_planner.plan(dsl)
+        dump_json(render_plan, rp_file)
+        dump_json(layout_intent, os.path.join(work, "layout-intent.json"))
+        dump_json(footprint, os.path.join(work, "content-footprint.json"))
+        dump_json(layout_audit, os.path.join(work, "layout-audit.json"))
+
+        log("→ 入场编排（cue 序列 / 节奏预算 / handoff）")
+        entrance = entrance_planner.plan(dsl)
+        ent_audit = entrance_planner.audit(entrance)
+        if ent_audit["status"] != "PASS":
+            dump_json(entrance, ep_file)
+            raise SystemExit("入场编排门禁未通过: %s" % ent_audit["issues"])
+        dump_json(entrance, ep_file)
 
     log("→ 生成后契约（end_state / transition / hold / 视线路径 / ambient）")
     from common import CANVAS_W, CANVAS_H
