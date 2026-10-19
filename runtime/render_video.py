@@ -10,6 +10,7 @@ track (mov_text), so the video is self-explanatory while the visuals stay
 pure — no burned-in captions on top of the composition.
 """
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import os
 import subprocess
 import sys
@@ -70,6 +71,13 @@ def build_layers(srt_path, overrides_path):
     return dsl, plans, ents
 
 
+def _render_frame_bytes(task):
+    """子进程任务：渲染单帧并转成 RGB24 原始字节（可跨进程回传）。"""
+    beat, pb, pe, t, prev = task
+    img = raster_renderer.draw_frame(beat, pb, pe, t, prev=prev)
+    return img.convert("RGB").tobytes()
+
+
 def main():
     ap = argparse.ArgumentParser(description="把示例渲染成 MP4 样例视频")
     ap.add_argument("--srt", default=DEFAULT_SRT)
@@ -77,6 +85,8 @@ def main():
     ap.add_argument("--out", default=os.path.join(
         ROOT, "sample-video", "attention-sample.mp4"))
     ap.add_argument("--fps", type=int, default=15)
+    ap.add_argument("--workers", type=int,
+                    default=max(1, (os.cpu_count() or 2) - 1))
     args = ap.parse_args()
 
     dsl, plans, ents = build_layers(args.srt, args.overrides)
@@ -106,20 +116,26 @@ def main():
     idx = 0
     prev = None
     try:
-        for beat in dsl["beats"]:
-            pb, pe = plans[beat["beat_id"]], ents[beat["beat_id"]]
-            n = max(1, int(round((beat["end_sec"] - beat["start_sec"])
-                                 * args.fps)))
-            for k in range(n):
-                t = beat["start_sec"] + k / args.fps
-                img = raster_renderer.draw_frame(beat, pb, pe, t, prev=prev)
-                proc.stdin.write(img.convert("RGB").tobytes())
-                idx += 1
-            prev = (beat, pb, pe)  # 跨拍连续：下一拍首 0.45s 溶出本拍末态
-            print("  %s → %d/%d frames" % (beat["beat_id"], idx, total))
-        proc.stdin.close()
+        with ProcessPoolExecutor(max_workers=args.workers) as pool:
+            for beat in dsl["beats"]:
+                pb, pe = plans[beat["beat_id"]], ents[beat["beat_id"]]
+                n = max(1, int(round((beat["end_sec"] - beat["start_sec"])
+                                     * args.fps)))
+                tasks = [
+                    (beat, pb, pe, beat["start_sec"] + k / args.fps, prev)
+                    for k in range(n)
+                ]
+                for raw_bytes in pool.map(_render_frame_bytes, tasks, chunksize=4):
+                    proc.stdin.write(raw_bytes)
+                    idx += 1
+                prev = (beat, pb, pe)  # 跨拍连续：下一拍首 0.45s 溶出本拍末态
+                print("  %s → %d/%d frames" % (beat["beat_id"], idx, total))
     except BrokenPipeError:
         pass
+    finally:
+        # 先关 stdin 再读 stderr；否则子进程写满 stderr 缓冲会与父进程互相等待
+        if proc.stdin and not proc.stdin.closed:
+            proc.stdin.close()
     err = proc.stderr.read().decode("utf-8", "ignore")
     if proc.wait() != 0:
         sys.stderr.write(err[-2000:])
