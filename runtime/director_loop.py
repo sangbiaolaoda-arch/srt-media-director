@@ -25,13 +25,20 @@ def _auto_fix(intent, route_info, attempt):
       intent 问题 → 若过密降密度，若空帧升密度/去 silence
     """
     fixed = dict(intent)
+    codes = set(route_info.get("issue_codes", []))
+    d = float(fixed.get("density", 0.5))
     if route_info.get("target_layer") == "intent":
-        d = fixed.get("density", 0.5)
-        if "CRITIC_OVERCROWDED" in route_info.get("issue_codes", []):
-            fixed["density"] = round(max(0.2, d - 0.15 * attempt), 2)
-        if "CRITIC_BLANK_FRAME" in route_info.get("issue_codes", []):
-            fixed["density"] = round(min(0.9, d + 0.15 * attempt), 2)
+        if "CRITIC_OVERCROWDED" in codes:
+            fixed["density"] = round(max(0.2, d * 0.75), 2)
+        if "CRITIC_BLANK_FRAME" in codes:
+            fixed["density"] = round(min(0.9, d + (0.9 - d) * 0.5), 2)
             fixed["silence"] = False
+    elif route_info.get("target_layer") == "layout":
+        # 编译期约束失败（LAYOUT_OVERFLOW 等）：按当前值阻尼降载，并丢弃末位
+        # 元素，避免原样返回同一 intent 导致下一轮重复同样的失败（死循环）。
+        fixed["density"] = round(max(0.2, d * 0.8), 2)
+        if isinstance(fixed.get("elements"), list) and len(fixed["elements"]) > 3:
+            fixed["elements"] = fixed["elements"][:-1]
     return fixed
 
 
