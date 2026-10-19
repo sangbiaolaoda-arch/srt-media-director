@@ -6,7 +6,7 @@ be re-estimated from character counts (skill: 01-srt-and-beats).
 import re
 
 TIME_RE = re.compile(
-    r"(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})"
+    r"(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{1,2}):(\d{2}):(\d{2})[,.](\d{3})"
 )
 NUM_RE = re.compile(r"\d+(?:\.\d+)?\s*%?")
 
@@ -17,7 +17,7 @@ def _sec(h, m, s, ms):
 
 def parse_srt(path):
     """Parse an .srt file into cues + structural errors."""
-    with open(path, encoding="utf-8-sig") as f:
+    with open(path, encoding="utf-8-sig", errors="replace") as f:
         raw = f.read().replace("\r\n", "\n").strip()
     cues, errors = [], []
     for block in re.split(r"\n\s*\n", raw):
@@ -42,7 +42,7 @@ def parse_srt(path):
             "id": len(cues) + 1,
             "start": round(start, 3),
             "end": round(end, 3),
-            "text": "".join(lines[tidx + 1:]),
+            "text": " ".join(lines[tidx + 1:]).strip(),
         })
     for i in range(1, len(cues)):
         if cues[i]["start"] < cues[i - 1]["end"] - 1e-6:
